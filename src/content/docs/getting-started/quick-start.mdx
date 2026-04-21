@@ -1,0 +1,57 @@
+---
+title: "Quick Start"
+description: "Install ShipItSwifty and ship your first build in minutes."
+group: "Getting Started"
+order: 1
+sourcePath: "upstream:README.md"
+---
+
+## Quick Start
+
+```bash
+# Build the CLI
+swift build
+
+# Create a config file
+cp Shipfile.example.yml Shipfile.yml
+
+# Verify your configuration
+swift run shipit env
+
+# Run a build
+swift run shipit build --scheme MyApp
+
+# Force colorful human output
+swift run shipit build --scheme MyApp --color always
+
+# Run a test suite
+swift run shipit test --scheme MyApp
+
+# Run a release workflow
+swift run shipit run beta
+```
+
+## Installation
+
+### Homebrew
+
+The repository includes a Homebrew formula template at `Formula/shipit.rb`, but there is no published tap yet.
+
+If you want to distribute `shipit` through Homebrew, copy that formula into your tap and install it as a `--HEAD` formula until tagged release tarballs are published.
+
+For now, the supported install path is building from source from the public repository:
+
+### Build from source
+
+```bash
+git clone https://github.com/shipitswifty/shipitswifty
+cd ShipItSwifty
+swift build
+```
+
+To use `shipit` globally, copy the binary:
+
+```bash
+swift build -c release
+cp .build/release/shipit /usr/local/bin/shipit
+```

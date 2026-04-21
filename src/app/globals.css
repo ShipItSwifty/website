@@ -1,0 +1,627 @@
+@import "tailwindcss";
+
+/* ────────────────────────────────────────────────────────────────────────
+   Design tokens — light + dark
+   Dark mirrors the ~/Downloads/index.html template (GitHub dark dimmed +
+   Swift orange brand). Light is GitHub-warm (white surfaces, near-black
+   ink, brand stays #F05138).
+   ──────────────────────────────────────────────────────────────────────── */
+@theme {
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --color-brand: #f05138;
+  --color-brand-hover: #e04430;
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+    --brand: #f05138;
+    --brand-hover: #e04430;
+    --brand-muted: rgba(240, 81, 56, 0.1);
+    --bg: #ffffff;
+    --surface: #f6f8fa;
+    --elevated: #ffffff;
+    --border: #d0d7de;
+    --border-active: #afb8c1;
+    --fg1: #1f2328;
+    --fg2: #59636e;
+    --fg3: #6e7781;
+    --green: #1a7f37;
+    --amber: #9a6700;
+    --red: #cf222e;
+    --blue: #0969da;
+    --blue-hover: #0550ae;
+    --code-key: #0550ae;
+    --term-green: #1a7f37;
+    --code-bg: #f6f8fa;
+  }
+
+  :root.dark {
+    color-scheme: dark;
+    --brand: #f05138;
+    --brand-hover: #e04430;
+    --brand-muted: rgba(240, 81, 56, 0.1);
+    --bg: #0d1117;
+    --surface: #161b22;
+    --elevated: #1c2128;
+    --border: #30363d;
+    --border-active: #484f58;
+    --fg1: #e6edf3;
+    --fg2: #8b949e;
+    --fg3: #7d8590;
+    --green: #3fb950;
+    --amber: #d29922;
+    --red: #f85149;
+    --blue: #58a6ff;
+    --blue-hover: #79c0ff;
+    --code-key: #79c0ff;
+    --term-green: #39d353;
+    --code-bg: #0d1117;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg1);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.6;
+    transition:
+      background 200ms ease,
+      color 200ms ease;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+
+  /* Reduced motion: disable looping animations */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Accessible skip-to-content link. Visually hidden until keyboard-focused,
+     at which point it pops in at the top-left for screen-reader and
+     keyboard users to bypass the nav. */
+  .skip-to-content {
+    position: fixed;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 9999;
+    padding: 0.5rem 0.875rem;
+    background: var(--brand);
+    color: #ffffff;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transform: translateY(-150%);
+    transition: transform 150ms ease;
+  }
+  .skip-to-content:focus,
+  .skip-to-content:focus-visible {
+    transform: translateY(0);
+    outline: 2px solid var(--fg1);
+    outline-offset: 2px;
+  }
+  /* Search dialog: visible focus indicator on the input row, since the
+     input itself uses inline outline:none for design (the icon + kbd hint
+     are in the same row). */
+  .search-input-row:focus-within {
+    box-shadow: inset 0 -2px 0 0 var(--brand);
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Animations (preserved from template)
+   ──────────────────────────────────────────────────────────────────────── */
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes stepIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.fade-up {
+  animation: fadeUp 0.5s ease-out both;
+}
+.fade-up-delayed {
+  animation: fadeUp 0.5s 0.15s ease-out both;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   MDX prose styles (used by /docs)
+   ──────────────────────────────────────────────────────────────────────── */
+.prose-docs {
+  font-size: 15.5px;
+  line-height: 1.75;
+  color: var(--fg1);
+}
+.prose-docs h1 {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin-bottom: 16px;
+  margin-top: 0;
+}
+.prose-docs h2 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-top: 48px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.prose-docs h3 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 32px;
+  margin-bottom: 12px;
+}
+.prose-docs h4 {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 24px;
+  margin-bottom: 8px;
+}
+.prose-docs p {
+  margin-bottom: 16px;
+  color: var(--fg2);
+}
+.prose-docs ul,
+.prose-docs ol {
+  margin-bottom: 16px;
+  padding-left: 24px;
+  color: var(--fg2);
+}
+.prose-docs li {
+  margin-bottom: 6px;
+}
+.prose-docs li > p {
+  margin-bottom: 4px;
+}
+.prose-docs a {
+  color: var(--blue);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: color-mix(in srgb, var(--blue) 30%, transparent);
+}
+.prose-docs a:hover {
+  text-decoration-color: var(--blue);
+}
+.prose-docs strong {
+  color: var(--fg1);
+  font-weight: 600;
+}
+.prose-docs code:not(pre code) {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  color: var(--brand);
+  background: var(--brand-muted);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.prose-docs pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin: 16px 0;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.prose-docs pre code {
+  background: transparent;
+  padding: 0;
+  color: var(--fg1);
+}
+.prose-docs blockquote {
+  border-left: 3px solid var(--brand);
+  padding-left: 16px;
+  margin: 16px 0;
+  color: var(--fg2);
+  font-style: italic;
+}
+.prose-docs table {
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 14px;
+  width: 100%;
+}
+.prose-docs th,
+.prose-docs td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  text-align: left;
+}
+.prose-docs th {
+  background: var(--surface);
+  font-weight: 600;
+  color: var(--fg1);
+}
+.prose-docs hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 32px 0;
+}
+
+/* rehype-pretty-code multi-theme support */
+[data-rehype-pretty-code-figure] pre {
+  display: grid;
+}
+:root.dark [data-theme="light"] {
+  display: none;
+}
+:root:not(.dark) [data-theme="dark"] {
+  display: none;
+}
+
+/* Edit-on-GitHub link hover (server-component-safe) */
+.edit-on-github {
+  color: var(--fg3);
+}
+.edit-on-github:hover {
+  color: var(--fg1);
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   DocC API renderer
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* Sidebar */
+.docc-sidebar {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.docc-sidebar-root {
+  display: block;
+  padding: 0.4rem 0.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--fg1);
+  border-radius: 6px;
+}
+.docc-sidebar-root:hover,
+.docc-sidebar-root.is-current {
+  background: var(--brand-muted);
+  color: var(--brand);
+}
+.docc-sidebar-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-left: 1px solid var(--border);
+}
+.docc-sidebar-group {
+  padding: 0.75rem 0.5rem 0.25rem;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg3);
+}
+.docc-sidebar-item {
+  position: relative;
+}
+.docc-sidebar-link {
+  display: block;
+  padding: 0.25rem 0.5rem;
+  color: var(--fg2);
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.docc-sidebar-link:hover {
+  color: var(--fg1);
+  background: var(--surface);
+}
+.docc-sidebar-link.is-current {
+  color: var(--brand);
+  background: var(--brand-muted);
+  font-weight: 500;
+}
+
+/* Article header */
+.docc-article {
+  max-width: 100%;
+}
+.docc-eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--brand);
+}
+.docc-title {
+  margin: 0 0 1rem;
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  font-family: var(--font-mono);
+  color: var(--fg1);
+}
+.docc-abstract {
+  margin: 0 0 1.5rem;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--fg2);
+}
+
+/* Declaration */
+.docc-declaration {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  line-height: 1.55;
+  margin: 0 0 2rem;
+}
+.docc-declaration code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+}
+.docc-tok-keyword {
+  color: #cf222e;
+}
+.docc-tok-type {
+  color: #6639ba;
+}
+.docc-tok-identifier {
+  color: var(--fg1);
+}
+.docc-tok-param {
+  color: #953800;
+}
+.docc-tok-number {
+  color: #0550ae;
+}
+.docc-tok-string {
+  color: #0a3069;
+}
+.docc-tok-attribute {
+  color: #6639ba;
+}
+[data-theme="dark"] .docc-tok-keyword {
+  color: #ff7b72;
+}
+[data-theme="dark"] .docc-tok-type {
+  color: #d2a8ff;
+}
+[data-theme="dark"] .docc-tok-identifier {
+  color: var(--fg1);
+}
+[data-theme="dark"] .docc-tok-param {
+  color: #ffa657;
+}
+[data-theme="dark"] .docc-tok-number {
+  color: #79c0ff;
+}
+[data-theme="dark"] .docc-tok-string {
+  color: #a5d6ff;
+}
+[data-theme="dark"] .docc-tok-attribute {
+  color: #d2a8ff;
+}
+.docc-declaration a {
+  text-decoration: none;
+  border-bottom: 1px dotted currentColor;
+}
+.docc-declaration a:hover {
+  border-bottom-style: solid;
+}
+
+/* Shiki output inside DocC code blocks */
+.docc-code {
+  margin: 1rem 0 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.docc-code pre {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+/* Topics */
+.docc-topics h2 {
+  margin: 2.5rem 0 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 24px;
+}
+.docc-topic-group + .docc-topic-group {
+  margin-top: 1.75rem;
+}
+.docc-topic-title {
+  margin: 0 0 0.75rem;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg3);
+}
+.docc-topic-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid var(--border);
+}
+.docc-topic-item {
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.docc-topic-link {
+  display: inline-block;
+  color: var(--brand);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+}
+.docc-topic-link:hover {
+  text-decoration: underline;
+}
+.docc-topic-link code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+.docc-topic-abstract {
+  margin: 0.4rem 0 0;
+  color: var(--fg2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Relationships */
+.docc-relationships {
+  margin: 2rem 0;
+}
+.docc-relationships h2 {
+  margin: 2.5rem 0 1.25rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 24px;
+}
+.docc-relationship-group + .docc-relationship-group {
+  margin-top: 1.5rem;
+}
+.docc-relationship-title {
+  margin: 0 0 0.5rem;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg3);
+}
+.docc-relationship-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.docc-relationship-list li {
+  padding: 0.25rem 0.6rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 12.5px;
+}
+.docc-relationship-list code {
+  background: none;
+  padding: 0;
+  color: var(--fg1);
+}
+
+/* Parameters */
+.docc-parameters h2 {
+  margin: 2rem 0 1rem;
+  font-size: 20px;
+}
+.docc-param-list {
+  margin: 0;
+}
+.docc-param-row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.docc-param-row:first-child {
+  border-top: 1px solid var(--border);
+}
+.docc-param-name {
+  font-family: var(--font-mono);
+  color: var(--fg1);
+  font-weight: 500;
+}
+.docc-param-name code {
+  background: none;
+  padding: 0;
+}
+.docc-param-desc p {
+  margin: 0;
+  color: var(--fg2);
+}
+@media (max-width: 640px) {
+  .docc-param-row {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+}

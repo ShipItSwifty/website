@@ -1,0 +1,8 @@
+node_modules
+.next
+out
+dist
+public/api/shipitkit
+data/docc
+data/releases.json
+pnpm-lock.yaml

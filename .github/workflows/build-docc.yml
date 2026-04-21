@@ -1,0 +1,91 @@
+name: Build ShipItKit DocC
+
+on:
+  # Triggered by upstream ShipItSwifty repo via repository_dispatch when a
+  # new release ships. The dispatch payload may include `client_payload.tag`;
+  # if absent, the build script queries GitHub for the latest release.
+  repository_dispatch:
+    types: [upstream-release]
+  # Manual trigger with optional tag override
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Upstream tag to build (e.g. v1.2.3). Leave empty for latest."
+        required: false
+        type: string
+
+permissions:
+  contents: write # needed to upload release assets
+
+concurrency:
+  group: build-docc
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build DocC and publish release asset
+    runs-on: macos-26
+    steps:
+      - name: Checkout website
+        uses: actions/checkout@v5
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_26.4.app
+
+      - name: Resolve target tag
+        id: tag
+        env:
+          DISPATCH_TAG: ${{ github.event.client_payload.tag }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          TAG="${INPUT_TAG:-$DISPATCH_TAG}"
+          if [ -z "$TAG" ]; then
+            TAG=$(curl -fsSL \
+              -H "User-Agent: shipitswifty-website-ci" \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              https://api.github.com/repos/ShipItSwifty/shipitswifty/releases/latest \
+              | python3 -c 'import sys,json; print(json.load(sys.stdin)["tag_name"])')
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Resolved tag: $TAG"
+
+      - name: Cache SPM checkouts
+        uses: actions/cache@v5
+        with:
+          path: .docc-build/shipitswifty/.build/checkouts
+          key: ${{ runner.os }}-spm-docc-${{ steps.tag.outputs.tag }}
+          restore-keys: |
+            ${{ runner.os }}-spm-docc-
+
+      - name: Build DocC and pack tarball
+        id: build
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/build-docc.mjs
+
+      - name: Upload tarball as release asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.tag.outputs.tag }}
+          TARBALL: ${{ steps.build.outputs.tarball }}
+        run: |
+          RELEASE_TAG="docs-$TAG"
+          # Create the release if it doesn't exist (idempotent)
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" \
+              --title "DocC for ShipItKit $TAG" \
+              --notes "Auto-generated DocC JSON for ShipItKit $TAG. Consumed by the website build via scripts/sync-docc.mjs." \
+              --target "${{ github.sha }}"
+          fi
+          gh release upload "$RELEASE_TAG" "$TARBALL" --clobber
+
+      - name: Trigger Vercel rebuild
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "VERCEL_DEPLOY_HOOK_URL not set; skipping rebuild trigger."
+            exit 0
+          fi
+          curl -fsSL -X POST "$HOOK"
