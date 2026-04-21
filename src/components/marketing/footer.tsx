@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Smartphone, Shield } from "lucide-react";
+import { Shield } from "lucide-react";
 import { GithubIcon as Github } from "@/components/icons/github";
+import { AppleIcon } from "@/components/icons/apple";
+import { AndroidIcon } from "@/components/icons/android";
 import { LogoMark } from "./logo-mark";
 import { siteConfig } from "@/lib/site";
 
@@ -51,12 +53,12 @@ const badges = [
   {
     label: "iOS",
     color: "#F05138",
-    icon: <Smartphone size={10} />,
+    icon: <AppleIcon size={10} />,
   },
   {
     label: "Android",
     color: "#3FB950",
-    icon: <Smartphone size={10} />,
+    icon: <AndroidIcon size={10} />,
   },
   {
     label: "Open Source",

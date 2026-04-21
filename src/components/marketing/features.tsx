@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { Cpu, Upload, Bot, Shield, Smartphone, GitBranch, type LucideIcon } from "lucide-react";
+import { useState, type ComponentType } from "react";
+import { Cpu, Upload, Bot, Shield, GitBranch } from "lucide-react";
+import { AndroidIcon } from "@/components/icons/android";
 
 interface Feature {
-  Icon: LucideIcon;
+  Icon: ComponentType<{ size?: number; className?: string }>;
   title: string;
   tag?: "iOS" | "Android";
   desc: string;
@@ -34,7 +35,7 @@ const featureData: Feature[] = [
     desc: "Encrypted cert vault from a Git repo. Create certs and profiles via ASC API. CI-safe keychain management.",
   },
   {
-    Icon: Smartphone,
+    Icon: AndroidIcon,
     title: "Android Support",
     tag: "Android",
     desc: "Gradle-native build, test, archive, lint, and Play Store upload. Platform auto-detected from project files.",
