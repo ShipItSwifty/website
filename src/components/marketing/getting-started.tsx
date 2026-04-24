@@ -50,14 +50,14 @@ dependencies: [
 ];
 
 const aiLines: TerminalLine[] = [
-  { t: "prompt", s: "shipit ai-session --goal beta" },
+  { t: "prompt", s: "shipit ai-session --goal beta --output json" },
   { t: "dim", s: "▸ inspecting project…" },
   { t: "ok", s: "  detected scheme: MyApp (high confidence)" },
   { t: "ok", s: "  detected bundle_id: com.example.myapp" },
-  { t: "warn", s: "  ambiguity: 2 runnable schemes found" },
-  { t: "info", s: "  nextAction: create_shipfile" },
-  { t: "info", s: "  command: shipit suggest-config --goal beta" },
-  { t: "done", s: "✓ ai-session ready — follow the prompt" },
+  { t: "info", s: "  hint: workflow beta -> version, archive, export, testflight" },
+  { t: "info", s: "  nextAction: generate_shipfile" },
+  { t: "info", s: "  command: shipit run beta --dry-run" },
+  { t: "done", s: "✓ ai-session ready — give this JSON to your agent" },
 ];
 
 function StepHeader({ n, title }: { n: string; title: string }) {
@@ -116,7 +116,7 @@ export function GettingStarted() {
   };
 
   return (
-    <section id="getting-started" className="mx-auto max-w-[1200px] px-6 py-24">
+    <section id="getting-started" className="mx-auto max-w-[1200px] scroll-mt-24 px-6 py-24">
       <div className="mb-14">
         <div
           className="mb-4 inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.12em] uppercase"
@@ -200,9 +200,9 @@ export function GettingStarted() {
           </div>
 
           <div className="mb-10">
-            <StepHeader n="2" title="Scaffold your config" />
+            <StepHeader n="2" title="Prompt your agent with project hints" />
             <p className="mb-4 text-sm leading-[1.7]" style={{ color: "var(--fg2)" }}>
-              Run{" "}
+              Ask your coding agent to use{" "}
               <code
                 className="rounded px-1.5 py-px text-xs"
                 style={{
@@ -211,16 +211,18 @@ export function GettingStarted() {
                   background: "var(--brand-muted)",
                 }}
               >
-                shipit init
+                shipit ai-session
               </code>{" "}
-              in your project root to generate a starter Shipfile.yml, or let the AI agent
-              auto-detect your setup.
+              as grounding context. Instead of hand-writing YAML, the agent can inspect the project,
+              resolve the likely workflow, and draft the full config for you.
             </p>
-            <CodeBlock lang="bash">{`# Scaffold manually
-shipit init
+            <CodeBlock lang="bash">{`Prompt:
+Generate my ShipItSwifty beta setup for this app.
+Run shipit ai-session --goal beta --output json first and use it as source of truth.
+If something is ambiguous, ask me one question. Otherwise create Shipfile.yml and tell me the next shipit command.
 
-# Or let the AI set it up
-shipit ai-session --goal beta`}</CodeBlock>
+# Optional manual fallback
+shipit init`}</CodeBlock>
           </div>
 
           <div className="mb-10">
@@ -265,14 +267,19 @@ shipit run beta --ci`}</CodeBlock>
                   className="text-sm font-semibold"
                   style={{ fontFamily: "var(--font-display)", color: "var(--fg1)" }}
                 >
-                  Prefer AI-assisted setup?
+                  AI-first setup
                 </div>
                 <div className="text-[13px]" style={{ color: "var(--fg2)" }}>
-                  Let the agent detect, configure, and guide you.
+                  One prompt plus ai-session hints can generate the whole release workflow.
                 </div>
               </div>
             </div>
             <AnimTerminal lines={aiLines} loopMs={7000} />
+            <p className="mt-4 text-[13px] leading-[1.65]" style={{ color: "var(--fg2)" }}>
+              The agent gets a stable JSON snapshot of detected scheme, bundle ID, readiness, and
+              the best next action. That keeps the setup grounded in your project instead of making
+              the model guess.
+            </p>
           </div>
 
           <div

@@ -82,40 +82,29 @@ export function Nav() {
             })}
           </div>
           <div className="mx-2 hidden h-5 w-px md:block" style={{ background: "var(--border)" }} />
-          <a
-            href={siteConfig.github.cli}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden items-center gap-1.5 rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors md:inline-flex"
-            style={{ color: "var(--fg2)" }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "var(--fg1)";
-              e.currentTarget.style.background = "var(--surface)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "var(--fg2)";
-              e.currentTarget.style.background = "transparent";
-            }}
-            aria-label="View ShipItSwifty on GitHub"
-          >
-            <Github size={16} />
-            GitHub
-          </a>
           <div className="ml-1 flex items-center gap-2">
             <SearchButton variant="compact" />
             <ThemeToggle />
-            <Link
-              href="/#getting-started"
-              className="rounded-md px-4 py-1.5 text-sm font-medium text-white transition-colors"
-              style={{
-                background: "var(--brand)",
-                border: "1px solid var(--brand)",
+            <a
+              href={siteConfig.github.cli}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md border transition-colors"
+              style={{ color: "var(--fg2)", borderColor: "var(--border)" }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "var(--fg1)";
+                e.currentTarget.style.background = "var(--surface)";
+                e.currentTarget.style.borderColor = "var(--border-active)";
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--brand-hover)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "var(--brand)")}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "var(--fg2)";
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.borderColor = "var(--border)";
+              }}
+              aria-label="View ShipItSwifty on GitHub"
             >
-              Install
-            </Link>
+              <Github size={14} />
+            </a>
           </div>
         </div>
       </nav>
