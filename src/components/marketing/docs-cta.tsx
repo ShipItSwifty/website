@@ -113,11 +113,11 @@ export function DocsCTA() {
             className="mb-2.5 text-2xl font-bold"
             style={{ fontFamily: "var(--font-display)", color: "var(--fg1)" }}
           >
-            Ready to replace fastlane?
+            Public beta, feedback welcome.
           </h3>
           <p className="max-w-[480px] text-[15px] leading-[1.65]" style={{ color: "var(--fg2)" }}>
-            Swift-native. AI-first. No Ruby required. Install in 30 seconds and run your first
-            workflow today.
+            ShipItSwifty is ready to try, but we are still smoothing edges. Use it, ship with it,
+            and send bug reports or missing-feature feedback through GitHub Issues.
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-3">

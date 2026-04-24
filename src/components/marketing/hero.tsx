@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { Check, Copy } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { GithubIcon as Github } from "@/components/icons/github";
 import { AnimTerminal, type TerminalLine } from "./anim-terminal";
 import { siteConfig } from "@/lib/site";
@@ -22,23 +20,14 @@ const heroLines: TerminalLine[] = [
 ];
 
 const pills = [
+  { t: "Public beta", c: "#D29922" },
   { t: "Swift 6", c: "#F05138" },
   { t: "macOS 15+", c: "#8B949E" },
   { t: "iOS + Android", c: "#3FB950" },
   { t: "AI-first", c: "#58A6FF" },
 ];
 
-const installCommand = "swift build -c release";
-
 export function Hero() {
-  const [copied, setCopied] = useState(false);
-
-  const copy = () => {
-    void navigator.clipboard?.writeText(installCommand);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1600);
-  };
-
   return (
     <section className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-12 px-6 pt-[88px] pb-20 md:grid-cols-2 md:gap-[72px]">
       <div className="fade-up">
@@ -67,43 +56,49 @@ export function Hero() {
           className="mb-[22px] text-[42px] leading-[1.06] font-bold tracking-[-0.03em] sm:text-[54px]"
           style={{ fontFamily: "var(--font-display)", color: "var(--fg1)" }}
         >
-          Ship your iOS app.
+          Tell your agent
           <br />
-          <span style={{ color: "var(--brand)" }}>No Ruby required.</span>
+          <span style={{ color: "var(--brand)" }}>what to ship.</span>
         </h1>
         <p className="mb-9 max-w-[460px] text-[17px] leading-[1.7]" style={{ color: "var(--fg2)" }}>
-          ShipItSwifty is a Swift-native CLI for iOS and Android release automation. Build, archive,
-          sign, and push to TestFlight — all from a single YAML config.
+          ShipItSwifty is in public beta today. Give your coding agent one prompt, ground it with{" "}
+          <code>shipit ai-session</code>, and let it generate the release config, checks, and next
+          command for you.
         </p>
-        <div
-          className="mb-6 flex max-w-[380px] items-center gap-3 rounded-lg border px-4 py-2.5"
+        <a
+          href={siteConfig.github.cli}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mb-6 flex max-w-[380px] items-center gap-3 rounded-lg border px-4 py-3 transition-colors"
           style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = "var(--border-active)";
+            e.currentTarget.style.background = "var(--elevated)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = "var(--border)";
+            e.currentTarget.style.background = "var(--surface)";
+          }}
         >
-          <span
-            style={{ color: "var(--brand)", fontFamily: "var(--font-mono)", fontSize: 13 }}
-            aria-hidden
+          <div
+            className="flex h-8 w-8 items-center justify-center rounded-lg"
+            style={{ background: "var(--brand-muted)", color: "var(--brand)" }}
           >
-            $
-          </span>
-          <span
-            className="flex-1 truncate"
-            style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--fg1)" }}
-          >
-            {installCommand}
-          </span>
-          <button
-            type="button"
-            onClick={copy}
-            className="inline-flex items-center justify-center transition-colors"
-            style={{ color: copied ? "var(--green)" : "var(--fg3)" }}
-            aria-label={copied ? "Copied!" : "Copy install command"}
-          >
-            {copied ? <Check size={14} /> : <Copy size={14} />}
-          </button>
-        </div>
+            <Github size={15} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-[11px] tracking-[0.08em] uppercase" style={{ color: "var(--fg3)" }}>
+              Open source
+            </div>
+            <div className="truncate text-[13px]" style={{ color: "var(--fg1)" }}>
+              Browse ShipItSwifty on GitHub
+            </div>
+          </div>
+          <ArrowUpRight size={15} style={{ color: "var(--fg3)" }} />
+        </a>
         <div className="flex flex-wrap gap-3">
-          <Link
-            href="/#getting-started"
+          <a
+            href="#getting-started"
             className="inline-block rounded-md px-[22px] py-2.5 text-[15px] font-medium text-white transition-colors"
             style={{
               background: "var(--brand)",
@@ -114,30 +109,20 @@ export function Hero() {
             onMouseLeave={(e) => (e.currentTarget.style.background = "var(--brand)")}
           >
             Get Started
-          </Link>
-          <a
-            href={siteConfig.github.cli}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-md border px-[22px] py-2.5 text-[15px] font-medium transition-colors"
-            style={{
-              color: "var(--fg2)",
-              borderColor: "var(--border)",
-              fontFamily: "var(--font-body)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "var(--border-active)";
-              e.currentTarget.style.color = "var(--fg1)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "var(--border)";
-              e.currentTarget.style.color = "var(--fg2)";
-            }}
-          >
-            <Github size={15} />
-            View on GitHub
           </a>
         </div>
+        <p className="mt-4 text-[13px] leading-[1.65]" style={{ color: "var(--fg3)" }}>
+          Beta release. Use{" "}
+          <a
+            href={`${siteConfig.github.cli}/issues`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "var(--blue)" }}
+          >
+            GitHub Issues
+          </a>
+          {" "}for bug reports, feedback, and feature requests.
+        </p>
       </div>
       <div className="fade-up-delayed">
         <AnimTerminal lines={heroLines} loopMs={8000} />

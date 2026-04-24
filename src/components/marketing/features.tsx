@@ -26,7 +26,7 @@ const featureData: Feature[] = [
   {
     Icon: Bot,
     title: "AI Session",
-    desc: "shipit ai-session returns a versioned JSON contract with inferred config, readiness, and the next command.",
+    desc: "Give your agent one prompt, attach shipit ai-session output, and let it generate Shipfile.yml plus the exact next command to run.",
   },
   {
     Icon: Shield,
