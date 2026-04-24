@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Menu } from "lucide-react";
 import { GithubIcon as Github } from "@/components/icons/github";
 import { LogoMark } from "./logo-mark";
 import { ThemeToggle } from "./theme-toggle";
@@ -39,7 +40,7 @@ export function Nav() {
       }}
     >
       <nav
-        className="mx-auto flex h-[62px] max-w-[1200px] items-center justify-between px-6"
+        className="mx-auto flex h-[62px] max-w-[1200px] items-center justify-between px-4 sm:px-6"
         aria-label="Primary"
       >
         <Link href="/" className="flex items-center gap-2.5" aria-label="ShipItSwifty home">
@@ -82,7 +83,7 @@ export function Nav() {
             })}
           </div>
           <div className="mx-2 hidden h-5 w-px md:block" style={{ background: "var(--border)" }} />
-          <div className="ml-1 flex items-center gap-2">
+          <div className="ml-1 flex items-center gap-1.5 sm:gap-2">
             <SearchButton variant="compact" />
             <ThemeToggle />
             <a
@@ -105,6 +106,41 @@ export function Nav() {
             >
               <Github size={14} />
             </a>
+            <details className="relative md:hidden">
+              <summary
+                className="inline-flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-md border"
+                style={{ color: "var(--fg2)", borderColor: "var(--border)" }}
+                aria-label="Open navigation menu"
+              >
+                <Menu size={14} />
+              </summary>
+              <div
+                className="absolute top-10 right-0 w-[220px] overflow-hidden rounded-xl border py-2 shadow-xl"
+                style={{
+                  background: "var(--surface)",
+                  borderColor: "var(--border)",
+                  boxShadow: "0 20px 40px rgba(0,0,0,0.18)",
+                }}
+              >
+                {links.map((l) => {
+                  const isCurrent = !l.href.includes("#")
+                    ? pathname === l.href || (l.href !== "/" && pathname?.startsWith(`${l.href}/`))
+                    : false;
+
+                  return (
+                    <Link
+                      key={`mobile-${l.label}`}
+                      href={l.href}
+                      aria-current={isCurrent ? "page" : undefined}
+                      className="block px-4 py-2.5 text-sm transition-colors"
+                      style={{ color: isCurrent ? "var(--fg1)" : "var(--fg2)" }}
+                    >
+                      {l.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </details>
           </div>
         </div>
       </nav>
