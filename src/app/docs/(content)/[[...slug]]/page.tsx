@@ -45,8 +45,8 @@ export default async function DocPage({ params }: PageProps) {
   const fallbackContentPath = relative(process.cwd(), page.filePath);
 
   return (
-    <div className="grid grid-cols-1 gap-10 xl:grid-cols-[1fr_200px]">
-      <article>
+    <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_200px] xl:gap-10">
+      <article className="min-w-0">
         <header className="mb-10">
           {page.frontmatter.group && (
             <div
@@ -57,17 +57,35 @@ export default async function DocPage({ params }: PageProps) {
             </div>
           )}
           <h1
-            className="mb-3 text-[36px] font-bold tracking-[-0.025em]"
+            className="mb-3 text-[32px] font-bold tracking-[-0.025em] sm:text-[36px]"
             style={{ fontFamily: "var(--font-display)", color: "var(--fg1)" }}
           >
             {page.frontmatter.title}
           </h1>
           {page.frontmatter.description && (
-            <p className="text-[17px] leading-[1.65]" style={{ color: "var(--fg2)" }}>
+            <p className="text-[16px] leading-[1.65] sm:text-[17px]" style={{ color: "var(--fg2)" }}>
               {page.frontmatter.description}
             </p>
           )}
         </header>
+        {toc.length ? (
+          <div
+            className="mb-8 overflow-hidden rounded-xl border xl:hidden"
+            style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+          >
+            <details>
+              <summary
+                className="cursor-pointer list-none px-4 py-3 text-sm font-medium"
+                style={{ color: "var(--fg1)" }}
+              >
+                On this page
+              </summary>
+              <div className="border-t px-4 py-4" style={{ borderColor: "var(--border)" }}>
+                <Toc items={toc} />
+              </div>
+            </details>
+          </div>
+        ) : null}
         <div className="prose-docs">
           <MDXRemote
             source={content}
