@@ -105,24 +105,18 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
   useEffect(() => {
     if (open) {
       lastFocusedRef.current = document.activeElement as HTMLElement | null;
-      setQuery("");
-      setActiveIdx(0);
       // Focus input after paint.
       requestAnimationFrame(() => inputRef.current?.focus());
-      return;
+      return () => {
+        // Restore focus to the element that opened the dialog (if still in DOM).
+        const last = lastFocusedRef.current;
+        if (last && document.contains(last)) {
+          last.focus();
+        }
+        lastFocusedRef.current = null;
+      };
     }
-    // Restore focus to the element that opened the dialog (if still in DOM).
-    const last = lastFocusedRef.current;
-    if (last && document.contains(last)) {
-      last.focus();
-    }
-    lastFocusedRef.current = null;
   }, [open]);
-
-  // Reset activeIdx whenever the result list shape changes.
-  useEffect(() => {
-    setActiveIdx(0);
-  }, [query, entries]);
 
   // Esc + arrow key handling + focus trap (Tab cycles within the dialog).
   useEffect(() => {
@@ -244,7 +238,10 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
             ref={inputRef}
             type="text"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setActiveIdx(0);
+            }}
             placeholder="Search docs…"
             aria-label="Search query"
             className="flex-1 bg-transparent text-[15px]"
