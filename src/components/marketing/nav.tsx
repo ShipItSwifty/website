@@ -106,7 +106,7 @@ export function Nav() {
             >
               <Github size={14} />
             </a>
-            <details className="relative md:hidden">
+            <details className="md:hidden">
               <summary
                 className="inline-flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-md border"
                 style={{ color: "var(--fg2)", borderColor: "var(--border)" }}
@@ -115,7 +115,7 @@ export function Nav() {
                 <Menu size={14} />
               </summary>
               <div
-                className="absolute top-10 right-0 w-[220px] overflow-hidden rounded-xl border py-2 shadow-xl"
+                className="fixed top-[70px] right-4 left-4 z-50 overflow-hidden rounded-xl border py-2 shadow-xl"
                 style={{
                   background: "var(--surface)",
                   borderColor: "var(--border)",
