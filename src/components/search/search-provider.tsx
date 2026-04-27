@@ -40,7 +40,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
   return (
     <Ctx.Provider value={{ open, setOpen, toggle }}>
       {children}
-      <SearchDialog open={open} onClose={() => setOpen(false)} />
+      {open ? <SearchDialog open={open} onClose={() => setOpen(false)} /> : null}
     </Ctx.Provider>
   );
 }

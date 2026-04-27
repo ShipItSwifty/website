@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 export type TerminalLineType = "prompt" | "dim" | "info" | "ok" | "done" | "warn" | "json";
 
@@ -26,23 +26,36 @@ const colorByType: Record<TerminalLineType, string> = {
   json: "var(--fg2)",
 };
 
+function subscribeToReducedMotion(onChange: () => void) {
+  const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+}
+
+function getReducedMotionSnapshot() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function getServerReducedMotionSnapshot() {
+  return false;
+}
+
 export function AnimTerminal({
   lines,
   loopMs = 7000,
   termBg,
   label = "shipit",
 }: AnimTerminalProps) {
+  const reduceMotion = useSyncExternalStore(
+    subscribeToReducedMotion,
+    getReducedMotionSnapshot,
+    getServerReducedMotionSnapshot,
+  );
   const [vis, setVis] = useState<number[]>([]);
+  const visibleLines = reduceMotion ? lines.map((_, i) => i) : vis;
 
   useEffect(() => {
-    const reduce =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (reduce) {
-      setVis(lines.map((_, i) => i));
-      return;
-    }
+    if (reduceMotion) return;
 
     let timers: ReturnType<typeof setTimeout>[] = [];
     const run = () => {
@@ -55,7 +68,7 @@ export function AnimTerminal({
       timers.forEach(clearTimeout);
       clearInterval(loop);
     };
-  }, [lines, loopMs]);
+  }, [lines, loopMs, reduceMotion]);
 
   return (
     <div
@@ -88,8 +101,8 @@ export function AnimTerminal({
             key={i}
             style={{
               color: colorByType[l.t] || "var(--fg1)",
-              opacity: vis.includes(i) ? 1 : 0,
-              transform: vis.includes(i) ? "none" : "translateY(4px)",
+              opacity: visibleLines.includes(i) ? 1 : 0,
+              transform: visibleLines.includes(i) ? "none" : "translateY(4px)",
               transition: "opacity 200ms, transform 200ms",
             }}
           >
@@ -103,7 +116,7 @@ export function AnimTerminal({
           style={{
             background: "var(--fg1)",
             animation: "blink 1s step-end infinite",
-            opacity: vis.length >= lines.length ? 1 : 0,
+            opacity: visibleLines.length >= lines.length ? 1 : 0,
           }}
         />
       </div>

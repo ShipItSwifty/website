@@ -1,8 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { Search as SearchIcon } from "lucide-react";
 import { useSearch } from "./search-provider";
+
+function subscribeKeyboardModifier() {
+  return () => {};
+}
+
+function getKeyboardModifier() {
+  return navigator.platform.toLowerCase().includes("mac") ? "⌘" : "Ctrl";
+}
+
+function getServerKeyboardModifier() {
+  return "⌘";
+}
 
 interface SearchButtonProps {
   /** "compact" = just an icon (mobile/nav). "full" = pill with placeholder + ⌘K (sidebar). */
@@ -11,11 +23,11 @@ interface SearchButtonProps {
 
 export function SearchButton({ variant = "compact" }: SearchButtonProps) {
   const { setOpen } = useSearch();
-  const [mod, setMod] = useState<"⌘" | "Ctrl">("⌘");
-
-  useEffect(() => {
-    setMod(navigator.platform.toLowerCase().includes("mac") ? "⌘" : "Ctrl");
-  }, []);
+  const mod = useSyncExternalStore(
+    subscribeKeyboardModifier,
+    getKeyboardModifier,
+    getServerKeyboardModifier,
+  );
 
   if (variant === "full") {
     return (
