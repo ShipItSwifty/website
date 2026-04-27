@@ -2,7 +2,7 @@
 
 import { useRef, useState, type KeyboardEvent } from "react";
 import Link from "next/link";
-import { Check, Sparkles } from "lucide-react";
+import { Check, Terminal } from "lucide-react";
 import { AnimTerminal, type TerminalLine } from "./anim-terminal";
 import { CodeBlock } from "./code-block";
 import { siteConfig } from "@/lib/site";
@@ -13,9 +13,17 @@ interface InstallTab {
   code: string;
   available: boolean;
   badge?: string;
+  desc?: string;
 }
 
 const installTabs: InstallTab[] = [
+  {
+    id: "homebrew",
+    label: "Homebrew",
+    available: true,
+    code: siteConfig.install.homebrewCommand,
+    desc: "The fastest way to get started. One command, always up to date.",
+  },
   {
     id: "build",
     label: "Build from Source",
@@ -24,6 +32,7 @@ const installTabs: InstallTab[] = [
 cd shipitswifty
 swift build -c release
 # Binary at .build/release/shipit`,
+    desc: "Get the latest unreleased code, contribute patches, or audit every line before running it.",
   },
   {
     id: "spm",
@@ -36,28 +45,18 @@ dependencies: [
     from: "1.0.0"
   )
 ]`,
-  },
-  {
-    id: "homebrew",
-    label: "Homebrew",
-    available: siteConfig.install.homebrewAvailable,
-    badge: siteConfig.install.homebrewAvailable ? undefined : "Coming soon",
-    code: siteConfig.install.homebrewAvailable
-      ? siteConfig.install.homebrewCommand
-      : `# Coming soon — the Homebrew tap is in private beta.
-# In the meantime, build from source or use SPM.`,
+    desc: "Want full control? Add ShipItSwifty as a library dependency and compose your release pipeline in Swift — type-safe, scriptable, and deeply integrated with your own tooling.",
   },
 ];
 
-const aiLines: TerminalLine[] = [
-  { t: "prompt", s: "shipit ai-session --goal beta --output json" },
-  { t: "dim", s: "▸ inspecting project…" },
-  { t: "ok", s: "  detected scheme: MyApp (high confidence)" },
+const generateLines: TerminalLine[] = [
+  { t: "prompt", s: "shipit generate --goal beta" },
+  { t: "dim", s: "▸ scanning Xcode project…" },
+  { t: "ok", s: "  detected scheme: MyApp" },
   { t: "ok", s: "  detected bundle_id: com.example.myapp" },
-  { t: "info", s: "  hint: workflow beta -> version, archive, export, testflight" },
-  { t: "info", s: "  nextAction: generate_shipfile" },
-  { t: "info", s: "  command: shipit run beta --dry-run" },
-  { t: "done", s: "✓ ai-session ready — give this JSON to your agent" },
+  { t: "info", s: "  workflow: version → archive → export → testflight" },
+  { t: "dim", s: "▸ writing Shipfile.yml…" },
+  { t: "done", s: "✓ Shipfile.yml ready — run: shipit run beta --dry-run" },
 ];
 
 function StepHeader({ n, title }: { n: string; title: string }) {
@@ -85,7 +84,7 @@ function StepHeader({ n, title }: { n: string; title: string }) {
 }
 
 export function GettingStarted() {
-  const [active, setActive] = useState<string>("build");
+  const [active, setActive] = useState<string>("homebrew");
   const tab = installTabs.find((t) => t.id === active) ?? installTabs[0];
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
@@ -135,7 +134,7 @@ export function GettingStarted() {
           className="mt-3.5 max-w-[500px] text-base leading-[1.65]"
           style={{ color: "var(--fg2)" }}
         >
-          Install the binary, scaffold a config, and run your first workflow. No Gemfile. No
+          Install the binary, generate a config, and run your first workflow. No Gemfile. No
           Bundler. No Ruby.
         </p>
       </div>
@@ -189,6 +188,11 @@ export function GettingStarted() {
                 );
               })}
             </div>
+            {tab.desc && (
+              <p className="mb-3 text-[13px] leading-[1.6]" style={{ color: "var(--fg3)" }}>
+                {tab.desc}
+              </p>
+            )}
             <div
               role="tabpanel"
               id="install-panel"
@@ -200,9 +204,9 @@ export function GettingStarted() {
           </div>
 
           <div className="mb-10">
-            <StepHeader n="2" title="Prompt your agent with project hints" />
+            <StepHeader n="2" title="Generate your config" />
             <p className="mb-4 text-sm leading-[1.7]" style={{ color: "var(--fg2)" }}>
-              Ask your coding agent to use{" "}
+              Run{" "}
               <code
                 className="rounded px-1.5 py-px text-xs"
                 style={{
@@ -211,17 +215,25 @@ export function GettingStarted() {
                   background: "var(--brand-muted)",
                 }}
               >
-                shipit ai-session
+                shipit generate
               </code>{" "}
-              as grounding context. Instead of hand-writing YAML, the agent can inspect the project,
-              resolve the likely workflow, and draft the full config for you.
+              to inspect your project and scaffold a{" "}
+              <code
+                className="rounded px-1.5 py-px text-xs"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  color: "var(--fg2)",
+                  background: "var(--elevated)",
+                }}
+              >
+                Shipfile.yml
+              </code>{" "}
+              in seconds. No hand-writing YAML — shipit detects your scheme, bundle ID, and the
+              right workflow automatically.
             </p>
-            <CodeBlock lang="bash">{`Prompt:
-Generate my ShipItSwifty beta setup for this app.
-Run shipit ai-session --goal beta --output json first and use it as source of truth.
-If something is ambiguous, ask me one question. Otherwise create Shipfile.yml and tell me the next shipit command.
+            <CodeBlock lang="bash">{`shipit generate --goal beta
 
-# Optional manual fallback
+# Or scaffold interactively
 shipit init`}</CodeBlock>
           </div>
 
@@ -255,30 +267,39 @@ shipit run beta --ci`}</CodeBlock>
               <div
                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
                 style={{
-                  background: "rgba(88,166,255,0.1)",
-                  border: "1px solid rgba(88,166,255,0.2)",
-                  color: "var(--blue)",
+                  background: "var(--brand-muted)",
+                  border: "1px solid rgba(240,81,56,0.2)",
+                  color: "var(--brand)",
                 }}
               >
-                <Sparkles size={16} />
+                <Terminal size={16} />
               </div>
               <div>
                 <div
                   className="text-sm font-semibold"
                   style={{ fontFamily: "var(--font-display)", color: "var(--fg1)" }}
                 >
-                  AI-first setup
+                  shipit generate in action
                 </div>
                 <div className="text-[13px]" style={{ color: "var(--fg2)" }}>
-                  One prompt plus ai-session hints can generate the whole release workflow.
+                  Inspects your project and writes Shipfile.yml — ready to run.
                 </div>
               </div>
             </div>
-            <AnimTerminal lines={aiLines} loopMs={7000} />
+            <AnimTerminal lines={generateLines} loopMs={7000} />
             <p className="mt-4 text-[13px] leading-[1.65]" style={{ color: "var(--fg2)" }}>
-              The agent gets a stable JSON snapshot of detected scheme, bundle ID, readiness, and
-              the best next action. That keeps the setup grounded in your project instead of making
-              the model guess.
+              Generate produces a stable, reviewable config. Edit it once if you need to, then
+              commit it. Every CI run after that is just{" "}
+              <code
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  color: "var(--brand)",
+                  fontSize: 12,
+                }}
+              >
+                shipit run
+              </code>
+              .
             </p>
           </div>
 
