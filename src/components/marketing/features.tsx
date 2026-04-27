@@ -2,12 +2,11 @@
 
 import { useState, type ComponentType } from "react";
 import { Cpu, Upload, Bot, Shield, GitBranch } from "lucide-react";
-import { AndroidIcon } from "@/components/icons/android";
 
 interface Feature {
   Icon: ComponentType<{ size?: number; className?: string }>;
   title: string;
-  tag?: "iOS" | "Android";
+  tag?: "iOS";
   desc: string;
 }
 
@@ -15,7 +14,7 @@ const featureData: Feature[] = [
   {
     Icon: Cpu,
     title: "Build & Archive",
-    desc: "Compile with xcodebuild or Gradle. Archive to .xcarchive or .aab. Export your IPA in one step.",
+    desc: "Compile with xcodebuild. Archive to .xcarchive, export your IPA, and move straight to distribution — one step, no shell scripts.",
   },
   {
     Icon: Upload,
@@ -35,12 +34,6 @@ const featureData: Feature[] = [
     desc: "Encrypted cert vault from a Git repo. Create certs and profiles via ASC API. CI-safe keychain management.",
   },
   {
-    Icon: AndroidIcon,
-    title: "Android Support",
-    tag: "Android",
-    desc: "Gradle-native build, test, archive, lint, and Play Store upload. Platform auto-detected from project files.",
-  },
-  {
     Icon: GitBranch,
     title: "Composable Workflows",
     desc: "Define reusable step sequences in Shipfile.yml. Parameterized custom actions with cycle detection.",
@@ -51,7 +44,6 @@ function FeatureCard({ Icon, title, desc, tag }: Feature) {
   const [hov, setHov] = useState(false);
   const tagCols: Record<string, { c: string; bg: string }> = {
     iOS: { c: "var(--brand)", bg: "var(--brand-muted)" },
-    Android: { c: "var(--green)", bg: "rgba(63,185,80,0.1)" },
   };
   return (
     <div

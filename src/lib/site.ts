@@ -15,7 +15,7 @@ export const siteConfig = {
   },
   install: {
     // Homebrew tap is in a private repo today; mark "coming soon" until published.
-    homebrewAvailable: false as boolean,
+    homebrewAvailable: true as boolean,
     homebrewCommand: "brew tap shipitswifty/tap\nbrew install shipit",
   },
 } as const;
