@@ -145,7 +145,7 @@ async function build() {
   }
 
   await fs.mkdir(join(ROOT, "public"), { recursive: true });
-  await fs.writeFile(OUT_FILE, JSON.stringify(entries));
+  await fs.writeFile(OUT_FILE, `${JSON.stringify(entries, null, 2)}\n`);
   console.log(
     `[search-index] wrote ${entries.length} entries from ${files.length} docs to ${relative(
       ROOT,

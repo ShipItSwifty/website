@@ -187,11 +187,11 @@ ShipItSwifty is a Swift-native CLI for iOS and Android release automation. These
 - Coming from fastlane? Read the [migration guide](/docs/getting-started/migrating-from-fastlane).
 - Setting up CI? See the [CI Setup guide](/docs/guides/ci-setup).
 - Looking for the full Shipfile schema? Open the [Configuration Reference](/docs/reference/configuration).
-- Need the Swift API? Browse the [API Reference](/docs/api).
+- Need the Swift API? Browse the [API Reference](https://shipitswifty.github.io/shipitswifty/documentation/shipitkit/).
 
 ## Versioning
 
-The docs in this site track the latest published release of \`shipit\`. The Swift API reference is regenerated automatically on every release.
+The docs in this site track the latest published release of \`shipit\`. The Swift API reference is generated from DocC and published separately on GitHub Pages.
 `;
   await writeFile(indexPath, body);
   console.log("[scaffold-docs] wrote index.mdx");
@@ -202,7 +202,7 @@ async function writeApiIndex() {
   if (await exists(dst)) return;
   const body = `---
 title: "API Reference"
-description: "ShipItKit Swift API — generated from DocC and rendered natively here."
+description: "ShipItKit Swift API generated from DocC."
 group: "API Reference"
 order: 1
 ---
@@ -217,17 +217,16 @@ Add the dependency to your \`Package.swift\`:
 dependencies: [
   .package(
     url: "https://github.com/ShipItSwifty/shipitswifty.git",
-    from: "1.0.0"
+    from: "0.1.0"
   )
 ]
 \`\`\`
 
 ## Browse the API
 
-The full API reference is generated from DocC on every release and rendered into this site. Browse the symbol tree on the left, or jump straight to the entry point: <a href="/docs/api/shipitkit">\`ShipItKit\`</a>.
+The full API reference is generated from DocC and published with GitHub Pages:
 
-> **Note**
-> The API browser comes online once a \`docs-*\` release has been published on the website repo. While that's in progress, this page is the only thing you'll see. Check back after the next release.
+[Open the ShipItKit API reference](https://shipitswifty.github.io/shipitswifty/documentation/shipitkit/).
 `;
   await mkdir(dirname(dst), { recursive: true });
   await writeFile(dst, body);

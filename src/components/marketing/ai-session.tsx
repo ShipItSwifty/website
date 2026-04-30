@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Bot, ArrowRight } from "lucide-react";
 import { AnimTerminal, type TerminalLine } from "./anim-terminal";
 import { CodeBlock } from "./code-block";
@@ -178,14 +179,14 @@ shipit command to run next.`}</CodeBlock>
                 </div>
               ))}
               <div className="mt-4 border-t pt-4" style={{ borderColor: "var(--border)" }}>
-                <a
-                  href="/docs/ai-session"
+                <Link
+                  href="/docs/getting-started/walkthrough#step-2-create-your-config-file"
                   className="inline-flex items-center gap-1 text-[13px]"
                   style={{ color: "var(--blue)" }}
                 >
-                  Full ai-session reference
+                  AI session walkthrough
                   <ArrowRight size={12} />
-                </a>
+                </Link>
               </div>
             </div>
           </div>

@@ -10,12 +10,15 @@ export const siteConfig = {
     website: "https://github.com/ShipItSwifty/website",
     websiteRepo: "ShipItSwifty/website",
   },
+  docs: {
+    api: "https://shipitswifty.github.io/shipitswifty/documentation/shipitkit/",
+  },
   social: {
     // Add Twitter/Mastodon/Bluesky here once they exist.
   },
   install: {
-    // Homebrew tap is in a private repo today; mark "coming soon" until published.
-    homebrewAvailable: true as boolean,
+    // Flip this once the public tap exists.
+    homebrewAvailable: false as boolean,
     homebrewCommand: "brew tap shipitswifty/tap\nbrew install shipit",
   },
 } as const;
