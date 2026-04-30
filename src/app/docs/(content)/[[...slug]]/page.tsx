@@ -63,7 +63,10 @@ export default async function DocPage({ params }: PageProps) {
             {page.frontmatter.title}
           </h1>
           {page.frontmatter.description && (
-            <p className="text-[16px] leading-[1.65] sm:text-[17px]" style={{ color: "var(--fg2)" }}>
+            <p
+              className="text-[16px] leading-[1.65] sm:text-[17px]"
+              style={{ color: "var(--fg2)" }}
+            >
               {page.frontmatter.description}
             </p>
           )}

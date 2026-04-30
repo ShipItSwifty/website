@@ -18,21 +18,27 @@ interface InstallTab {
 
 const installTabs: InstallTab[] = [
   {
-    id: "homebrew",
-    label: "Homebrew",
-    available: true,
-    code: siteConfig.install.homebrewCommand,
-    desc: "The fastest way to get started. One command, always up to date.",
-  },
-  {
     id: "build",
     label: "Build from Source",
     available: true,
     code: `git clone ${siteConfig.github.cli}.git
 cd shipitswifty
+git checkout 0.1.0
 swift build -c release
 # Binary at .build/release/shipit`,
-    desc: "Get the latest unreleased code, contribute patches, or audit every line before running it.",
+    desc: "Build the public 0.1.0 release from source, or audit every line before running it.",
+  },
+  {
+    id: "homebrew",
+    label: "Homebrew",
+    available: siteConfig.install.homebrewAvailable,
+    badge: siteConfig.install.homebrewAvailable ? undefined : "Soon",
+    code: siteConfig.install.homebrewAvailable
+      ? siteConfig.install.homebrewCommand
+      : "# Homebrew tap coming soon\n# For now, build from source.",
+    desc: siteConfig.install.homebrewAvailable
+      ? "The fastest way to get started. One command, always up to date."
+      : "The public tap is not published yet. Use the source build while the tap is prepared.",
   },
   {
     id: "spm",
@@ -42,10 +48,10 @@ swift build -c release
 dependencies: [
   .package(
     url: "${siteConfig.github.cli}.git",
-    from: "1.0.0"
+    from: "0.1.0"
   )
 ]`,
-    desc: "Want full control? Add ShipItSwifty as a library dependency and compose your release pipeline in Swift — type-safe, scriptable, and deeply integrated with your own tooling.",
+    desc: "Want full control? Add ShipItSwifty as a pinned library dependency.",
   },
 ];
 
@@ -84,7 +90,7 @@ function StepHeader({ n, title }: { n: string; title: string }) {
 }
 
 export function GettingStarted() {
-  const [active, setActive] = useState<string>("homebrew");
+  const [active, setActive] = useState<string>("build");
   const tab = installTabs.find((t) => t.id === active) ?? installTabs[0];
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
@@ -143,11 +149,7 @@ export function GettingStarted() {
         <div>
           <div className="mb-10">
             <StepHeader n="1" title="Install shipit" />
-            <div
-              className="mb-4 flex flex-wrap gap-1.5"
-              role="tablist"
-              aria-label="Install method"
-            >
+            <div className="mb-4 flex flex-wrap gap-1.5" role="tablist" aria-label="Install method">
               {installTabs.map((t, i) => {
                 const isActive = active === t.id;
                 return (

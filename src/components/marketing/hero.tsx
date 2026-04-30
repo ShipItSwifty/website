@@ -87,7 +87,10 @@ export function Hero() {
             <Github size={15} />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-[11px] tracking-[0.08em] uppercase" style={{ color: "var(--fg3)" }}>
+            <div
+              className="text-[11px] tracking-[0.08em] uppercase"
+              style={{ color: "var(--fg3)" }}
+            >
               Open source
             </div>
             <div className="truncate text-[13px]" style={{ color: "var(--fg1)" }}>
@@ -120,8 +123,8 @@ export function Hero() {
             style={{ color: "var(--blue)" }}
           >
             GitHub Issues
-          </a>
-          {" "}for bug reports, feedback, and feature requests.
+          </a>{" "}
+          for bug reports, feedback, and feature requests.
         </p>
       </div>
       <div className="fade-up-delayed">

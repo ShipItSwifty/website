@@ -37,7 +37,7 @@ swift run shipit run beta
 
 The repository includes a Homebrew formula template at `Formula/shipit.rb`, but there is no published tap yet.
 
-If you want to distribute `shipit` through Homebrew, copy that formula into your tap and install it as a `--HEAD` formula until tagged release tarballs are published.
+If you want to distribute `shipit` through Homebrew, copy that formula into your tap and install it as a `--HEAD` formula until release tarballs are published.
 
 For now, the supported install path is building from source from the public repository:
 
@@ -45,7 +45,8 @@ For now, the supported install path is building from source from the public repo
 
 ```bash
 git clone https://github.com/shipitswifty/shipitswifty
-cd ShipItSwifty
+cd shipitswifty
+git checkout 0.1.0
 swift build
 ```
 

@@ -43,8 +43,8 @@ Docs live in `src/content/docs/` as MDX files with frontmatter:
 ---
 title: Page Title
 description: Short description for SEO
-group: getting-started   # folder group
-order: 2                 # sort order within group
+group: getting-started # folder group
+order: 2 # sort order within group
 ---
 ```
 

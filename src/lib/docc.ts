@@ -10,10 +10,24 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const DOCC_ROOT = path.join(process.cwd(), "data", "docc");
-const DATA_ROOT = path.join(DOCC_ROOT, "data");
-const INDEX_PATH = path.join(DOCC_ROOT, "index", "index.json");
-const METADATA_PATH = path.join(DOCC_ROOT, "metadata.json");
+const INDEX_PATH = path.join(process.cwd(), "data", "docc", "index", "index.json");
+const METADATA_PATH = path.join(process.cwd(), "data", "docc", "metadata.json");
+const MODULE_NODE_PATH = path.join(
+  process.cwd(),
+  "data",
+  "docc",
+  "data",
+  "documentation",
+  "shipitkit.json",
+);
+const MODULE_NODES_ROOT = path.join(
+  process.cwd(),
+  "data",
+  "docc",
+  "data",
+  "documentation",
+  "shipitkit",
+);
 
 // ---------- Inline content ----------
 
@@ -212,7 +226,7 @@ export function isDoccAvailable(): boolean {
 
 let _metadataCache: DoccMetadata | null = null;
 let _indexCache: DoccIndex | null = null;
-const _nodeCache = new Map<string, RenderNode>();
+let _nodeCache: Map<string, RenderNode> | null = null;
 
 export function getDoccMetadata(): DoccMetadata | null {
   if (!isDoccAvailable()) return null;
@@ -230,36 +244,42 @@ export function getDoccIndex(): DoccIndex | null {
   return _indexCache;
 }
 
-/**
- * Resolve a DocC slug array (e.g. ["action","run(with:context:)"]) into the
- * absolute on-disk JSON path. Returns null if missing.
- *
- * The on-disk layout uses lower-cased segments because DocC writes files like
- * `action/run(with:context:).json`. The DocC index, however, exposes paths
- * with the original casing in `path` fields. We always lower-case here.
- */
-export function getRenderNodePath(slug: string[]): string | null {
-  if (!isDoccAvailable()) return null;
-  const moduleId = "shipitkit";
-  const lowered = slug.map((s) => s.toLowerCase());
-  // Empty slug → module root JSON: data/documentation/shipitkit.json
-  if (lowered.length === 0) {
-    const p = path.join(DATA_ROOT, "documentation", `${moduleId}.json`);
-    return fs.existsSync(p) ? p : null;
-  }
-  const joined = lowered.join("/");
-  const p = path.join(DATA_ROOT, "documentation", moduleId, `${joined}.json`);
-  return fs.existsSync(p) ? p : null;
+export function loadRenderNode(slug: string[]): RenderNode | null {
+  const key = slug.map((s) => s.toLowerCase()).join("/");
+  return getRenderNodeCache().get(key) ?? null;
 }
 
-export function loadRenderNode(slug: string[]): RenderNode | null {
-  const p = getRenderNodePath(slug);
-  if (!p) return null;
-  if (_nodeCache.has(p)) return _nodeCache.get(p)!;
-  const raw = fs.readFileSync(p, "utf8");
-  const node = JSON.parse(raw) as RenderNode;
-  _nodeCache.set(p, node);
-  return node;
+function getRenderNodeCache(): Map<string, RenderNode> {
+  if (_nodeCache) return _nodeCache;
+  const nodes = new Map<string, RenderNode>();
+  _nodeCache = nodes;
+  if (!isDoccAvailable()) return nodes;
+
+  if (fs.existsSync(MODULE_NODE_PATH)) {
+    const raw = fs.readFileSync(MODULE_NODE_PATH, "utf8");
+    nodes.set("", JSON.parse(raw) as RenderNode);
+  }
+
+  if (!fs.existsSync(MODULE_NODES_ROOT)) return nodes;
+
+  const walk = (dir: string, slugPrefix: string[]) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const entryPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(entryPath, [...slugPrefix, entry.name.toLowerCase()]);
+        continue;
+      }
+      if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
+
+      const fileSlug = entry.name.slice(0, -".json".length).toLowerCase();
+      const key = [...slugPrefix, fileSlug].join("/");
+      const raw = fs.readFileSync(entryPath, "utf8");
+      nodes.set(key, JSON.parse(raw) as RenderNode);
+    }
+  };
+
+  walk(MODULE_NODES_ROOT, []);
+  return nodes;
 }
 
 /**

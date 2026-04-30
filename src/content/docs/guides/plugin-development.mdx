@@ -22,9 +22,8 @@ This guide walks through two complete, production-grade examples:
 2. **`copy-artifacts`** — copies built artifacts (`.ipa`, `.aab`, `.app`, dSYMs) to a versioned destination directory after `archive` / `export` finishes. Useful for shaping CI output into a stable layout.
 
 <Callout type="info" title="Verified">
-  All Swift code in this guide is verified to compile against the public
-  `ShipItKit` API and is tested against the upstream test suite before each
-  release.
+  All Swift code in this guide is verified to compile against the public `ShipItKit` API and is
+  tested against the upstream test suite before each release.
 </Callout>
 
 ## Package layout
@@ -43,8 +42,7 @@ let package = Package(
         .library(name: "ExamplePlugin", targets: ["ExamplePlugin"])
     ],
     dependencies: [
-        // Replace with the version / branch / path you want to track.
-        .package(url: "https://github.com/shipitswifty/shipitswifty", branch: "main")
+        .package(url: "https://github.com/shipitswifty/shipitswifty", from: "0.1.0")
     ],
     targets: [
         .target(
@@ -86,14 +84,14 @@ Key points:
 
 The `ActionContext` you receive in `run(with:context:)` exposes:
 
-| Property          | Type                    | Description                                          |
-| ----------------- | ----------------------- | ---------------------------------------------------- |
-| `shell`           | `ShellContext`          | SwiftyShell context for spawning subprocesses        |
-| `logger`          | `Logger`                | OSLog logger scoped to your action                   |
-| `config`          | `ResolvedConfig`        | Final merged Shipfile + env + CLI configuration      |
-| `appStoreConnect` | `AppStoreConnectClient` | App Store Connect REST client                        |
-| `googlePlay`      | `GooglePlayClient?`     | Google Play client (Android only; `nil` otherwise)   |
-| `platform`        | `Platform`              | `.ios` or `.android`                                 |
+| Property          | Type                    | Description                                        |
+| ----------------- | ----------------------- | -------------------------------------------------- |
+| `shell`           | `ShellContext`          | SwiftyShell context for spawning subprocesses      |
+| `logger`          | `Logger`                | OSLog logger scoped to your action                 |
+| `config`          | `ResolvedConfig`        | Final merged Shipfile + env + CLI configuration    |
+| `appStoreConnect` | `AppStoreConnectClient` | App Store Connect REST client                      |
+| `googlePlay`      | `GooglePlayClient?`     | Google Play client (Android only; `nil` otherwise) |
+| `platform`        | `Platform`              | `.ios` or `.android`                               |
 
 To run a shell command, use the SwiftyShell `Command` API (never `Foundation.Process` directly):
 
@@ -545,9 +543,9 @@ For typed `Options` structs (the recommended approach for action-specific config
 
 ## Troubleshooting
 
-| Symptom                                                                        | Likely cause                                                                                                                          |
-| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `Type 'MyAction' does not conform to protocol 'Action'`                        | `Options` or `Result` is missing `Codable` (only `Sendable` is not enough).                                                           |
-| `No action named 'foo' is registered` at runtime                               | The plugin wasn't registered into the same `ActionRegistry` the workflow runner uses. Register before calling `Workflow.run(...)`.    |
-| YAML `log_path: ./build/timings.json` produces `nil` in `Options.logPath`      | The property name doesn't match the snake-case → camelCase mapping. The decoder uses `.convertFromSnakeCase`; double-check spelling.  |
-| Tests fail to compile referencing `ActionContext.mock()`                       | The factory requires `executor:` — pass a `MockExecutor` from `SwiftyShell`.                                                          |
+| Symptom                                                                   | Likely cause                                                                                                                         |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `Type 'MyAction' does not conform to protocol 'Action'`                   | `Options` or `Result` is missing `Codable` (only `Sendable` is not enough).                                                          |
+| `No action named 'foo' is registered` at runtime                          | The plugin wasn't registered into the same `ActionRegistry` the workflow runner uses. Register before calling `Workflow.run(...)`.   |
+| YAML `log_path: ./build/timings.json` produces `nil` in `Options.logPath` | The property name doesn't match the snake-case → camelCase mapping. The decoder uses `.convertFromSnakeCase`; double-check spelling. |
+| Tests fail to compile referencing `ActionContext.mock()`                  | The factory requires `executor:` — pass a `MockExecutor` from `SwiftyShell`.                                                         |
