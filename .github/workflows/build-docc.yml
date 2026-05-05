@@ -29,6 +29,11 @@ jobs:
       - name: Checkout website
         uses: actions/checkout@v5
 
+      - name: Use Node.js 24
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode_26.4.app
 
