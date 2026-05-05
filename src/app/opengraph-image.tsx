@@ -13,7 +13,7 @@ export default async function OG() {
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        background: "#0d1117",
+        background: "#111118",
         color: "#e6edf3",
         padding: 80,
         fontFamily: "system-ui, sans-serif",
@@ -40,7 +40,7 @@ export default async function OG() {
             alignItems: "center",
             justifyContent: "center",
             borderRadius: 14,
-            background: "#fa6800",
+            background: "#8B5CF6",
             color: "white",
             fontSize: 32,
             fontWeight: 700,
@@ -49,7 +49,7 @@ export default async function OG() {
           S
         </div>
         <div style={{ display: "flex", fontSize: 36, fontWeight: 700, letterSpacing: "-0.02em" }}>
-          ShipIt<span style={{ color: "#fa6800" }}>Swifty</span>
+          ShipIt<span style={{ color: "#A78BFA" }}>Swifty</span>
         </div>
       </div>
 

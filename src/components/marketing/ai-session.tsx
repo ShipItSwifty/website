@@ -114,8 +114,7 @@ export function AISession() {
               >
                 Example agent prompt
               </div>
-              <CodeBlock lang="text">{`Run shipit generate --goal beta first.
-Then run shipit ai-session --goal beta --output json
+              <CodeBlock lang="text">{`Run shipit ai-session --goal beta --output json
 and use that result as the source of truth.
 Validate the setup and tell me the exact
 shipit command to run next.`}</CodeBlock>

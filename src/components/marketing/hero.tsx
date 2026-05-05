@@ -21,10 +21,10 @@ const heroLines: TerminalLine[] = [
 ];
 
 const pills = [
-  { t: "Public beta", c: "#D29922" },
-  { t: "Swift 6", c: "#F05138" },
+  { t: "Swift 6", c: "#8B5CF6" },
   { t: "macOS 15+", c: "#8B949E" },
   { t: "iOS + Android", c: "#3FB950" },
+  { t: "Linux", c: "#58A6FF" },
   { t: "AI-first", c: "#58A6FF" },
 ];
 
@@ -32,27 +32,6 @@ export function Hero() {
   return (
     <section className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-12 px-6 pt-[88px] pb-20 md:grid-cols-2 md:gap-[72px]">
       <div className="fade-up">
-        <div className="mb-7 flex flex-wrap gap-2">
-          {pills.map((p) => (
-            <span
-              key={p.t}
-              className="rounded-full border px-2.5 py-[3px] text-xs font-medium"
-              style={{
-                color: "var(--fg1)",
-                background: `${p.c}18`,
-                borderColor: `${p.c}55`,
-                fontFamily: "var(--font-body)",
-              }}
-            >
-              <span
-                aria-hidden
-                className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full align-middle"
-                style={{ background: p.c }}
-              />
-              {p.t}
-            </span>
-          ))}
-        </div>
         <h1
           className="mb-[22px] text-[42px] leading-[1.06] font-bold tracking-[-0.03em] sm:text-[54px]"
           style={{ fontFamily: "var(--font-display)", color: "var(--fg1)" }}
@@ -127,6 +106,27 @@ export function Hero() {
           </a>
           .
         </p>
+        <div className="mt-5 flex flex-wrap gap-2">
+          {pills.map((p) => (
+            <span
+              key={p.t}
+              className="rounded-full border px-2.5 py-[3px] text-xs font-medium"
+              style={{
+                color: "var(--fg1)",
+                background: `${p.c}18`,
+                borderColor: `${p.c}55`,
+                fontFamily: "var(--font-body)",
+              }}
+            >
+              <span
+                aria-hidden
+                className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full align-middle"
+                style={{ background: p.c }}
+              />
+              {p.t}
+            </span>
+          ))}
+        </div>
       </div>
       <div className="fade-up-delayed">
         <AnimTerminal lines={heroLines} loopMs={8000} />
