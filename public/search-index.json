@@ -29,7 +29,7 @@
     "title": "Android Quickstart",
     "section": null,
     "group": "Getting Started",
-    "content": "Android Quickstart Get your first Android build shipped with ShipItSwifty."
+    "content": "Get your first Android build shipped with ShipItSwifty."
   },
   {
     "id": "/docs/getting-started/android-quickstart#prerequisites",
@@ -37,7 +37,7 @@
     "title": "Android Quickstart",
     "section": "Prerequisites",
     "group": "Getting Started",
-    "content": "Xcode CLI tools or Homebrew (swift, swift build) An Android project with a gradlew wrapper at the project root A Google Play service account JSON key (for Play Store uploads) bundletool on PATH (for validate bundle: brew install bundletool)"
+    "content": "An Android project with a gradlew wrapper at the project root A Google Play service account JSON key (for Play Store uploads) bundletool on PATH (for validate bundle: brew install bundletool)"
   },
   {
     "id": "/docs/getting-started/android-quickstart#1-install-shipitswifty",
@@ -109,7 +109,7 @@
     "title": "Android Quickstart",
     "section": "Google Play service account setup",
     "group": "Getting Started",
-    "content": "Use these values for Android setup: | Value | Where to find it | | ----- | ---------------- | | packagename | Your Android application ID, usually applicationId in app/build.gradle or app/build.gradle.kts (for example com.example.myapp) | | playtrack | The Play Console release track you want to target: typically internal, alpha, beta, or production | | GOOGLEPLAYSERVICEACCOUNTJSON | Raw contents of the service account key JSON file | | GOOGLEPLAYSERVICEACCOUNTJSONPATH | Local filesystem path to that JSON key file | Set up Play API access: Open Google Cloud Console and create or choose a projec"
+    "content": "Use these values for Android setup: packagename — Your Android application ID, usually applicationId in app/build.gradle or app/build.gradle.kts (for example com.example.myapp) playtrack — The Play Console release track you want to target: typically internal, alpha, beta, or production GOOGLEPLAYSERVICEACCOUNTJSON — Raw contents of the service account key JSON file GOOGLEPLAYSERVICEACCOUNTJSONPATH — Local filesystem path to that JSON key file Set up Play API access: Open Google Cloud Console and create or choose a project. Enable the Google Play Developer API for that project. Create a service"
   },
   {
     "id": "/docs/getting-started/android-quickstart#troubleshooting",
@@ -118,6 +118,158 @@
     "section": "Troubleshooting",
     "group": "Getting Started",
     "content": "gradlew: Permission denied bundletool: command not found Google Play upload failed: 401 Check that your service account has the Release Manager role in Google Play Console (not just Google Cloud Console). Build uses gradle instead of ./gradlew ShipItSwifty uses ./gradlew when it exists in the working directory or the configured gradlewpath. If neither is present, it falls back to gradle on PATH. Set android.gradlewpath in Shipfile.yml to override."
+  },
+  {
+    "id": "/docs/getting-started/installation",
+    "url": "/docs/getting-started/installation",
+    "title": "Installation",
+    "section": null,
+    "group": "Getting Started",
+    "content": "ShipItSwifty is a Swift CLI that drives Xcode and Gradle to build, sign, and ship your apps. It has Swift package dependencies (SwiftyShell, apple-subprocess, and others) that are resolved automatically — you just need a working Swift toolchain."
+  },
+  {
+    "id": "/docs/getting-started/installation#prerequisites",
+    "url": "/docs/getting-started/installation#prerequisites",
+    "title": "Installation",
+    "section": "Prerequisites",
+    "group": "Getting Started",
+    "content": "macOS 15+, Xcode 16+ — ShipItSwifty calls xcodebuild under the hood for builds, archives, and exports. Swift 6 toolchain — the CLI is built with Swift 6 structured concurrency. Apple Developer account — required for code signing and provisioning profiles. App Store Connect API key (optional) — only needed for commands that talk to Apple's servers: upload, testflight, metadata, and provision. Local builds work without one. Google Play Store credentials (optional) — required for Android upload and release commands. Local Gradle builds work without them."
+  },
+  {
+    "id": "/docs/getting-started/installation#homebrew",
+    "url": "/docs/getting-started/installation#homebrew",
+    "title": "Installation",
+    "section": "Homebrew",
+    "group": "Getting Started",
+    "content": "The fastest way to get started. One command, always up to date:"
+  },
+  {
+    "id": "/docs/getting-started/installation#swift-package-manager",
+    "url": "/docs/getting-started/installation#swift-package-manager",
+    "title": "Installation",
+    "section": "Swift Package Manager",
+    "group": "Getting Started",
+    "content": "Use this when you want to embed ShipItKit as a library in your own Swift tooling, or when you want to run shipit from source in CI scripts:"
+  },
+  {
+    "id": "/docs/getting-started/installation#build-from-source",
+    "url": "/docs/getting-started/installation#build-from-source",
+    "title": "Installation",
+    "section": "Build from source",
+    "group": "Getting Started",
+    "content": "If you prefer to build from the repository directly: The binary lands at .build/release/shipit. To make it available globally, symlink it:"
+  },
+  {
+    "id": "/docs/getting-started/installation#verify-the-installation",
+    "url": "/docs/getting-started/installation#verify-the-installation",
+    "title": "Installation",
+    "section": "Verify the installation",
+    "group": "Getting Started",
+    "content": "After installing, confirm everything is wired up: If your config file is not the default Shipfile.yml, pass it explicitly:"
+  },
+  {
+    "id": "/docs/getting-started/ios-quickstart",
+    "url": "/docs/getting-started/ios-quickstart",
+    "title": "iOS Quickstart",
+    "section": null,
+    "group": "Getting Started",
+    "content": "Once ShipItSwifty is installed, you are one command away from a working config. This guide walks through generating it, running individual actions, and composing them into repeatable workflows."
+  },
+  {
+    "id": "/docs/getting-started/ios-quickstart#generate-your-config",
+    "url": "/docs/getting-started/ios-quickstart#generate-your-config",
+    "title": "iOS Quickstart",
+    "section": "Generate your config",
+    "group": "Getting Started",
+    "content": "Instead of writing YAML by hand, let ShipItSwifty inspect your Xcode project. It detects your scheme, bundle ID, and team — then writes a Shipfile.yml you can review and commit: If you already know the release goal, target it explicitly: For non-interactive use, run: The generated result includes: appConfig — every inferred value with source, confidence, and why missing — required fields that couldn't be resolved, with env var names ambiguities — fields where multiple candidates exist and confirmation is needed readiness — blockers, missing secrets, and signing risk level nextAction.command — "
+  },
+  {
+    "id": "/docs/getting-started/ios-quickstart#manual-setup",
+    "url": "/docs/getting-started/ios-quickstart#manual-setup",
+    "title": "iOS Quickstart",
+    "section": "Manual setup",
+    "group": "Getting Started",
+    "content": "If you prefer to start from the example file: Edit it to match your project: Shipfile.yml is only the default filename. You can rename it and pass --shipfile on every command."
+  },
+  {
+    "id": "/docs/getting-started/ios-quickstart#set-app-store-connect-credentials",
+    "url": "/docs/getting-started/ios-quickstart#set-app-store-connect-credentials",
+    "title": "iOS Quickstart",
+    "section": "Set App Store Connect credentials",
+    "group": "Getting Started",
+    "content": "For actions that call the App Store Connect API, you need ASCKEYID, ASCISSUERID, and exactly one of ASCPRIVATEKEY or ASCPRIVATEKEYPATH. If you only plan to use local build flows (build, test, archive, export), skip this step. | Value | Where to find it | | ----- | ---------------- | | teamid | Usually auto-detected by shipit generate from Xcode signing settings. If manual, use the 10-character Team ID from your Apple Developer account. | | ASCKEYID | App Store Connect → Users and Access → Integrations → App Store Connect API → Key ID | | ASCISSUERID | Same page — this is account-level metadata"
+  },
+  {
+    "id": "/docs/getting-started/ios-quickstart#run-individual-commands",
+    "url": "/docs/getting-started/ios-quickstart#run-individual-commands",
+    "title": "iOS Quickstart",
+    "section": "Run individual commands",
+    "group": "Getting Started",
+    "content": "Test destinations: shipit test requires a destinations list in Shipfile.yml (or --destination flag). Use xcodebuild -showdestinations -scheme MyApp -workspace MyApp.xcworkspace to find valid strings."
+  },
+  {
+    "id": "/docs/getting-started/ios-quickstart#define-workflows",
+    "url": "/docs/getting-started/ios-quickstart#define-workflows",
+    "title": "iOS Quickstart",
+    "section": "Define workflows",
+    "group": "Getting Started",
+    "content": "Workflows chain actions into repeatable sequences. ShipItSwifty uses Apple's two-version model: | Plist key | Format | Role | | --------- | ------ | ---- | | CFBundleShortVersionString | MAJOR.MINOR.PATCH | Marketing version. Bump manually for releases. | | CFBundleVersion | plain integer | Build counter. Auto-incremented on beta runs. |"
+  },
+  {
+    "id": "/docs/getting-started/ios-quickstart#local-beta-no-upload",
+    "url": "/docs/getting-started/ios-quickstart#local-beta-no-upload",
+    "title": "iOS Quickstart",
+    "section": "Local beta (no upload)",
+    "group": "Getting Started",
+    "content": ""
+  },
+  {
+    "id": "/docs/getting-started/ios-quickstart#beta-with-testflight-upload",
+    "url": "/docs/getting-started/ios-quickstart#beta-with-testflight-upload",
+    "title": "iOS Quickstart",
+    "section": "Beta with TestFlight upload",
+    "group": "Getting Started",
+    "content": ""
+  },
+  {
+    "id": "/docs/getting-started/ios-quickstart#release-submit-for-review",
+    "url": "/docs/getting-started/ios-quickstart#release-submit-for-review",
+    "title": "iOS Quickstart",
+    "section": "Release (submit for review)",
+    "group": "Getting Started",
+    "content": "Run a workflow:"
+  },
+  {
+    "id": "/docs/getting-started/ios-quickstart#dry-run",
+    "url": "/docs/getting-started/ios-quickstart#dry-run",
+    "title": "iOS Quickstart",
+    "section": "Dry run",
+    "group": "Getting Started",
+    "content": "Preview what a command or workflow would do without executing anything:"
+  },
+  {
+    "id": "/docs/getting-started/ios-quickstart#json-output",
+    "url": "/docs/getting-started/ios-quickstart#json-output",
+    "title": "iOS Quickstart",
+    "section": "JSON output",
+    "group": "Getting Started",
+    "content": "For CI pipelines and downstream tooling:"
+  },
+  {
+    "id": "/docs/getting-started/ios-quickstart#debugging",
+    "url": "/docs/getting-started/ios-quickstart#debugging",
+    "title": "iOS Quickstart",
+    "section": "Debugging",
+    "group": "Getting Started",
+    "content": ""
+  },
+  {
+    "id": "/docs/getting-started/ios-quickstart#common-caveats",
+    "url": "/docs/getting-started/ios-quickstart#common-caveats",
+    "title": "iOS Quickstart",
+    "section": "Common caveats",
+    "group": "Getting Started",
+    "content": "Full code-signing flows (sign, provision) require vault configuration (an encrypted certificate repo). Some advanced ASC features are still under active development."
   },
   {
     "id": "/docs/getting-started/migrating-from-fastlane#why-migrate",
@@ -133,7 +285,7 @@
     "title": "Migrating from fastlane",
     "section": "Lane-by-lane mapping",
     "group": "Getting Started",
-    "content": "| fastlane | shipit | | ---------- | ----------------------------------- | | match | shipit sign sync | | gym | shipit archive + shipit export | | pilot | shipit testflight | | deliver | shipit metadata + shipit upload | | scan | shipit test | | snapshot | shipit screenshot | | frameit | shipit screenshot --frame | | pem | covered by ASC API integration | | produce | covered by ASC API integration |"
+    "content": "| fastlane | shipit | | ---------- | ----------------------------------- | | match | shipit sign sync | | gym | shipit archive + shipit export | | pilot | shipit testflight | | deliver | shipit metadata + shipit upload | | scan | shipit test | | snapshot | shipit screenshot (coming soon) | | frameit | shipit screenshot --frame (coming soon) | | pem | covered by ASC API integration | | produce | covered by ASC API integration |"
   },
   {
     "id": "/docs/getting-started/migrating-from-fastlane#what-you-gain",
@@ -141,7 +293,7 @@
     "title": "Migrating from fastlane",
     "section": "What you gain",
     "group": "Getting Started",
-    "content": "Single binary — no Ruby, no Bundler, no plugin compatibility matrix Native Swift — same language as your app, debuggable with Xcode iOS + Android — one CLI for both platforms Guided setup — shipit generate walks you through config creation interactively Validation built-in — YAML, metadata, and archive checks before upload For the full feature set, see the Configuration Reference."
+    "content": "Single binary — no Ruby, no Bundler, no plugin compatibility matrix Native Swift — same language as your app, debuggable with Xcode Guided setup — shipit generate walks you through config creation interactively Validation built-in — YAML, metadata, and archive checks before upload For the full feature set, see the Configuration Reference."
   },
   {
     "id": "/docs/getting-started/migrating-from-fastlane#tool-comparison",
@@ -157,191 +309,7 @@
     "title": "Migrating from fastlane",
     "section": "Next steps",
     "group": "Getting Started",
-    "content": "Quick Start — get running in 5 minutes Walkthrough — end-to-end guide including migration tips"
-  },
-  {
-    "id": "/docs/getting-started/quick-start#quick-start",
-    "url": "/docs/getting-started/quick-start#quick-start",
-    "title": "Quick Start",
-    "section": "Quick Start",
-    "group": "Getting Started",
-    "content": ""
-  },
-  {
-    "id": "/docs/getting-started/quick-start#installation",
-    "url": "/docs/getting-started/quick-start#installation",
-    "title": "Quick Start",
-    "section": "Installation",
-    "group": "Getting Started",
-    "content": ""
-  },
-  {
-    "id": "/docs/getting-started/quick-start#homebrew",
-    "url": "/docs/getting-started/quick-start#homebrew",
-    "title": "Quick Start",
-    "section": "Homebrew",
-    "group": "Getting Started",
-    "content": "The repository includes a Homebrew formula template at Formula/shipit.rb, but there is no published tap yet. If you want to distribute shipit through Homebrew, copy that formula into your tap and install it as a --HEAD formula until release tarballs are published. For now, the supported install path is building from source from the public repository:"
-  },
-  {
-    "id": "/docs/getting-started/quick-start#build-from-source",
-    "url": "/docs/getting-started/quick-start#build-from-source",
-    "title": "Quick Start",
-    "section": "Build from source",
-    "group": "Getting Started",
-    "content": "To use shipit globally, copy the binary:"
-  },
-  {
-    "id": "/docs/getting-started/walkthrough",
-    "url": "/docs/getting-started/walkthrough",
-    "title": "Walkthrough",
-    "section": null,
-    "group": "Getting Started",
-    "content": "ShipItSwifty Walkthrough A step-by-step guide to setting up and running your first release."
-  },
-  {
-    "id": "/docs/getting-started/walkthrough#guided-setup",
-    "url": "/docs/getting-started/walkthrough#guided-setup",
-    "title": "Walkthrough",
-    "section": "Guided setup",
-    "group": "Getting Started",
-    "content": ""
-  },
-  {
-    "id": "/docs/getting-started/walkthrough#detailed-walkthrough",
-    "url": "/docs/getting-started/walkthrough#detailed-walkthrough",
-    "title": "Walkthrough",
-    "section": "Detailed walkthrough",
-    "group": "Getting Started",
-    "content": ""
-  },
-  {
-    "id": "/docs/getting-started/walkthrough#prerequisites",
-    "url": "/docs/getting-started/walkthrough#prerequisites",
-    "title": "Walkthrough",
-    "section": "Prerequisites",
-    "group": "Getting Started",
-    "content": "macOS 15+, Swift 6 / Xcode 16+ An Apple Developer account (For ASC features) An App Store Connect API key"
-  },
-  {
-    "id": "/docs/getting-started/walkthrough#step-1--clone-and-build",
-    "url": "/docs/getting-started/walkthrough#step-1--clone-and-build",
-    "title": "Walkthrough",
-    "section": "Step 1 — Clone and build",
-    "group": "Getting Started",
-    "content": ""
-  },
-  {
-    "id": "/docs/getting-started/walkthrough#step-2--create-your-config-file",
-    "url": "/docs/getting-started/walkthrough#step-2--create-your-config-file",
-    "title": "Walkthrough",
-    "section": "Step 2 — Create your config file",
-    "group": "Getting Started",
-    "content": "Use generate as the default setup path. It walks you through the missing project details, auto-detects what it can from Xcode, and writes Shipfile.yml for you. If you already know the release goal, target it explicitly: For non-interactive use in CI or agent flows: The generated result includes: appConfig — every inferred value with source, confidence, and why missing — required fields that couldn't be resolved, with env var names ambiguities — fields where multiple candidates exist and confirmation is needed readiness — blockers, missing secrets, and signing risk level nextAction.command — th"
-  },
-  {
-    "id": "/docs/getting-started/walkthrough#step-3--set-app-store-connect-credentials",
-    "url": "/docs/getting-started/walkthrough#step-3--set-app-store-connect-credentials",
-    "title": "Walkthrough",
-    "section": "Step 3 — Set App Store Connect credentials",
-    "group": "Getting Started",
-    "content": "For actions that call the App Store Connect API, you need ASCKEYID, ASCISSUERID, and exactly one of ASCPRIVATEKEY or ASCPRIVATEKEYPATH. ASCISSUERID is shown on the App Store Connect API Keys page. It is not stored in the .p8 file. If you only plan to use local build flows such as build, test, archive, or export, you can skip this step. Where the Apple values come from: | Value | Where to find it | | ----- | ---------------- | | teamid | Usually auto-detected by shipit generate from Xcode signing settings. If you need to set it manually, use the 10-character Apple Developer Team ID shown in the"
-  },
-  {
-    "id": "/docs/getting-started/walkthrough#step-4--verify-resolved-configuration",
-    "url": "/docs/getting-started/walkthrough#step-4--verify-resolved-configuration",
-    "title": "Walkthrough",
-    "section": "Step 4 — Verify resolved configuration",
-    "group": "Getting Started",
-    "content": "This prints all resolved values — workspace, scheme, credentials, etc. — so you can confirm everything is wired up before running any actions. It also prints the selected shipfile path, processed files, and the relevant environment variables that were read during resolution. If you used a custom filename, run swift run shipit env --shipfile ./path/to/your-config.yml."
-  },
-  {
-    "id": "/docs/getting-started/walkthrough#step-5--run-individual-commands",
-    "url": "/docs/getting-started/walkthrough#step-5--run-individual-commands",
-    "title": "Walkthrough",
-    "section": "Step 5 — Run individual commands",
-    "group": "Getting Started",
-    "content": "Test destinations: shipit test requires a destinations list in Shipfile.yml (or --destination flag). It never falls back to a hardcoded simulator name. Use xcodebuild -showdestinations to find valid destination strings for your scheme."
-  },
-  {
-    "id": "/docs/getting-started/walkthrough#step-6--define-workflows-for-repeatable-releases",
-    "url": "/docs/getting-started/walkthrough#step-6--define-workflows-for-repeatable-releases",
-    "title": "Walkthrough",
-    "section": "Step 6 — Define workflows for repeatable releases",
-    "group": "Getting Started",
-    "content": "ShipItSwifty uses Apple's two-version model: | Plist key | Format | Role | | ---------------------------- | ------------------- | ----------------------------------------------------------- | | CFBundleShortVersionString | MAJOR.MINOR.PATCH | User-facing marketing version. Bump manually for releases. | | CFBundleVersion | plain integer | Internal build counter. Auto-incremented on every beta run. | Add workflows to Shipfile.yml. The version step with bump: build increments only CFBundleVersion and leaves CFBundleShortVersionString untouched — the correct behavior for beta runs. Local-only beta"
-  },
-  {
-    "id": "/docs/getting-started/walkthrough#migrating-from-fastlane",
-    "url": "/docs/getting-started/walkthrough#migrating-from-fastlane",
-    "title": "Walkthrough",
-    "section": "Migrating from fastlane",
-    "group": "Getting Started",
-    "content": "If you already have a Fastfile, the easiest migration path is to translate each lane into a Shipfile.yml workflow and move shared config into the top-level sections."
-  },
-  {
-    "id": "/docs/getting-started/walkthrough#concept-mapping",
-    "url": "/docs/getting-started/walkthrough#concept-mapping",
-    "title": "Walkthrough",
-    "section": "Concept mapping",
-    "group": "Getting Started",
-    "content": "| fastlane | ShipItSwifty | | ----------------------------------------------------- | ----------------------------------------------- | | Appfile | app: + appstoreconnect: in Shipfile.yml | | Fastfile lane | workflows: entry | | lane parameters / env vars | workflow options: + SHIPIT env vars | | match | shipit sign sync | | gym | shipit archive + shipit export | | scan | shipit test | | pilot | shipit testflight | | deliver | shipit metadata and shipit upload | | incrementbuildnumber / incrementversionnumber | shipit version |"
-  },
-  {
-    "id": "/docs/getting-started/walkthrough#typical-migration-steps",
-    "url": "/docs/getting-started/walkthrough#typical-migration-steps",
-    "title": "Walkthrough",
-    "section": "Typical migration steps",
-    "group": "Getting Started",
-    "content": "Move app identity from Appfile into Shipfile.yml: Convert each lane into a workflow. For example, this fastlane lane: becomes (with TestFlight upload): Or, for a local-only beta that skips the App Store Connect upload: Move secrets out of Ruby config and into environment variables: Replace lane invocations with shipit commands: Validate the migration before using it in CI: If you renamed the file, include --shipfile ./path/to/your-config.yml on both commands."
-  },
-  {
-    "id": "/docs/getting-started/walkthrough#migration-advice",
-    "url": "/docs/getting-started/walkthrough#migration-advice",
-    "title": "Walkthrough",
-    "section": "Migration advice",
-    "group": "Getting Started",
-    "content": "Start by migrating one lane, usually your beta/TestFlight flow, before moving release automation. Keep workflows small and explicit. ShipItSwifty favors separate archive, export, testflight, and upload steps over one large command. If your fastlane setup uses match, migrate signing separately and verify shipit sign sync before wiring it into a full release workflow. CI usually gets simpler: keep credentials in standard env vars and call swift run shipit run --ci --output json."
-  },
-  {
-    "id": "/docs/getting-started/walkthrough#dry-run-mode",
-    "url": "/docs/getting-started/walkthrough#dry-run-mode",
-    "title": "Walkthrough",
-    "section": "Dry Run Mode",
-    "group": "Getting Started",
-    "content": "Preview what a command or workflow would do without executing anything: For structured output that agents and CI scripts can parse, combine with --output json: This returns the full step list with options, not mixed human text: If you want colored human output in screenshots, demos, or piped logs, force it explicitly:"
-  },
-  {
-    "id": "/docs/getting-started/walkthrough#json-output",
-    "url": "/docs/getting-started/walkthrough#json-output",
-    "title": "Walkthrough",
-    "section": "JSON Output",
-    "group": "Getting Started",
-    "content": "For CI pipelines and downstream tooling, use --output json: Color flags only affect human output. JSON output is always plain machine-readable text."
-  },
-  {
-    "id": "/docs/getting-started/walkthrough#debugging",
-    "url": "/docs/getting-started/walkthrough#debugging",
-    "title": "Walkthrough",
-    "section": "Debugging",
-    "group": "Getting Started",
-    "content": "Enable verbose logging: Run the doctor to diagnose environment issues: If your config is not named Shipfile.yml, pass it explicitly:"
-  },
-  {
-    "id": "/docs/getting-started/walkthrough#common-caveats",
-    "url": "/docs/getting-started/walkthrough#common-caveats",
-    "title": "Walkthrough",
-    "section": "Common Caveats",
-    "group": "Getting Started",
-    "content": "The package depends on the remote SwiftyShell Swift package, so your environment must be able to fetch Swift package dependencies. Full code-signing (sign, provision) flows require proper vault configuration (VAULTPASSWORD and a cert repo). Some advanced ASC features are still under active development."
-  },
-  {
-    "id": "/docs/guides/ci-setup",
-    "url": "/docs/guides/ci-setup",
-    "title": "CI Setup",
-    "section": null,
-    "group": "Guides",
-    "content": "CI Setup How to run ShipItSwifty in GitHub Actions and other CI systems."
+    "content": "Installation — install and verify your environment iOS Quickstart — end-to-end guide from config to TestFlight Android Quickstart — set up Gradle builds and Play Store uploads"
   },
   {
     "id": "/docs/guides/ci-setup#github-actions",
@@ -349,15 +317,7 @@
     "title": "CI Setup",
     "section": "GitHub Actions",
     "group": "Guides",
-    "content": "The repository includes two pre-built workflows: | Workflow | File | Trigger | | ------------ | ---------------------------- | ----------------------- | | Build & Test | .github/workflows/ci.yml | Push / PR to main | | Build DocC | .github/workflows/docc.yml | Push to main + manual |"
-  },
-  {
-    "id": "/docs/guides/ci-setup#swiftyshell-dependency",
-    "url": "/docs/guides/ci-setup#swiftyshell-dependency",
-    "title": "CI Setup",
-    "section": "SwiftyShell dependency",
-    "group": "Guides",
-    "content": "ShipItSwifty depends on the remote SwiftyShell Swift package. CI runners must have network and authentication access to fetch Swift package dependencies during swift build and swift test."
+    "content": ""
   },
   {
     "id": "/docs/guides/ci-setup#required-secrets",
@@ -365,103 +325,23 @@
     "title": "CI Setup",
     "section": "Required Secrets",
     "group": "Guides",
-    "content": "For App Store Connect API actions, CI needs ASCKEYID, ASCISSUERID, and ASCPRIVATEKEY. ASCPRIVATEKEY must be the raw contents of the downloaded .p8 file. ASCISSUERID comes from the App Store Connect API Keys page, not from the key file. If your CI only runs local validation like swift test, shipit build, shipit test, shipit archive, or shipit export, you can skip these ASC secrets. Add these under Settings → Secrets → Actions: | Secret | Description | | -------------------------- | --------------------------------------------------------------- | | ASCKEYID | App Store Connect API key ID | | AS"
+    "content": "For App Store Connect API actions, CI needs ASCKEYID, ASCISSUERID, and ASCPRIVATEKEY. ASCPRIVATEKEY must be the raw contents of the downloaded .p8 file. ASCISSUERID comes from the App Store Connect API Keys page, not from the key file. If your CI only runs local validation like shipit build, shipit test, shipit archive, or shipit export, you can skip these secrets. Add these under Settings → Secrets → Actions: | Secret | Description | | -------------------------- | --------------------------------------------------------------- | | ASCKEYID | App Store Connect API key ID | | ASCISSUERID | App "
   },
   {
-    "id": "/docs/guides/ci-setup#example-release-workflow",
-    "url": "/docs/guides/ci-setup#example-release-workflow",
+    "id": "/docs/guides/ci-setup#example-workflow",
+    "url": "/docs/guides/ci-setup#example-workflow",
     "title": "CI Setup",
-    "section": "Example release workflow",
+    "section": "Example workflow",
     "group": "Guides",
-    "content": ""
+    "content": "A typical release workflow installs shipit via Homebrew and runs a workflow:"
   },
   {
-    "id": "/docs/guides/ci-setup#recommended-environment-variables",
-    "url": "/docs/guides/ci-setup#recommended-environment-variables",
+    "id": "/docs/guides/ci-setup#ci-with-tests",
+    "url": "/docs/guides/ci-setup#ci-with-tests",
     "title": "CI Setup",
-    "section": "Recommended Environment Variables",
+    "section": "CI with tests",
     "group": "Guides",
-    "content": "Set these for any CI job that uses ShipItSwifty:"
-  },
-  {
-    "id": "/docs/guides/ci-setup#basic-ci-steps",
-    "url": "/docs/guides/ci-setup#basic-ci-steps",
-    "title": "CI Setup",
-    "section": "Basic CI Steps",
-    "group": "Guides",
-    "content": "If your CI stores the config at a non-default path, pass it explicitly on every ShipIt command:"
-  },
-  {
-    "id": "/docs/guides/ci-setup#json-output-in-ci",
-    "url": "/docs/guides/ci-setup#json-output-in-ci",
-    "title": "CI Setup",
-    "section": "JSON Output in CI",
-    "group": "Guides",
-    "content": "Use --output json for machine-readable results:"
-  },
-  {
-    "id": "/docs/guides/ci-setup#docc-github-pages",
-    "url": "/docs/guides/ci-setup#docc-github-pages",
-    "title": "CI Setup",
-    "section": "DocC GitHub Pages",
-    "group": "Guides",
-    "content": "The docc.yml workflow builds API documentation and deploys it to GitHub Pages automatically on every push to main. Enable GitHub Pages in your repo settings: Go to Settings → Pages Set Source to GitHub Actions The docs will be available at https:// .github.io/ShipItSwifty/documentation/shipitkit/."
-  },
-  {
-    "id": "/docs/guides/ci-setup#xcode-version",
-    "url": "/docs/guides/ci-setup#xcode-version",
-    "title": "CI Setup",
-    "section": "Xcode Version",
-    "group": "Guides",
-    "content": "The workflows pin Xcode16.3.app. Update the xcode-select step if you need a different version. Available Xcode versions on GitHub's macos-15 runner are listed in the GitHub Actions runner images documentation."
-  },
-  {
-    "id": "/docs/guides/code-signing",
-    "url": "/docs/guides/code-signing",
-    "title": "Code Signing & Security",
-    "section": null,
-    "group": "Guides",
-    "content": "ShipItSwifty — Security Model"
-  },
-  {
-    "id": "/docs/guides/code-signing#secrets-management",
-    "url": "/docs/guides/code-signing#secrets-management",
-    "title": "Code Signing & Security",
-    "section": "Secrets management",
-    "group": "Guides",
-    "content": "| Secret | Storage | | --------------------------- | ----------------------------------------------------------------------------------------- | | ASC Private Key (.p8) | Env var ASCPRIVATEKEY in CI; local file path outside version control for dev machines | | Vault Passphrase | Env var VAULTPASSWORD — encrypts/decrypts the cert repo | | Slack Webhook URL | Env var | | Keychain Password | Auto-generated per CI run, stored in memory only |"
-  },
-  {
-    "id": "/docs/guides/code-signing#principles",
-    "url": "/docs/guides/code-signing#principles",
-    "title": "Code Signing & Security",
-    "section": "Principles",
-    "group": "Guides",
-    "content": "Never log secrets — the logger redacts any value from env vars matching KEY, SECRET, TOKEN, PASSWORD Temporary keychains — CI runs create and destroy ephemeral keychains scoped to the process Minimal token scope — JWT scope claim limits API surface per operation Short token lifetime — default 15-minute JWT lifetime with auto-refresh Encrypted at rest — cert vault storage uses AES-256-GCM No telemetry — ShipItSwifty collects zero usage data"
-  },
-  {
-    "id": "/docs/guides/code-signing#threat-mitigations",
-    "url": "/docs/guides/code-signing#threat-mitigations",
-    "title": "Code Signing & Security",
-    "section": "Threat mitigations",
-    "group": "Guides",
-    "content": "| Threat | Mitigation | | ------------------ | -------------------------------------------------------------------------------------- | | .p8 key leakage | CI secrets vault; local .p8 paths outside version control; never commit key material | | JWT theft | 15-min expiry; scoped tokens; HTTPS-only | | Cert repo exposure | AES-256-GCM encryption with team passphrase | | CI log exposure | Automatic secret redaction in all log output |"
-  },
-  {
-    "id": "/docs/guides/code-signing#code-signing-storage-encrypted-vault",
-    "url": "/docs/guides/code-signing#code-signing-storage-encrypted-vault",
-    "title": "Code Signing & Security",
-    "section": "Code signing storage (encrypted vault)",
-    "group": "Guides",
-    "content": "Certificates and provisioning profiles are stored encrypted in a shared Git repository. The encryption key is the VAULTPASSWORD passphrase. Only teammates who know the passphrase can decrypt assets. shipit sign sync --ci creates a temporary keychain for the CI process lifetime and removes it on shipit sign cleanup."
-  },
-  {
-    "id": "/docs/guides/plugin-development",
-    "url": "/docs/guides/plugin-development",
-    "title": "Plugin Development",
-    "section": null,
-    "group": "Guides",
-    "content": "Plugin Development Extend ShipItSwifty with custom actions."
+    "content": "If you want to run tests before shipping: If your CI stores the config at a non-default path, pass it explicitly:"
   },
   {
     "id": "/docs/guides/plugin-development#overview",
@@ -565,7 +445,7 @@
     "title": "Documentation",
     "section": "Where to start",
     "group": "Getting Started",
-    "content": "New here? Begin with the Quick Start. Coming from fastlane? Read the migration guide. Setting up CI? See the CI Setup guide. Looking for the full Shipfile schema? Open the Configuration Reference. Need the Swift API? Browse the API Reference."
+    "content": "New here? Begin with the Installation guide. Coming from fastlane? Read the migration guide. Setting up CI? See the CI Setup guide. Looking for the full Shipfile schema? Open the Configuration Reference. Need the Swift API? Browse the API Reference."
   },
   {
     "id": "/docs#versioning",
@@ -581,7 +461,7 @@
     "title": "Configuration Reference",
     "section": null,
     "group": "Reference",
-    "content": "Configuration Reference All config file keys, environment variables, and CLI flags. Shipfile.yml is only the default config filename. ShipIt reads ./Shipfile.yml when --shipfile is omitted, but any YAML file path works with --shipfile . For config-backed CLI commands, the selected file must exist. A missing ./Shipfile.yml or missing --shipfile target causes the command to exit with code 2."
+    "content": "Shipfile.yml is only the default config filename. ShipIt reads ./Shipfile.yml when --shipfile is omitted, but any YAML file path works with --shipfile . For config-backed CLI commands, the selected file must exist. A missing ./Shipfile.yml or missing --shipfile target causes the command to exit with code 2."
   },
   {
     "id": "/docs/reference/configuration#priority-order",
