@@ -12,10 +12,7 @@ import { siteConfig } from "@/lib/site";
 
 const links = [
   { label: "Overview", href: "/#overview" },
-  { label: "Getting Started", href: "/#getting-started" },
-  { label: "Features", href: "/#features" },
   { label: "Docs", href: "/docs" },
-  { label: "Changelog", href: "/changelog" },
 ];
 
 export function Nav() {

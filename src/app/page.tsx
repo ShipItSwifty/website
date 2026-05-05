@@ -1,9 +1,7 @@
 import { Nav } from "@/components/marketing/nav";
 import { Hero } from "@/components/marketing/hero";
 import { Overview } from "@/components/marketing/overview";
-import { GettingStarted } from "@/components/marketing/getting-started";
 import { AISession } from "@/components/marketing/ai-session";
-import { Features } from "@/components/marketing/features";
 import { DocsCTA } from "@/components/marketing/docs-cta";
 import { Footer } from "@/components/marketing/footer";
 import { siteConfig } from "@/lib/site";
@@ -33,9 +31,7 @@ export default function HomePage() {
       <main id="main-content">
         <Hero />
         <Overview />
-        <GettingStarted />
         <AISession />
-        <Features />
         <DocsCTA />
       </main>
       <Footer />

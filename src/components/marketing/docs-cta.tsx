@@ -113,23 +113,14 @@ export function DocsCTA() {
             className="mb-2.5 text-2xl font-bold"
             style={{ fontFamily: "var(--font-display)", color: "var(--fg1)" }}
           >
-            Public beta, feedback welcome.
+            Public beta, feedback via GitHub issues.
           </h3>
           <p className="max-w-[480px] text-[15px] leading-[1.65]" style={{ color: "var(--fg2)" }}>
             ShipItSwifty is ready to try, but we are still smoothing edges. Use it, ship with it,
-            and send bug reports or missing-feature feedback through GitHub Issues.
+            and open GitHub issues for bug reports, feedback, or missing features.
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-3">
-          <Link
-            href="/#getting-started"
-            className="inline-block rounded-md px-[26px] py-2.5 text-center text-[15px] font-medium text-white transition-colors"
-            style={{ background: "var(--brand)", border: "1px solid var(--brand)" }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--brand-hover)")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "var(--brand)")}
-          >
-            Get Started
-          </Link>
           <a
             href={siteConfig.github.cli}
             target="_blank"
