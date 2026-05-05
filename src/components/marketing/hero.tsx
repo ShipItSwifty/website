@@ -61,9 +61,9 @@ export function Hero() {
           <span style={{ color: "var(--brand)" }}>what to ship.</span>
         </h1>
         <p className="mb-9 max-w-[460px] text-[17px] leading-[1.7]" style={{ color: "var(--fg2)" }}>
-          ShipItSwifty is in public beta today. Give your coding agent one prompt, ground it with{" "}
-          <code>shipit ai-session</code>, and let it generate the release config, checks, and next
-          command for you.
+          ShipItSwifty is in public beta today. Start with <code>shipit generate</code> to build a
+          real config from your project, then hand the repo to your agent to validate, dry-run,
+          and ship the workflow.
         </p>
         <a
           href={siteConfig.github.cli}
