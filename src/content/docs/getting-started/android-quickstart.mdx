@@ -10,7 +10,6 @@ Get your first Android build shipped with ShipItSwifty.
 
 ## Prerequisites
 
-- Xcode CLI tools or Homebrew (`swift`, `swift build`)
 - An Android project with a `gradlew` wrapper at the project root
 - A Google Play service account JSON key (for Play Store uploads)
 - `bundletool` on PATH (for `validate bundle`: `brew install bundletool`)
@@ -21,9 +20,8 @@ Get your first Android build shipped with ShipItSwifty.
 # From source
 git clone https://github.com/shipitswifty/shipitswifty
 cd shipitswifty
-git checkout 0.1.0
 swift build -c release
-cp .build/release/shipit /usr/local/bin/shipit
+alias shipit="$(pwd)/.build/release/shipit"
 ```
 
 ## 2. Auto-detect your project
@@ -129,12 +127,10 @@ When `--platform` is omitted, ShipItSwifty checks the current directory:
 
 Use these values for Android setup:
 
-| Value | Where to find it |
-| ----- | ---------------- |
-| `package_name` | Your Android application ID, usually `applicationId` in `app/build.gradle` or `app/build.gradle.kts` (for example `com.example.myapp`) |
-| `play_track` | The Play Console release track you want to target: typically `internal`, `alpha`, `beta`, or `production` |
-| `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | Raw contents of the service account key JSON file |
-| `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_PATH` | Local filesystem path to that JSON key file |
+- **`package_name`** — Your Android application ID, usually `applicationId` in `app/build.gradle` or `app/build.gradle.kts` (for example `com.example.myapp`)
+- **`play_track`** — The Play Console release track you want to target: typically `internal`, `alpha`, `beta`, or `production`
+- **`GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`** — Raw contents of the service account key JSON file
+- **`GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_PATH`** — Local filesystem path to that JSON key file
 
 Set up Play API access:
 
