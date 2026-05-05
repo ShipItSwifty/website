@@ -8,8 +8,6 @@ sourcePath: "upstream:docs/plugin-development.md"
 
 import { Callout } from "@/components/docs/callout";
 
-Extend ShipItSwifty with custom actions.
-
 ## Overview
 
 The plugin system lets you add custom release steps without modifying the ShipItSwifty core. In v1, plugins are **statically linked** Swift packages — you add them to your `Package.swift`, register them at startup, and invoke them from `Shipfile.yml` workflows like any built-in action.
