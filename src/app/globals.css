@@ -3,28 +3,28 @@
 /* ────────────────────────────────────────────────────────────────────────
    Design tokens — light + dark
    Dark mirrors the ~/Downloads/index.html template (GitHub dark dimmed +
-   Swift orange brand). Light is GitHub-warm (white surfaces, near-black
-   ink, brand stays #F05138).
+   violet brand). Light is GitHub-warm (white surfaces, near-black
+   ink, brand stays #8B5CF6).
    ──────────────────────────────────────────────────────────────────────── */
 @theme {
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-body: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --color-brand: #f05138;
-  --color-brand-hover: #e04430;
+  --color-brand: #8B5CF6;
+  --color-brand-hover: #7C3AED;
 }
 
 @layer base {
   :root {
     color-scheme: light;
-    --brand: #f05138;
-    --brand-hover: #e04430;
-    --brand-muted: rgba(240, 81, 56, 0.1);
-    --bg: #ffffff;
-    --surface: #f6f8fa;
+    --brand: #8B5CF6;
+    --brand-hover: #7C3AED;
+    --brand-muted: rgba(139, 92, 246, 0.08);
+    --bg: #faf9fb;
+    --surface: #f3f1f6;
     --elevated: #ffffff;
-    --border: #d0d7de;
-    --border-active: #afb8c1;
+    --border: #d5d1dc;
+    --border-active: #b0aab8;
     --fg1: #1f2328;
     --fg2: #59636e;
     --fg3: #6e7781;
@@ -35,19 +35,19 @@
     --blue-hover: #0550ae;
     --code-key: #0550ae;
     --term-green: #1a7f37;
-    --code-bg: #f6f8fa;
+    --code-bg: #f3f1f6;
   }
 
   :root.dark {
     color-scheme: dark;
-    --brand: #f05138;
-    --brand-hover: #e04430;
-    --brand-muted: rgba(240, 81, 56, 0.1);
-    --bg: #0d1117;
-    --surface: #161b22;
-    --elevated: #1c2128;
-    --border: #30363d;
-    --border-active: #484f58;
+    --brand: #A78BFA;
+    --brand-hover: #8B5CF6;
+    --brand-muted: rgba(167, 139, 250, 0.1);
+    --bg: #111118;
+    --surface: #1a1a24;
+    --elevated: #22222e;
+    --border: #2e2e3a;
+    --border-active: #44445a;
     --fg1: #e6edf3;
     --fg2: #8b949e;
     --fg3: #7d8590;
@@ -58,7 +58,7 @@
     --blue-hover: #79c0ff;
     --code-key: #79c0ff;
     --term-green: #39d353;
-    --code-bg: #0d1117;
+    --code-bg: #111118;
   }
 
   *,

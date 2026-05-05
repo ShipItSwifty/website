@@ -53,7 +53,7 @@
     "title": "Android Quickstart",
     "section": "2. Auto-detect your project",
     "group": "Getting Started",
-    "content": "Run ai-session from your Android project root. ShipItSwifty detects gradlew and produces an Android-specific bootstrap payload: The response includes: Detected platform (.android) Required secrets (GOOGLEPLAYSERVICEACCOUNTJSON) A ready-to-use Shipfile.yml draft The next recommended command"
+    "content": "Run generate from your Android project root. ShipItSwifty detects gradlew, walks through the missing values, and writes an Android-ready Shipfile.yml: The generated setup includes: Detected platform (.android) Required secrets (GOOGLEPLAYSERVICEACCOUNTJSON) A ready-to-use Shipfile.yml draft The next recommended command"
   },
   {
     "id": "/docs/getting-started/android-quickstart#3-create-a-shipfile",
@@ -109,7 +109,7 @@
     "title": "Android Quickstart",
     "section": "Google Play service account setup",
     "group": "Getting Started",
-    "content": "Open Google Cloud Console Create a service account under your project Grant it the Release Manager role in Google Play Console Download the JSON key file Set GOOGLEPLAYSERVICEACCOUNTJSON or GOOGLEPLAYSERVICEACCOUNTJSONPATH"
+    "content": "Use these values for Android setup: | Value | Where to find it | | ----- | ---------------- | | packagename | Your Android application ID, usually applicationId in app/build.gradle or app/build.gradle.kts (for example com.example.myapp) | | playtrack | The Play Console release track you want to target: typically internal, alpha, beta, or production | | GOOGLEPLAYSERVICEACCOUNTJSON | Raw contents of the service account key JSON file | | GOOGLEPLAYSERVICEACCOUNTJSONPATH | Local filesystem path to that JSON key file | Set up Play API access: Open Google Cloud Console and create or choose a projec"
   },
   {
     "id": "/docs/getting-started/android-quickstart#troubleshooting",
@@ -141,7 +141,7 @@
     "title": "Migrating from fastlane",
     "section": "What you gain",
     "group": "Getting Started",
-    "content": "Single binary — no Ruby, no Bundler, no plugin compatibility matrix Native Swift — same language as your app, debuggable with Xcode iOS + Android — one CLI for both platforms AI-assisted setup — shipit ai-session generates your config interactively Validation built-in — YAML, metadata, and archive checks before upload For the full feature set, see the Configuration Reference."
+    "content": "Single binary — no Ruby, no Bundler, no plugin compatibility matrix Native Swift — same language as your app, debuggable with Xcode iOS + Android — one CLI for both platforms Guided setup — shipit generate walks you through config creation interactively Validation built-in — YAML, metadata, and archive checks before upload For the full feature set, see the Configuration Reference."
   },
   {
     "id": "/docs/getting-started/migrating-from-fastlane#tool-comparison",
@@ -200,6 +200,22 @@
     "content": "ShipItSwifty Walkthrough A step-by-step guide to setting up and running your first release."
   },
   {
+    "id": "/docs/getting-started/walkthrough#guided-setup",
+    "url": "/docs/getting-started/walkthrough#guided-setup",
+    "title": "Walkthrough",
+    "section": "Guided setup",
+    "group": "Getting Started",
+    "content": ""
+  },
+  {
+    "id": "/docs/getting-started/walkthrough#detailed-walkthrough",
+    "url": "/docs/getting-started/walkthrough#detailed-walkthrough",
+    "title": "Walkthrough",
+    "section": "Detailed walkthrough",
+    "group": "Getting Started",
+    "content": ""
+  },
+  {
     "id": "/docs/getting-started/walkthrough#prerequisites",
     "url": "/docs/getting-started/walkthrough#prerequisites",
     "title": "Walkthrough",
@@ -221,7 +237,7 @@
     "title": "Walkthrough",
     "section": "Step 2 — Create your config file",
     "group": "Getting Started",
-    "content": "Option A — Let an AI agent set it up for you Run the AI session command first. It inspects the project, returns a versioned JSON payload with all detected values, identifies what's missing, and tells you the exact next step: The response includes: appConfig — every inferred value with source, confidence, and why missing — required fields that couldn't be resolved, with env var names ambiguities — fields where multiple candidates exist and confirmation is needed readiness — blockers, missing secrets, and signing risk level nextAction.command — the exact command to run next agentPrompt — a syste"
+    "content": "Use generate as the default setup path. It walks you through the missing project details, auto-detects what it can from Xcode, and writes Shipfile.yml for you. If you already know the release goal, target it explicitly: For non-interactive use in CI or agent flows: The generated result includes: appConfig — every inferred value with source, confidence, and why missing — required fields that couldn't be resolved, with env var names ambiguities — fields where multiple candidates exist and confirmation is needed readiness — blockers, missing secrets, and signing risk level nextAction.command — th"
   },
   {
     "id": "/docs/getting-started/walkthrough#step-3--set-app-store-connect-credentials",
@@ -229,7 +245,7 @@
     "title": "Walkthrough",
     "section": "Step 3 — Set App Store Connect credentials",
     "group": "Getting Started",
-    "content": "For actions that call the App Store Connect API, you need ASCKEYID, ASCISSUERID, and exactly one of ASCPRIVATEKEY or ASCPRIVATEKEYPATH. ASCISSUERID is shown on the App Store Connect API Keys page. It is not stored in the .p8 file. If you only plan to use local build flows such as build, test, archive, or export, you can skip this step. Find the values in App Store Connect: Open App Store Connect. Go to Users and Access. Open Integrations. Open App Store Connect API. Create or select an API key. Copy Key ID into ASCKEYID. Copy Issuer ID into ASCISSUERID. Download the .p8 file. For local develop"
+    "content": "For actions that call the App Store Connect API, you need ASCKEYID, ASCISSUERID, and exactly one of ASCPRIVATEKEY or ASCPRIVATEKEYPATH. ASCISSUERID is shown on the App Store Connect API Keys page. It is not stored in the .p8 file. If you only plan to use local build flows such as build, test, archive, or export, you can skip this step. Where the Apple values come from: | Value | Where to find it | | ----- | ---------------- | | teamid | Usually auto-detected by shipit generate from Xcode signing settings. If you need to set it manually, use the 10-character Apple Developer Team ID shown in the"
   },
   {
     "id": "/docs/getting-started/walkthrough#step-4--verify-resolved-configuration",
@@ -597,7 +613,7 @@
     "title": "Configuration Reference",
     "section": "`app`",
     "group": "Reference",
-    "content": "| Key | Type | Description | | ----------- | ------ | --------------------------------------------------------------------------------- | | workspace | string | Path to .xcworkspace | | project | string | Path to .xcodeproj (used when workspace is nil) | | scheme | string | Xcode scheme for build and test | | bundleid | string | App bundle identifier. Optional if it can be inferred from Xcode build settings | | teamid | string | Apple Developer Team ID. Optional if it can be inferred from Xcode build settings |"
+    "content": "| Key | Type | Description | | ----------- | ------ | --------------------------------------------------------------------------------- | | workspace | string | Path to .xcworkspace | | project | string | Path to .xcodeproj (used when workspace is nil) | | scheme | string | Xcode scheme for build and test | | bundleid | string | App bundle identifier. Optional if it can be inferred from Xcode build settings | | teamid | string | Apple Developer Team ID. Optional if it can be inferred from Xcode build settings | Where to find these values manually: bundleid: your target's bundle identifier / ap"
   },
   {
     "id": "/docs/reference/configuration#app_store_connect",
@@ -605,7 +621,7 @@
     "title": "Configuration Reference",
     "section": "`app_store_connect`",
     "group": "Reference",
-    "content": "For App Store Connect API actions, provide keyid, issuerid, and exactly one private key source: privatekey or keypath. issuerid is not inside the .p8 file. Copy it from the App Store Connect API Keys page. You can omit this whole section if you only use local Xcode actions such as build, test, archive, or export. Find these values in App Store Connect: Open Users and Access. Open Integrations. Open App Store Connect API. Create or select an API key. Copy Key ID and Issuer ID. Download the .p8 file and use it via privatekey or keypath. | Key | Type | Env Var | Description | | ------------- | --"
+    "content": "For App Store Connect API actions, provide keyid, issuerid, and exactly one private key source: privatekey or keypath. issuerid is not inside the .p8 file. Copy it from the App Store Connect API Keys page. You can omit this whole section if you only use local Xcode actions such as build, test, archive, or export. Find these values in App Store Connect: Open Users and Access. Open Integrations. Open App Store Connect API. Create or select an API key. Copy Key ID and Issuer ID. Download the .p8 file and use it via privatekey or keypath. If ShipIt cannot infer app.teamid, use the team selected in"
   },
   {
     "id": "/docs/reference/configuration#code_signing",
@@ -765,7 +781,7 @@
     "title": "Configuration Reference",
     "section": "Google Play credentials",
     "group": "Reference",
-    "content": "Set these environment variables for Google Play upload actions: | Variable | Description | | --------------------------------------- | ------------------------------------------------- | | GOOGLEPLAYSERVICEACCOUNTJSON | Full JSON content of the service account key file | | GOOGLEPLAYSERVICEACCOUNTJSONPATH | Path to the service account key JSON file | Find or create a service account in Google Cloud Console with the Release Manager role in Google Play Console."
+    "content": "Set these environment variables for Google Play upload actions: | Variable | Description | | --------------------------------------- | ------------------------------------------------- | | GOOGLEPLAYSERVICEACCOUNTJSON | Full JSON content of the service account key file | | GOOGLEPLAYSERVICEACCOUNTJSONPATH | Path to the service account key JSON file | Lookup notes: packagename is your Android applicationId, usually from app/build.gradle or app/build.gradle.kts playtrack maps to the Play Console track you are targeting: internal, alpha, beta, or production Create the service account in Google Cl"
   },
   {
     "id": "/docs/reference/configuration#ios",
