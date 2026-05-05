@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { GithubIcon as Github } from "@/components/icons/github";
 import { AnimTerminal, type TerminalLine } from "./anim-terminal";
@@ -100,8 +101,8 @@ export function Hero() {
           <ArrowUpRight size={15} style={{ color: "var(--fg3)" }} />
         </a>
         <div className="flex flex-wrap gap-3">
-          <a
-            href="#getting-started"
+          <Link
+            href="/docs"
             className="inline-block rounded-md px-[22px] py-2.5 text-[15px] font-medium text-white transition-colors"
             style={{
               background: "var(--brand)",
@@ -112,10 +113,10 @@ export function Hero() {
             onMouseLeave={(e) => (e.currentTarget.style.background = "var(--brand)")}
           >
             Get Started
-          </a>
+          </Link>
         </div>
         <p className="mt-4 text-[13px] leading-[1.65]" style={{ color: "var(--fg3)" }}>
-          Beta release. Use{" "}
+          Beta release. For feedback, bug reports, and feature requests, open an issue in{" "}
           <a
             href={`${siteConfig.github.cli}/issues`}
             target="_blank"
@@ -123,8 +124,8 @@ export function Hero() {
             style={{ color: "var(--blue)" }}
           >
             GitHub Issues
-          </a>{" "}
-          for bug reports, feedback, and feature requests.
+          </a>
+          .
         </p>
       </div>
       <div className="fade-up-delayed">
