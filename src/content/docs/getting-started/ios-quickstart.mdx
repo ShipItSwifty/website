@@ -1,0 +1,208 @@
+---
+title: "iOS Quickstart"
+description: "Generate a config, run your first build, and ship to TestFlight."
+group: "Getting Started"
+order: 2
+---
+
+Once ShipItSwifty is [installed](/docs/getting-started/installation), you are one command away from a working config. This guide walks through generating it, running individual actions, and composing them into repeatable workflows.
+
+## Generate your config
+
+Instead of writing YAML by hand, let ShipItSwifty inspect your Xcode project. It detects your scheme, bundle ID, and team — then writes a `Shipfile.yml` you can review and commit:
+
+```bash
+shipit generate
+```
+
+If you already know the release goal, target it explicitly:
+
+```bash
+shipit generate --goal beta
+```
+
+For non-interactive use, run:
+
+```bash
+shipit generate --goal beta --non-interactive --output json
+```
+
+The generated result includes:
+
+- `appConfig` — every inferred value with `source`, `confidence`, and `why`
+- `missing` — required fields that couldn't be resolved, with env var names
+- `ambiguities` — fields where multiple candidates exist and confirmation is needed
+- `readiness` — blockers, missing secrets, and signing risk level
+- `nextAction.command` — the exact command to run next
+- `shipfilePath` — where the generated config was written
+
+If your project is ambiguous (e.g., multiple runnable schemes), resolve those first, then re-run to get the `create_shipfile` action.
+
+### Manual setup
+
+If you prefer to start from the example file:
+
+```bash
+cp Shipfile.example.yml Shipfile.yml
+```
+
+Edit it to match your project:
+
+```yaml
+app:
+  workspace: MyApp.xcworkspace
+  scheme: MyApp
+  bundle_id: com.example.myapp
+  team_id: ABCDE12345
+```
+
+`Shipfile.yml` is only the default filename. You can rename it and pass `--shipfile <path>` on every command.
+
+## Set App Store Connect credentials
+
+For actions that call the App Store Connect API, you need `ASC_KEY_ID`, `ASC_ISSUER_ID`, and exactly one of `ASC_PRIVATE_KEY` or `ASC_PRIVATE_KEY_PATH`.
+
+If you only plan to use local build flows (`build`, `test`, `archive`, `export`), skip this step.
+
+| Value | Where to find it |
+| ----- | ---------------- |
+| `team_id` | Usually auto-detected by `shipit generate` from Xcode signing settings. If manual, use the 10-character Team ID from your Apple Developer account. |
+| `ASC_KEY_ID` | App Store Connect → Users and Access → Integrations → App Store Connect API → Key ID |
+| `ASC_ISSUER_ID` | Same page — this is account-level metadata, not part of the `.p8` file. |
+| `ASC_PRIVATE_KEY_PATH` | Local path to the `.p8` file downloaded when creating the API key |
+| `ASC_PRIVATE_KEY` | Raw `.p8` contents, typically stored in CI secrets |
+
+For local development, point at the file:
+
+```yaml
+app_store_connect:
+  key_id: ${ASC_KEY_ID}
+  issuer_id: ${ASC_ISSUER_ID}
+  key_path: ./.secrets/AuthKey_XXXXXXXXXX.p8
+```
+
+Export the variables:
+
+```bash
+export ASC_KEY_ID=XXXXXXXXXX
+export ASC_ISSUER_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+export ASC_PRIVATE_KEY_PATH=./.secrets/AuthKey_XXXXXXXXXX.p8
+```
+
+For CI, set `ASC_PRIVATE_KEY` to the raw file contents instead. Do not set both forms unless you want `ASC_PRIVATE_KEY` to take precedence.
+
+## Run individual commands
+
+```bash
+# Compile
+shipit build
+
+# Run tests
+shipit test
+
+# Archive for App Store
+shipit archive
+
+# Export IPA
+shipit export
+
+# Push to TestFlight
+shipit testflight
+```
+
+> **Test destinations:** `shipit test` requires a `destinations` list in `Shipfile.yml` (or `--destination` flag). Use `xcodebuild -showdestinations -scheme MyApp -workspace MyApp.xcworkspace` to find valid strings.
+
+## Define workflows
+
+Workflows chain actions into repeatable sequences. ShipItSwifty uses Apple's two-version model:
+
+| Plist key | Format | Role |
+| --------- | ------ | ---- |
+| `CFBundleShortVersionString` | `MAJOR.MINOR.PATCH` | Marketing version. Bump manually for releases. |
+| `CFBundleVersion` | plain integer | Build counter. Auto-incremented on beta runs. |
+
+### Local beta (no upload)
+
+```yaml
+versioning:
+  strategy: sequential
+  source: xcodeproj
+
+workflows:
+  beta:
+    - action: version
+      options: { bump: build }
+    - action: archive
+    - action: export
+```
+
+### Beta with TestFlight upload
+
+```yaml
+workflows:
+  beta:
+    - action: version
+      options: { bump: build }
+    - action: archive
+      options: { configuration: Release, export_method: app-store }
+    - action: export
+    - action: testflight
+      options:
+        groups: ["Internal QA"]
+        changelog: "Bug fixes and improvements"
+```
+
+### Release (submit for review)
+
+```yaml
+workflows:
+  release:
+    - action: version
+      options: { bump: patch }
+    - action: archive
+    - action: export
+    - action: upload
+      options: { submit_for_review: true, phased_release: true }
+```
+
+Run a workflow:
+
+```bash
+shipit run beta
+shipit run release --ci
+```
+
+## Dry run
+
+Preview what a command or workflow would do without executing anything:
+
+```bash
+shipit run release --dry-run
+
+# Structured output for CI/agents
+shipit run release --dry-run --output json
+```
+
+## JSON output
+
+For CI pipelines and downstream tooling:
+
+```bash
+shipit build --scheme MyApp --output json | jq .
+```
+
+## Debugging
+
+```bash
+# Verbose logging
+shipit build --verbose
+
+# Diagnose environment issues
+shipit doctor
+```
+
+## Common caveats
+
+- The package depends on `SwiftyShell`, so your environment must be able to fetch Swift package dependencies.
+- Full code-signing flows (`sign`, `provision`) require vault configuration (an encrypted certificate repo).
+- Some advanced ASC features are still under active development.

@@ -1,8 +1,8 @@
 import type { MDXComponents } from "mdx/types";
 import { Callout } from "./callout";
-import { GenerateWalkthrough } from "@/components/shared/generate-walkthrough";
+import { Pre } from "./pre";
 
 export const mdxComponents: MDXComponents = {
   Callout,
-  GenerateWalkthrough,
+  pre: Pre,
 };

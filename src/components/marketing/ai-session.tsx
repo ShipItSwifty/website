@@ -180,7 +180,7 @@ shipit command to run next.`}</CodeBlock>
               ))}
               <div className="mt-4 border-t pt-4" style={{ borderColor: "var(--border)" }}>
                 <Link
-                  href="/docs/getting-started/walkthrough"
+                  href="/docs/getting-started/ios-quickstart"
                   className="inline-flex items-center gap-1 text-[13px]"
                   style={{ color: "var(--blue)" }}
                 >
