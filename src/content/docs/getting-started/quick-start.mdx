@@ -13,22 +13,25 @@ sourcePath: "upstream:README.md"
 swift build
 
 # Create a config file
-cp Shipfile.example.yml Shipfile.yml
+shipit generate
 
 # Verify your configuration
-swift run shipit env
+shipit env
+
+# Diagnose your environment
+shipit doctor
 
 # Run a build
-swift run shipit build --scheme MyApp
+shipit build --scheme MyApp
 
 # Force colorful human output
-swift run shipit build --scheme MyApp --color always
+shipit build --scheme MyApp --color always
 
 # Run a test suite
-swift run shipit test --scheme MyApp
+shipit test --scheme MyApp
 
 # Run a release workflow
-swift run shipit run beta
+shipit run beta
 ```
 
 ## Installation

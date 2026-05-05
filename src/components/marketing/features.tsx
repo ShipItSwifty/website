@@ -24,8 +24,8 @@ const featureData: Feature[] = [
   },
   {
     Icon: Bot,
-    title: "AI Session",
-    desc: "Give your agent one prompt, attach shipit ai-session output, and let it generate Shipfile.yml plus the exact next command to run.",
+    title: "Guided Setup",
+    desc: "Start with shipit generate to scaffold Shipfile.yml from the real project, then use ai-session when you want an agent-ready JSON hand-off.",
   },
   {
     Icon: Shield,

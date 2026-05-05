@@ -6,7 +6,7 @@ import { AnimTerminal, type TerminalLine } from "./anim-terminal";
 import { CodeBlock } from "./code-block";
 
 const sessionLines: TerminalLine[] = [
-  { t: "prompt", s: "shipit ai-session run --goal beta --output json" },
+  { t: "prompt", s: "shipit ai-session --goal beta --output json" },
   { t: "dim", s: "▸ inspecting project…" },
   { t: "ok", s: "  detected scheme: MyApp (high confidence)" },
   { t: "ok", s: "  detected bundle_id: com.example.myapp" },
@@ -19,13 +19,13 @@ const sessionLines: TerminalLine[] = [
 const steps = [
   {
     num: "01",
-    title: "Run the session command",
-    desc: "ai-session inspects your Xcode project and emits a stable JSON snapshot — detected scheme, bundle ID, signing state, and the exact next shipit command.",
+    title: "Generate the Shipfile first",
+    desc: "Start with shipit generate so the config is grounded in the real project and checked into source control before an agent takes over.",
   },
   {
     num: "02",
-    title: "Hand it to your agent",
-    desc: "Paste the JSON into your coding agent's context. It already knows what your project needs — no guessing, no hallucinated flags.",
+    title: "Capture the JSON snapshot",
+    desc: "Run ai-session when you want a machine-readable view of the resolved project state, signing setup, and the exact next shipit command.",
   },
   {
     num: "03",
@@ -70,11 +70,11 @@ export function AISession() {
                 background: "var(--brand-muted)",
               }}
             >
-              shipit ai-session run
+              shipit ai-session
             </code>{" "}
-            gives your coding agent a grounded, machine-readable snapshot of your project — so it
-            can write the config, validate the setup, and run the release workflow without ever
-            leaving the chat.
+            is the agent hand-off step after generation. It gives your coding agent a grounded,
+            machine-readable snapshot of the resolved project so it can validate the setup and run
+            the release workflow without guessing.
           </p>
         </div>
 
@@ -114,9 +114,10 @@ export function AISession() {
               >
                 Example agent prompt
               </div>
-              <CodeBlock lang="text">{`Run shipit ai-session run --goal beta --output json
-and use the result as your source of truth.
-Then create Shipfile.yml and tell me the exact
+              <CodeBlock lang="text">{`Run shipit generate --goal beta first.
+Then run shipit ai-session --goal beta --output json
+and use that result as the source of truth.
+Validate the setup and tell me the exact
 shipit command to run next.`}</CodeBlock>
             </div>
           </div>
@@ -141,7 +142,7 @@ shipit command to run next.`}</CodeBlock>
                   className="text-sm font-semibold"
                   style={{ fontFamily: "var(--font-display)", color: "var(--fg1)" }}
                 >
-                  shipit ai-session run
+                  shipit ai-session
                 </div>
               </div>
               <AnimTerminal lines={sessionLines} loopMs={8000} />
@@ -180,11 +181,11 @@ shipit command to run next.`}</CodeBlock>
               ))}
               <div className="mt-4 border-t pt-4" style={{ borderColor: "var(--border)" }}>
                 <Link
-                  href="/docs/getting-started/walkthrough#step-2-create-your-config-file"
+                  href="/docs/getting-started/walkthrough"
                   className="inline-flex items-center gap-1 text-[13px]"
                   style={{ color: "var(--blue)" }}
                 >
-                  AI session walkthrough
+                  Generate walkthrough
                   <ArrowRight size={12} />
                 </Link>
               </div>
