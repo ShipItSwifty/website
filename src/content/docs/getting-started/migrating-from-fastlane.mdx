@@ -19,8 +19,8 @@ ShipItSwifty replaces a Ruby toolchain with a single Swift binary. No Gemfile, n
 | `pilot`    | `shipit testflight`                 |
 | `deliver`  | `shipit metadata` + `shipit upload` |
 | `scan`     | `shipit test`                       |
-| `snapshot` | `shipit screenshot`                 |
-| `frameit`  | `shipit screenshot --frame`         |
+| `snapshot` | `shipit screenshot` _(coming soon)_  |
+| `frameit`  | `shipit screenshot --frame` _(coming soon)_ |
 | `pem`      | covered by ASC API integration      |
 | `produce`  | covered by ASC API integration      |
 
@@ -28,7 +28,6 @@ ShipItSwifty replaces a Ruby toolchain with a single Swift binary. No Gemfile, n
 
 - **Single binary** — no Ruby, no Bundler, no plugin compatibility matrix
 - **Native Swift** — same language as your app, debuggable with Xcode
-- **iOS + Android** — one CLI for both platforms
 - **Guided setup** — `shipit generate` walks you through config creation interactively
 - **Validation built-in** — YAML, metadata, and archive checks before upload
 
@@ -53,3 +52,4 @@ For the full feature set, see the [Configuration Reference](/docs/reference/conf
 
 - [Installation](/docs/getting-started/installation) — install and verify your environment
 - [iOS Quickstart](/docs/getting-started/ios-quickstart) — end-to-end guide from config to TestFlight
+- [Android Quickstart](/docs/getting-started/android-quickstart) — set up Gradle builds and Play Store uploads

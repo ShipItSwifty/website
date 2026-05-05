@@ -23,8 +23,10 @@ export function Pre({ children, ...props }: { children: ReactNode } & React.HTML
       <button
         type="button"
         onClick={copy}
-        className="absolute right-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-md border opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100"
+        className="absolute flex h-7 w-7 items-center justify-center rounded-md border opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100"
         style={{
+          right: "10px",
+          top: "10px",
           color: copied ? "var(--green)" : "var(--fg3)",
           background: "var(--surface)",
           borderColor: "var(--border)",

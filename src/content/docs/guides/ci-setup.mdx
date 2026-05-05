@@ -6,8 +6,6 @@ order: 1
 sourcePath: "upstream:docs/ci-setup.md"
 ---
 
-How to run ShipItSwifty in GitHub Actions and other CI systems.
-
 ## GitHub Actions
 
 ### Required Secrets
@@ -38,7 +36,7 @@ To produce the base64 value from a `.p12` file:
 base64 -i MyCert.p12 | pbcopy
 ```
 
-See `CONTRIBUTING.md` for full signing credential setup instructions.
+See the [Code Signing & Security](/docs/guides/code-signing) guide for full signing credential setup instructions.
 
 ### Example workflow
 
@@ -59,7 +57,7 @@ jobs:
   release:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install shipit
         run: brew install shipitswifty/tap/shipit
@@ -69,7 +67,7 @@ jobs:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
-        run: shipit run ${{ github.event.inputs.workflow }} --ci --output json
+        run: shipit run ${{ github.event.inputs.workflow }} --ci
 ```
 
 ### CI with tests
@@ -81,13 +79,10 @@ jobs:
   test-and-ship:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install shipit
         run: brew install shipitswifty/tap/shipit
-
-      - name: Verify environment
-        run: shipit doctor --ci
 
       - name: Run tests
         run: shipit test --ci
@@ -97,20 +92,11 @@ jobs:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
-        run: shipit run beta --ci --output json
+        run: shipit run beta --ci
 ```
 
 If your CI stores the config at a non-default path, pass it explicitly:
 
 ```bash
-shipit doctor --ci --shipfile ./config/Shipfile.ci.yml
-shipit run beta --ci --output json --shipfile ./config/Shipfile.ci.yml
-```
-
-## JSON Output
-
-Use `--output json` for machine-readable results that downstream tools can parse:
-
-```bash
-shipit run beta --ci --output json | jq .status
+shipit run beta --ci --shipfile ./config/Shipfile.ci.yml
 ```
