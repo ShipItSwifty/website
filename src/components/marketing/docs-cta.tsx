@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Cpu, Shield, GitBranch, type LucideIcon } from "lucide-react";
+import { Shield, GitBranch, type LucideIcon } from "lucide-react";
 import { GithubIcon as Github } from "@/components/icons/github";
 import { siteConfig } from "@/lib/site";
 
@@ -15,13 +15,6 @@ interface DocCard {
 }
 
 const cards: DocCard[] = [
-  {
-    Icon: Cpu,
-    title: "Configuration Reference",
-    desc: "Full Shipfile.yml schema, all keys and defaults.",
-    href: "/docs/reference/configuration",
-    link: "View reference →",
-  },
   {
     Icon: Shield,
     title: "CI Setup Guide",

@@ -445,7 +445,7 @@
     "title": "Documentation",
     "section": "Where to start",
     "group": "Getting Started",
-    "content": "New here? Begin with the Installation guide. Coming from fastlane? Read the migration guide. Setting up CI? See the CI Setup guide. Looking for the full Shipfile schema? Open the Configuration Reference. Need the Swift API? Browse the API Reference."
+    "content": "New here? Begin with the Installation guide. Coming from fastlane? Read the migration guide. Setting up CI? See the CI Setup guide. Need the Swift API? Browse the API Reference."
   },
   {
     "id": "/docs#versioning",

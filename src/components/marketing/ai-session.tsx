@@ -6,31 +6,29 @@ import { AnimTerminal, type TerminalLine } from "./anim-terminal";
 import { CodeBlock } from "./code-block";
 
 const sessionLines: TerminalLine[] = [
-  { t: "prompt", s: "shipit ai-session --goal beta --output json" },
-  { t: "dim", s: "▸ inspecting project…" },
-  { t: "ok", s: "  detected scheme: MyApp (high confidence)" },
-  { t: "ok", s: "  detected bundle_id: com.example.myapp" },
-  { t: "ok", s: "  signing: automatic — provisioning profile valid" },
-  { t: "info", s: "  workflow: version → archive → export → testflight" },
-  { t: "info", s: "  nextAction: shipit run beta --dry-run" },
-  { t: "done", s: "✓ session ready — attach this JSON to your agent prompt" },
+  { t: "prompt", s: "shipit ai-session --output json" },
+  { t: "dim", s: "▸ analyzing project…" },
+  { t: "ok", s: "  ✓ project context captured" },
+  { t: "ok", s: "  ✓ shipit documentation included" },
+  { t: "ok", s: "  ✓ available commands resolved" },
+  { t: "done", s: "✓ session JSON ready — paste into your agent prompt" },
 ];
 
 const steps = [
   {
     num: "01",
-    title: "Generate the Shipfile first",
-    desc: "Start with shipit generate so the config is grounded in the real project and checked into source control before an agent takes over.",
+    title: "Run ai-session",
+    desc: "shipit ai-session generates a machine-readable snapshot: your project structure, available shipit commands, and documentation — everything an AI agent needs to understand your setup.",
   },
   {
     num: "02",
-    title: "Capture the JSON snapshot",
-    desc: "Run ai-session when you want a machine-readable view of the resolved project state, signing setup, and the exact next shipit command.",
+    title: "Feed it to your agent",
+    desc: "Paste the JSON into your coding agent's prompt. The agent learns about shipit, analyzes your project context, and generates a Shipfile.yml tailored to your app.",
   },
   {
     num: "03",
-    title: "Let the agent drive",
-    desc: "The agent runs the suggested commands, handles any questions, and iterates until your beta is in TestFlight. You just review the diff.",
+    title: "Agent asks, you confirm",
+    desc: "If anything is ambiguous — signing identity, TestFlight group, export method — the agent asks for clarification before proceeding.",
   },
 ];
 
@@ -54,9 +52,9 @@ export function AISession() {
             className="max-w-[600px] text-[40px] leading-[1.15] font-bold tracking-[-0.025em]"
             style={{ fontFamily: "var(--font-display)", color: "var(--fg1)" }}
           >
-            Describe the goal.
+            Describe the goal —
             <br />
-            Your agent ships the build.
+            your agent ships the build.
           </h2>
           <p
             className="mt-3.5 max-w-[500px] text-base leading-[1.65]"
@@ -72,9 +70,9 @@ export function AISession() {
             >
               shipit ai-session
             </code>{" "}
-            is the agent hand-off step after generation. It gives your coding agent a grounded,
-            machine-readable snapshot of the resolved project so it can validate the setup and run
-            the release workflow without guessing.
+            generates a machine-readable context dump — shipit documentation, available commands,
+            and your project details — so any coding agent can understand the tool and generate a
+            correct Shipfile.yml without guessing.
           </p>
         </div>
 
@@ -114,10 +112,11 @@ export function AISession() {
               >
                 Example agent prompt
               </div>
-              <CodeBlock lang="text">{`Run shipit ai-session --goal beta --output json
-and use that result as the source of truth.
-Validate the setup and tell me the exact
-shipit command to run next.`}</CodeBlock>
+              <CodeBlock lang="text">{`Run shipit ai-session --output json and use
+the output as context to understand my project
+and the shipit tool. Then generate a Shipfile.yml
+for my app. Ask me for clarification if anything
+is ambiguous or missing.`}</CodeBlock>
             </div>
           </div>
 
@@ -158,11 +157,10 @@ shipit command to run next.`}</CodeBlock>
                 What the JSON contains
               </div>
               {[
-                ["scheme", "Detected app target with confidence score"],
-                ["bundle_id", "Resolved from your project, not guessed"],
-                ["signing", "Profile expiry, cert validity, entitlements"],
-                ["nextAction", "The exact shipit command to run next"],
-                ["warnings", "Gaps your agent should ask you about"],
+                ["docs", "Full shipit command documentation and usage"],
+                ["commands", "All available shipit commands and their flags"],
+                ["project", "Detected project structure and targets"],
+                ["context", "Environment details the agent needs to know"],
               ].map(([field, detail]) => (
                 <div key={field} className="mb-3 flex items-start gap-3 text-[13px]">
                   <code

@@ -30,14 +30,14 @@ app_store_connect:
 
 workflows:
   beta:
-    - action: version
-      options: { bump: build }
     - action: archive
       options: { export_method: app-store }
     - action: export
     - action: testflight
       options:
-        groups: ["Internal QA"]`,
+        groups: ["Internal QA"]
+    - action: version
+      options: { bump: build }`,
     lang: "yaml",
   },
   {
@@ -56,15 +56,17 @@ workflows:
   {
     num: "03",
     title: "Dry-run first",
-    desc: "Preview exactly what will run without touching your build system or uploading anything. Every command outputs JSON — CI-safe by design.",
+    desc: "Preview exactly what will run without touching your build system or uploading anything.",
     termLines: [
       { t: "prompt", s: "shipit run beta --dry-run --output json" },
       { t: "json", s: "{" },
       { t: "json", s: '  "status": "dry_run",' },
       { t: "json", s: '  "workflow": "beta",' },
       { t: "json", s: '  "steps": [' },
-      { t: "json", s: '    "version", "archive",' },
-      { t: "json", s: '    "export", "testflight"' },
+      { t: "json", s: '    "archive",' },
+      { t: "json", s: '    "export",' },
+      { t: "json", s: '    "testflight",' },
+      { t: "json", s: '    "version"' },
       { t: "json", s: "  ]" },
       { t: "json", s: "}" },
       { t: "done", s: "✓ dry-run — no changes made" },
@@ -73,18 +75,18 @@ workflows:
   {
     num: "04",
     title: "Ship it",
-    desc: "Run the workflow. ShipItSwifty handles versioning, archiving, code signing, and TestFlight distribution in sequence.",
+    desc: "Run the workflow. ShipItSwifty handles archiving, code signing, TestFlight distribution, and version bumping in sequence.",
     termLines: [
       { t: "prompt", s: "shipit run beta --ci" },
       { t: "dim", s: "▸ loading Shipfile.yml" },
-      { t: "info", s: "→ step 1/4  version" },
-      { t: "ok", s: "  ✓ bumped build: 41 → 42" },
-      { t: "info", s: "→ step 2/4  archive" },
+      { t: "info", s: "→ step 1/4  archive" },
       { t: "ok", s: "  ✓ MyApp.xcarchive (14.2s)" },
-      { t: "info", s: "→ step 3/4  export" },
+      { t: "info", s: "→ step 2/4  export" },
       { t: "ok", s: "  ✓ MyApp.ipa" },
-      { t: "info", s: "→ step 4/4  testflight" },
+      { t: "info", s: "→ step 3/4  testflight" },
       { t: "ok", s: "  ✓ distributed to Internal QA" },
+      { t: "info", s: "→ step 4/4  version" },
+      { t: "ok", s: "  ✓ bumped build: 41 → 42" },
       { t: "done", s: "✓ workflow beta  completed in 2m 14s" },
     ],
   },
