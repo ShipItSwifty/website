@@ -39,7 +39,6 @@ data/
   docc/                   # synced DocC JSON tarball (when available)
 public/
   search-index.json       # built from MDX at build time (~57 KB)
-  favicon.svg
 scripts/
   prebuild.mjs            # orchestrator: runs all sync scripts before next build
   sync-changelog.mjs      # GitHub Releases → data/releases.json
