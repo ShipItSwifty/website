@@ -293,7 +293,7 @@
     "title": "Migrating from fastlane",
     "section": "What you gain",
     "group": "Getting Started",
-    "content": "Single binary — no Ruby, no Bundler, no plugin compatibility matrix Native Swift — same language as your app, debuggable with Xcode Guided setup — shipit generate walks you through config creation interactively Validation built-in — YAML, metadata, and archive checks before upload For the full feature set, see the Configuration Reference."
+    "content": "Single binary — no Ruby, no Bundler, no plugin compatibility matrix Native Swift — same language as your app, debuggable with Xcode Guided setup — shipit generate walks you through config creation interactively Validation built-in — YAML, metadata, and archive checks before upload"
   },
   {
     "id": "/docs/getting-started/migrating-from-fastlane#tool-comparison",
