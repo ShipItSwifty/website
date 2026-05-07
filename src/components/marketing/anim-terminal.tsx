@@ -14,6 +14,7 @@ interface AnimTerminalProps {
   loopMs?: number;
   termBg?: string;
   label?: string;
+  lineMode?: "scroll" | "wrap";
 }
 
 const colorByType: Record<TerminalLineType, string> = {
@@ -45,6 +46,7 @@ export function AnimTerminal({
   loopMs = 7000,
   termBg,
   label = "shipit",
+  lineMode = "scroll",
 }: AnimTerminalProps) {
   const reduceMotion = useSyncExternalStore(
     subscribeToReducedMotion,
@@ -95,7 +97,10 @@ export function AnimTerminal({
           {label}
         </span>
       </div>
-      <div className="min-h-[200px] px-[18px] py-4">
+      <div
+        className="min-h-[200px] px-[18px] py-4"
+        style={{ overflowX: lineMode === "scroll" ? "auto" : "hidden" }}
+      >
         {lines.map((l, i) => (
           <div
             key={i}
@@ -104,6 +109,7 @@ export function AnimTerminal({
               opacity: visibleLines.includes(i) ? 1 : 0,
               transform: visibleLines.includes(i) ? "none" : "translateY(4px)",
               transition: "opacity 200ms, transform 200ms",
+              whiteSpace: lineMode === "wrap" ? "pre-wrap" : "pre",
             }}
           >
             {l.t === "prompt" && <span style={{ color: "var(--brand)" }}>$ </span>}

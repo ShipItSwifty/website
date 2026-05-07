@@ -11,7 +11,7 @@ import { SearchButton } from "@/components/search/search-button";
 import { siteConfig } from "@/lib/site";
 
 const links = [
-  { label: "Overview", href: "/" },
+  { label: "Home", href: "/" },
   { label: "Docs", href: "/docs" },
 ];
 
