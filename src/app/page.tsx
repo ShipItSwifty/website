@@ -29,10 +29,14 @@ export default function HomePage() {
       />
       <Nav />
       <main id="main-content">
-        <Hero />
         <Overview />
+        <div style={{ background: "var(--surface)" }}>
+          <Hero />
+        </div>
         <AISession />
-        <DocsCTA />
+        <div style={{ background: "var(--surface)" }}>
+          <DocsCTA />
+        </div>
       </main>
       <Footer />
     </>
