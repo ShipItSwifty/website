@@ -61,9 +61,12 @@ export const metadata: Metadata = {
     description: siteConfig.description,
   },
   icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
-    shortcut: [{ url: "/icon.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    icon: [
+      { url: "/favicon.ico?v=5", type: "image/x-icon" },
+      { url: "/logo.png?v=6", type: "image/png" },
+    ],
+    shortcut: [{ url: "/favicon.ico?v=5", type: "image/x-icon" }],
+    apple: [{ url: "/logo.png?v=6", type: "image/png" }],
   },
   alternates: {
     canonical: siteConfig.url,
