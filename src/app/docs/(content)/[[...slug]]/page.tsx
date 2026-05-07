@@ -114,13 +114,13 @@ export default async function DocPage({ params }: PageProps) {
             }}
           />
         </div>
-        <div className="mt-12 border-t pt-6" style={{ borderColor: "var(--border)" }}>
+        <Pager prev={prev} next={next} />
+        <div className="mt-8 border-t pt-6" style={{ borderColor: "var(--border)" }}>
           <EditOnGitHub
             sourcePath={page.frontmatter.sourcePath}
             fallbackContentPath={fallbackContentPath}
           />
         </div>
-        <Pager prev={prev} next={next} />
       </article>
       <aside
         aria-label="Table of contents"
