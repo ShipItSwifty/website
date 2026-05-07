@@ -6,7 +6,7 @@ import { AnimTerminal, type TerminalLine } from "./anim-terminal";
 import { CodeBlock } from "./code-block";
 
 const sessionLines: TerminalLine[] = [
-  { t: "prompt", s: "shipit ai-session --output json" },
+  { t: "prompt", s: "shipit ai-session" },
   { t: "dim", s: "▸ analyzing project…" },
   { t: "ok", s: "  ✓ project context captured" },
   { t: "ok", s: "  ✓ shipit documentation included" },
@@ -18,17 +18,34 @@ const steps = [
   {
     num: "01",
     title: "Run ai-session",
-    desc: "shipit ai-session generates a machine-readable snapshot: your project structure, available shipit commands, and documentation — everything an AI agent needs to understand your setup.",
+    desc: (
+      <>
+        <code>shipit ai-session</code> generates a machine-readable snapshot: your project
+        structure, available <code>shipit</code> commands, and documentation - everything an AI
+        agent needs to understand your setup.
+      </>
+    ),
   },
   {
     num: "02",
     title: "Feed it to your agent",
-    desc: "Paste the JSON into your coding agent's prompt. The agent learns about shipit, analyzes your project context, and generates a Shipfile.yml tailored to your app.",
+    desc: (
+      <>
+        Paste the JSON into your coding agent's prompt. The agent learns about <code>shipit</code>,
+        analyzes your project context, and generates a <code>Shipfile.yml</code> tailored to your
+        app.
+      </>
+    ),
   },
   {
     num: "03",
     title: "Agent asks, you confirm",
-    desc: "If anything is ambiguous — signing identity, TestFlight group, export method — the agent asks for clarification before proceeding.",
+    desc: (
+      <>
+        If anything is ambiguous - signing identity, <code>TestFlight</code> group, and
+        <code>export method</code> - the agent asks for clarification before proceeding.
+      </>
+    ),
   },
 ];
 
@@ -37,7 +54,7 @@ export function AISession() {
     <section
       id="ai-session"
       className="border-y px-6 py-24"
-      style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+      style={{ background: "var(--bg)", borderColor: "var(--border)" }}
     >
       <div className="mx-auto max-w-[1200px]">
         <div className="mb-14">
@@ -52,9 +69,9 @@ export function AISession() {
             className="max-w-[600px] text-[40px] leading-[1.15] font-bold tracking-[-0.025em]"
             style={{ fontFamily: "var(--font-display)", color: "var(--fg1)" }}
           >
-            Describe the goal —
+            Tell your agent
             <br />
-            your agent ships the build.
+            what to ship.
           </h2>
           <p
             className="mt-3.5 max-w-[500px] text-base leading-[1.65]"
@@ -94,7 +111,13 @@ export function AISession() {
                     >
                       {s.title}
                     </div>
-                    <p className="text-[13.5px] leading-[1.65]" style={{ color: "var(--fg2)" }}>
+                    <p
+                      className="text-[13.5px] leading-[1.65] [&_code]:rounded [&_code]:bg-[var(--brand-muted)] [&_code]:px-1.5 [&_code]:py-px [&_code]:text-[11px] [&_code]:text-[var(--brand)] [&_code]:font-[var(--font-mono)]"
+                      style={{
+                        color: "var(--fg2)",
+                        fontFamily: "var(--font-body)",
+                      }}
+                    >
                       {s.desc}
                     </p>
                   </div>
