@@ -30,14 +30,15 @@ app_store_connect:
 
 workflows:
   beta:
+    - action: version
+      options: { bump: build }
     - action: archive
       options: { export_method: app-store }
     - action: export
     - action: testflight
       options:
         groups: ["Internal QA"]
-    - action: version
-      options: { bump: build }`,
+`,
     lang: "yaml",
   },
   {
@@ -79,14 +80,14 @@ workflows:
     termLines: [
       { t: "prompt", s: "shipit run beta --ci" },
       { t: "dim", s: "▸ loading Shipfile.yml" },
-      { t: "info", s: "→ step 1/4  archive" },
-      { t: "ok", s: "  ✓ MyApp.xcarchive (14.2s)" },
-      { t: "info", s: "→ step 2/4  export" },
-      { t: "ok", s: "  ✓ MyApp.ipa" },
-      { t: "info", s: "→ step 3/4  testflight" },
-      { t: "ok", s: "  ✓ distributed to Internal QA" },
-      { t: "info", s: "→ step 4/4  version" },
+      { t: "info", s: "→ step 1/4  version" },
       { t: "ok", s: "  ✓ bumped build: 41 → 42" },
+      { t: "info", s: "→ step 2/4  archive" },
+      { t: "ok", s: "  ✓ MyApp.xcarchive (14.2s)" },
+      { t: "info", s: "→ step 3/4  export" },
+      { t: "ok", s: "  ✓ MyApp.ipa" },
+      { t: "info", s: "→ step 4/4  testflight" },
+      { t: "ok", s: "  ✓ distributed to Internal QA" },
       { t: "done", s: "✓ workflow beta  completed in 2m 14s" },
     ],
   },
@@ -126,8 +127,8 @@ export function Overview() {
   return (
     <section
       id="overview"
-      className="border-y px-6 py-24"
-      style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+      className="border-y px-6 pt-16 pb-12 md:pt-20 md:pb-14"
+      style={{ background: "var(--bg)", borderColor: "var(--border)" }}
     >
       <div className="mx-auto max-w-[1200px]">
         <div className="mb-14">
@@ -150,12 +151,11 @@ export function Overview() {
             className="mt-3.5 max-w-[500px] text-base leading-[1.65]"
             style={{ color: "var(--fg2)" }}
           >
-            ShipItSwifty replaces a Ruby toolchain with a single Swift binary. One YAML file. One
-            command.
+            One YAML file. One command.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-[280px_1fr]">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-[280px_1fr] md:items-start">
           <div
             className="flex flex-col gap-1"
             role="tablist"
@@ -221,21 +221,22 @@ export function Overview() {
           </div>
 
           <div
-            key={active}
-            className="fade-up"
+            className="fade-up md:-mt-1"
             role="tabpanel"
             id={`overview-panel-${active}`}
             aria-labelledby={`overview-tab-${active}`}
             tabIndex={0}
           >
-            <p className="mb-6 text-[15px] leading-[1.7]" style={{ color: "var(--fg2)" }}>
+            <p className="mb-4 text-[15px] leading-[1.7]" style={{ color: "var(--fg2)" }}>
               {s.desc}
             </p>
-            {s.code ? (
-              <CodeBlock lang={s.lang || "bash"}>{s.code}</CodeBlock>
-            ) : (
-              <AnimTerminal lines={s.termLines!} loopMs={6000} />
-            )}
+            <div className="md:h-[460px] md:overflow-y-auto md:pr-1">
+              {s.code ? (
+                <CodeBlock lang={s.lang || "bash"}>{s.code}</CodeBlock>
+              ) : (
+                <AnimTerminal lines={s.termLines!} loopMs={6000} />
+              )}
+            </div>
           </div>
         </div>
       </div>
