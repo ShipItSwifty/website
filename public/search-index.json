@@ -149,7 +149,7 @@
     "title": "Installation",
     "section": "Swift Package Manager",
     "group": "Getting Started",
-    "content": "Use this when you want to embed ShipItKit as a library in your own Swift tooling, or when you want to run shipit from source in CI scripts:"
+    "content": "Use this when you want to embed ShipItKit as a library in your own Swift tooling, or when you want to run shipit from source:"
   },
   {
     "id": "/docs/getting-started/installation#build-from-source",
