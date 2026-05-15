@@ -2,6 +2,7 @@ import { Nav } from "@/components/marketing/nav";
 import { Hero } from "@/components/marketing/hero";
 import { Overview } from "@/components/marketing/overview";
 import { AISession } from "@/components/marketing/ai-session";
+import { Privacy } from "@/components/marketing/privacy";
 import { DocsCTA } from "@/components/marketing/docs-cta";
 import { Footer } from "@/components/marketing/footer";
 import { siteConfig } from "@/lib/site";
@@ -34,6 +35,7 @@ export default function HomePage() {
           <Hero />
         </div>
         <AISession />
+        <Privacy />
         <div style={{ background: "var(--surface)" }}>
           <DocsCTA />
         </div>
