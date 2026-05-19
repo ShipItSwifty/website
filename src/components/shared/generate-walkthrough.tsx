@@ -228,7 +228,7 @@ function WalkthroughBody({
         <p className="mb-4 text-sm leading-[1.7]" style={{ color: "var(--fg2)" }}>
           Instead of writing YAML by hand, let ShipItSwifty inspect your Xcode project. It detects your scheme, bundle ID, and team — then writes a{" "}
           <code className="rounded px-1.5 py-px text-xs" style={{ fontFamily: "var(--font-mono)", color: "var(--fg2)", background: "var(--elevated)" }}>Shipfile.yml</code>{" "}
-          you can review and commit. This is the recommended starting point for every project.
+          you can review and commit. It can also reuse existing env values or write a local <code>.env</code> for signing setup. This is the recommended starting point for every project.
         </p>
         <CodeBlock lang="bash">{`shipit generate
 

@@ -109,7 +109,7 @@
     "title": "Android Quickstart",
     "section": "Google Play service account setup",
     "group": "Getting Started",
-    "content": "Use these values for Android setup: packagename — Your Android application ID, usually applicationId in app/build.gradle or app/build.gradle.kts (for example com.example.myapp) playtrack — The Play Console release track you want to target: typically internal, alpha, beta, or production GOOGLEPLAYSERVICEACCOUNTJSON — Raw contents of the service account key JSON file GOOGLEPLAYSERVICEACCOUNTJSONPATH — Local filesystem path to that JSON key file Set up Play API access: Open Google Cloud Console and create or choose a project. Enable the Google Play Developer API for that project. Create a service"
+    "content": "Use these values for Android setup: packagename — Your Android application ID, usually applicationId in app/build.gradle or app/build.gradle.kts (for example com.example.myapp) playtrack — The Play Console release track you want to target: typically internal, alpha, beta, or production GOOGLEPLAYSERVICEACCOUNTJSON — Raw contents of the service account key JSON file GOOGLEPLAYSERVICEACCOUNTJSONPATH — Local filesystem path to that JSON key file Set up Play API access: Open Google Cloud Console and create or choose a project. Go to APIs & Services and enable the Google Play Developer API. Go to S"
   },
   {
     "id": "/docs/getting-started/android-quickstart#troubleshooting",
@@ -117,7 +117,7 @@
     "title": "Android Quickstart",
     "section": "Troubleshooting",
     "group": "Getting Started",
-    "content": "gradlew: Permission denied bundletool: command not found Google Play upload failed: 401 Check that your service account has the Release Manager role in Google Play Console (not just Google Cloud Console). Build uses gradle instead of ./gradlew ShipItSwifty uses ./gradlew when it exists in the working directory or the configured gradlewpath. If neither is present, it falls back to gradle on PATH. Set android.gradlewpath in Shipfile.yml to override."
+    "content": "gradlew: Permission denied bundletool: command not found Google Play upload failed: 401 Check that your service account has the required permissions in Google Play Console (not just Google Cloud Console). See the setup steps above. Google Play upload failed: 403 — PERMISSIONDENIED This means the service account lacks the required Play Console permissions for your app. Fix: Go to Users & permissions in Play Console. Find your service account email and click it. Under App permissions, ensure your app is listed and the account has at least Release apps to testing tracks (or Release to production."
   },
   {
     "id": "/docs/getting-started/installation",
@@ -205,7 +205,7 @@
     "title": "iOS Quickstart",
     "section": "Run individual commands",
     "group": "Getting Started",
-    "content": "Test destinations: shipit test requires a destinations list in Shipfile.yml (or --destination flag). Use xcodebuild -showdestinations -scheme MyApp -workspace MyApp.xcworkspace to find valid strings."
+    "content": "Test destinations: shipit test supports automatic destination discovery when no destinations list is configured. Use xcodebuild -showdestinations -scheme MyApp -workspace MyApp.xcworkspace if you want to pin exact simulator or device strings."
   },
   {
     "id": "/docs/getting-started/ios-quickstart#define-workflows",
@@ -245,7 +245,7 @@
     "title": "iOS Quickstart",
     "section": "Dry run",
     "group": "Getting Started",
-    "content": "Preview what a command or workflow would do without executing anything:"
+    "content": "Preview what a command or workflow would do without executing anything: For versioning flows, shipit version --bump patch --dry-run previews the current and next values before writing changes."
   },
   {
     "id": "/docs/getting-started/ios-quickstart#json-output",
@@ -261,7 +261,7 @@
     "title": "iOS Quickstart",
     "section": "Debugging",
     "group": "Getting Started",
-    "content": ""
+    "content": "ShipItSwifty also auto-loads a .env file from the same directory as your Shipfile.yml. Process environment variables take precedence, so .env is a convenient local fallback rather than a replacement for CI secrets."
   },
   {
     "id": "/docs/getting-started/ios-quickstart#common-caveats",
@@ -605,7 +605,15 @@
     "title": "Configuration Reference",
     "section": "`workflows`",
     "group": "Reference",
-    "content": "Each step: | Key | Description | | --------- | ------------------------------------------- | | action | Registered action name | | options | Optional key-value map passed to the action | Use these AI-oriented commands to inspect the supported workflow surface: ai-bootstrap always emits JSON and is intended for AI/tooling integrations rather than direct human consumption. Workflow notes: export can write an IPA into export.outputdirectory. testflight and upload can reuse that exported IPA automatically when they run after export in the same workflow and no explicit ipa / ipapath is set. validat"
+    "content": "Workflows can be defined as a plain array of steps (legacy) or as an object with optional workflow-level overrides:"
+  },
+  {
+    "id": "/docs/reference/configuration#workflow-level-overrides",
+    "url": "/docs/reference/configuration#workflow-level-overrides",
+    "title": "Configuration Reference",
+    "section": "Workflow-level overrides",
+    "group": "Reference",
+    "content": "| Key | Type | Description | | --------------- | ------ | ------------------------------------------------------------------------------------------------------------ | | buildvariant | string | Overrides android.buildvariant for all steps in this workflow. Used by actions that auto-discover paths. | | flavor | string | Overrides android.gradleproperties.flavor for all steps in this workflow. | | steps | array | Required when using the object format. The ordered sequence of action steps. | Each step: | Key | Description | | --------- | ------------------------------------------- | | action | R"
   },
   {
     "id": "/docs/reference/configuration#custom_actions",
@@ -653,7 +661,7 @@
     "title": "Configuration Reference",
     "section": "`android`",
     "group": "Reference",
-    "content": "Platform-specific Android configuration. These values are merged on top of shared config when --platform android is active or the platform is auto-detected as Android. | Key | Type | Default | Env Var | Description | | ------------------- | ------ | --------- | ------------------------------ | --------------------------------------------------------------------- | | module | string | app | — | Gradle module to build/bundle | | buildvariant | string | release | — | Gradle build variant (e.g. release, debug) | | buildtype | string | aab | — | aab (Android App Bundle) or apk | | packagename | str"
+    "content": "Platform-specific Android configuration. These values are merged on top of shared config when --platform android is active or the platform is auto-detected as Android. | Key | Type | Default | Env Var | Description | | -------------------- | ------ | -------------------- | ------------------------------------ | --------------------------------------------------------------------- | | buildsystem | string | native | SHIPITANDROIDBUILDSYSTEM | Build system that produces the Android artifact. | | module | string | app | — | Gradle module to build/bundle | | buildvariant | string | release | — | G"
   },
   {
     "id": "/docs/reference/configuration#google-play-credentials",
