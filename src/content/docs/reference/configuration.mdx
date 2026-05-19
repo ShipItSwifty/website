@@ -264,13 +264,33 @@ results in `nextQuestion` so an AI agent can ask which destinations to use.
 
 ## `workflows`
 
+Workflows can be defined as a plain array of steps (legacy) or as an object with optional workflow-level overrides:
+
 ```yaml
+# Legacy format: plain array of steps
 workflows:
-  <workflow-name>:
-    - action: <action-name>
-      options:
-        key: value
+  beta:
+    - action: archive
+    - action: testflight
+
+# New format: object with workflow-level overrides
+workflows:
+  release:
+    build_variant: prodRelease
+    steps:
+      - action: archive
+      - action: play-store
+        options:
+          track: production
 ```
+
+### Workflow-level overrides
+
+| Key             | Type   | Description                                                                                                  |
+| --------------- | ------ | ------------------------------------------------------------------------------------------------------------ |
+| `build_variant` | string | Overrides `android.build_variant` for all steps in this workflow. Used by actions that auto-discover paths. |
+| `flavor`        | string | Overrides `android.gradle_properties.flavor` for all steps in this workflow.                                 |
+| `steps`         | array  | Required when using the object format. The ordered sequence of action steps.                                 |
 
 Each step:
 
@@ -282,14 +302,14 @@ Each step:
 Use these AI-oriented commands to inspect the supported workflow surface:
 
 ```bash
-swift run shipit ai-bootstrap --goal beta
+swift run shipit ai-session --goal beta
 swift run shipit schema --output json
 swift run shipit inspect project --output json
-swift run shipit suggest-config --goal beta --output json
+swift run shipit generate --goal beta
 swift run shipit validate yml --shipfile ./Shipfile.yml --output json
 ```
 
-`ai-bootstrap` always emits JSON and is intended for AI/tooling integrations rather than direct human consumption.
+`ai-session` always emits JSON and is intended for AI/tooling integrations rather than direct human consumption.
 
 Workflow notes:
 
@@ -397,20 +417,23 @@ Rules:
 
 Platform-specific Android configuration. These values are merged on top of shared config when `--platform android` is active or the platform is auto-detected as Android.
 
-| Key                 | Type   | Default   | Env Var                        | Description                                                           |
-| ------------------- | ------ | --------- | ------------------------------ | --------------------------------------------------------------------- |
-| `module`            | string | `app`     | —                              | Gradle module to build/bundle                                         |
-| `build_variant`     | string | `release` | —                              | Gradle build variant (e.g. `release`, `debug`)                        |
-| `build_type`        | string | `aab`     | —                              | `aab` (Android App Bundle) or `apk`                                   |
-| `package_name`      | string | —         | `SHIPIT_ANDROID__PACKAGE_NAME` | Android application ID (e.g. `com.example.app`)                       |
-| `keystore_path`     | string | —         | —                              | Path to the release keystore                                          |
-| `keystore_password` | string | —         | `ANDROID_KEYSTORE_PASSWORD`    | Keystore password                                                     |
-| `key_alias`         | string | —         | `ANDROID_KEY_ALIAS`            | Key alias in the keystore                                             |
-| `key_password`      | string | —         | `ANDROID_KEY_PASSWORD`         | Key password                                                          |
-| `play_track`        | string | `qa`      | —                              | Google Play release track (`internal`, `alpha`, `beta`, `production`) |
-| `rollout_fraction`  | float  | —         | —                              | Staged rollout fraction (0.0–1.0), for `production` track             |
-| `gradle_properties` | map    | `{}`      | —                              | Extra `-P key=value` properties passed to Gradle                      |
-| `gradlew_path`      | string | —         | —                              | Explicit path to the `gradlew` script (auto-detected when omitted)    |
+| Key                  | Type   | Default              | Env Var                              | Description                                                           |
+| -------------------- | ------ | -------------------- | ------------------------------------ | --------------------------------------------------------------------- |
+| `build_system`       | string | `native`             | `SHIPIT_ANDROID__BUILD_SYSTEM`       | Build system that produces the Android artifact.                      |
+| `module`             | string | `app`                | —                                    | Gradle module to build/bundle                                         |
+| `build_variant`      | string | `release`            | —                                    | Gradle build variant (e.g. `release`, `debug`)                        |
+| `build_type`         | string | `aab`                | —                                    | `aab` (Android App Bundle) or `apk`                                   |
+| `package_name`       | string | —                    | `SHIPIT_ANDROID__PACKAGE_NAME`       | Android application ID (e.g. `com.example.app`)                       |
+| `keystore_path`      | string | —                    | —                                    | Path to the release keystore                                          |
+| `keystore_password`  | string | —                    | `ANDROID_KEYSTORE_PASSWORD`          | Keystore password                                                     |
+| `keystore_alias`     | string | —                    | `ANDROID_KEY_ALIAS`                  | Key alias in the keystore                                             |
+| `key_password`       | string | —                    | `ANDROID_KEY_PASSWORD`               | Key password                                                          |
+| `play_track`         | string | `internal`           | —                                    | Google Play release track (`internal`, `alpha`, `beta`, `production`) |
+| `rollout_fraction`   | float  | —                    | —                                    | Staged rollout fraction (0.0–1.0), for `production` track             |
+| `gradle_properties`  | map    | `{}`                 | —                                    | Extra `-P key=value` properties passed to Gradle                      |
+| `gradlew_path`       | string | —                    | `SHIPIT_ANDROID__GRADLEW_PATH`       | Explicit path to the `gradlew` script (auto-detected when omitted)    |
+| `gradle_project_dir` | string | Shipfile directory   | `SHIPIT_ANDROID__GRADLE_PROJECT_DIR` | Directory containing the Gradle root project                          |
+| `gradle_flags`       | array  | `[]`                 | —                                    | Extra Gradle flags such as `--stacktrace`                             |
 
 ### Google Play credentials
 
@@ -427,6 +450,8 @@ Lookup notes:
 - `play_track` maps to the Play Console track you are targeting: `internal`, `alpha`, `beta`, or `production`
 - Create the service account in Google Cloud, enable the `Google Play Developer API`, then invite that service account in Play Console `Users and permissions`
 - Give the service account Play Console permissions that match the rollout you want to perform
+
+> **Env var naming:** Android keystore variables support both the short form (`ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_PASSWORD`, `ANDROID_KEY_ALIAS`) and the standard `SHIPIT_` form (`SHIPIT_ANDROID__KEYSTORE_PASSWORD`, `SHIPIT_ANDROID__KEY_PASSWORD`, `SHIPIT_ANDROID__KEY_ALIAS`). The short forms are checked as a compatibility fallback when the `SHIPIT_` names are not set.
 
 ## `ios`
 

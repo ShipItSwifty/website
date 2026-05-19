@@ -38,6 +38,8 @@ The generated result includes:
 
 If your project is ambiguous (e.g., multiple runnable schemes), resolve those first, then re-run to get the `create_shipfile` action.
 
+`shipit generate` is also env-aware: it prefers environment variable references over inlining secrets, and ShipItSwifty auto-loads a local `.env` file from the Shipfile directory before config resolution.
+
 ### Manual setup
 
 If you prefer to start from the example file:
@@ -110,7 +112,7 @@ shipit export
 shipit testflight
 ```
 
-> **Test destinations:** `shipit test` requires a `destinations` list in `Shipfile.yml` (or `--destination` flag). Use `xcodebuild -showdestinations -scheme MyApp -workspace MyApp.xcworkspace` to find valid strings.
+> **Test destinations:** `shipit test` supports automatic destination discovery when no `destinations` list is configured. Use `xcodebuild -showdestinations -scheme MyApp -workspace MyApp.xcworkspace` if you want to pin exact simulator or device strings.
 
 ## Define workflows
 
@@ -183,6 +185,8 @@ shipit run release --dry-run
 shipit run release --dry-run --output json
 ```
 
+For versioning flows, `shipit version --bump patch --dry-run` previews the current and next values before writing changes.
+
 ## JSON output
 
 For CI pipelines and downstream tooling:
@@ -200,6 +204,8 @@ shipit build --verbose
 # Diagnose environment issues
 shipit doctor
 ```
+
+ShipItSwifty also auto-loads a `.env` file from the same directory as your `Shipfile.yml`. Process environment variables take precedence, so `.env` is a convenient local fallback rather than a replacement for CI secrets.
 
 ## Common caveats
 
