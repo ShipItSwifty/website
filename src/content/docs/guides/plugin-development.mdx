@@ -18,8 +18,7 @@ This guide walks through two complete, production-grade examples:
 2. **`copy-artifacts`** — copies built artifacts (`.ipa`, `.aab`, `.app`, dSYMs) to a versioned destination directory after `archive` / `export` finishes. Useful for shaping CI output into a stable layout.
 
 <Callout type="info" title="Verified">
-  All Swift code in this guide is verified to compile against the public `ShipItKit` API and is
-  tested against the upstream test suite before each release.
+  All Swift code in this guide is verified to compile against the public `ShipItKit` API.
 </Callout>
 
 ## Package layout
@@ -38,6 +37,7 @@ let package = Package(
         .library(name: "ExamplePlugin", targets: ["ExamplePlugin"])
     ],
     dependencies: [
+        // Replace with the version, branch, or local path you want to track.
         .package(url: "https://github.com/shipitswifty/shipitswifty", branch: "main")
     ],
     targets: [
