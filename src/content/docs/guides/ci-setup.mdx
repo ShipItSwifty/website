@@ -106,3 +106,96 @@ If your CI stores the config at a non-default path, pass it explicitly:
 ```bash
 shipit run beta --ci --shipfile ./config/Shipfile.ci.yml
 ```
+
+## Basic CI steps
+
+```bash
+shipit doctor --ci
+shipit test --ci
+shipit run beta --ci --output json
+```
+
+## JSON output in CI
+
+Use `--output json` for machine-readable results:
+
+```bash
+shipit run beta --ci --output json | jq .status
+```
+
+## Linux and cross-platform CI
+
+Android actions can run on Linux. iOS distribution still requires macOS because it depends on Xcode and Apple signing tooling.
+
+### Kotlin Multiplatform
+
+KMP iOS pipelines still run on macOS because they eventually invoke `xcodebuild`. Android-only KMP workflows can run on Linux.
+
+```yaml
+jobs:
+  ios-beta:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: shipit doctor --ci
+      - run: shipit run beta-ios --ci --output json
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+
+  android-beta:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: shipit run beta-android --ci --output json
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+```
+
+Notes:
+
+- JDK 17+ is required for modern Android and KMP builds.
+- `shipit doctor --ci` is the fastest way to fail early on missing Java, Gradle, or Apple credentials.
+- If reproducibility matters on macOS runners, pin explicit simulator destinations for iOS test jobs.
+
+### Flutter and React Native
+
+Framework-specific workflows need their usual toolchains installed before `shipit` runs.
+
+```yaml
+jobs:
+  flutter-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - run: shipit run beta-android --ci --output json
+
+  react-native-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: npm ci
+      - run: shipit run beta-android --ci --output json
+```
+
+Use macOS runners for Flutter iOS or React Native iOS distribution.
