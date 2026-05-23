@@ -227,6 +227,8 @@ To add a TestFlight upload later, append a `testflight` step and uncomment the `
 
 The `test` action is configured inline in a workflow step. It does **not** have a top-level Shipfile section.
 
+For Android workflows, `build_variant` is respected when ShipItSwifty derives the Gradle task name. You can also bypass variant-based task selection entirely with an explicit `task` value.
+
 | Option                 | Type   | Default      | Description                                                                                                                                                                                                                        |
 | ---------------------- | ------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `destinations`         | list   | —            | **Required.** One or more xcodebuild destination strings. Each entry triggers a separate `xcodebuild test` pass; pass/fail/skip counts are aggregated. Discover valid values with `xcodebuild -showdestinations -scheme <Scheme>`. |
@@ -239,6 +241,10 @@ The `test` action is configured inline in a workflow step. It does **not** have 
 | `only_testing`         | list   | —            | Restrict to specific targets or test cases. Each entry maps to `-only-testing`.                                                                                                                                                    |
 | `skip_testing`         | list   | —            | Skip specific targets or test cases. Each entry maps to `-skip-testing`.                                                                                                                                                           |
 | `retry_on_failure`     | bool   | `false`      | Pass `-retry-tests-on-failure` to retry each failing test once.                                                                                                                                                                    |
+| `module`               | string | `android.module` | Android only. Gradle module whose tests should run. Set `module: ""` with `task` to run a root-level aggregate Gradle task.                                                                                                   |
+| `build_variant`        | string | `debug`      | Android only. Overrides `android.build_variant` for this test step when ShipItSwifty derives the Gradle task name.                                                                                                                |
+| `instrumented`         | bool   | `false`      | Android only. Runs connected device or emulator tests instead of JVM unit tests.                                                                                                                                                   |
+| `task`                 | string | —            | Android only. Explicit Gradle task name such as `testDebugUnitTest` or `testProdDebugUnitTest`. Overrides variant-based task selection.                                                                                          |
 
 **Destination string format**
 
@@ -252,6 +258,24 @@ Run `xcodebuild -showdestinations -scheme <Scheme>` (with `-workspace` or `-proj
 to list all valid destination strings for your scheme on the current machine. Alternatively, run
 `shipit ai-session --goal local` which calls destination discovery automatically and includes the
 results in `nextQuestion` so an AI agent can ask which destinations to use.
+
+Android examples:
+
+```yaml
+workflows:
+  beta:
+    steps:
+      - action: test
+        options:
+          build_variant: debug
+
+      - action: test
+        options:
+          module: ""
+          task: testDebugUnitTest
+```
+
+For Android aggregate tasks, ShipItSwifty now falls back to JUnit XML reports under `build/test-results/<taskName>/` when Gradle stdout does not include a test summary.
 
 ## `notifications.slack`
 
@@ -316,6 +340,7 @@ Workflow notes:
 - `export` can write an IPA into `export.output_directory`.
 - `testflight` and `upload` can reuse that exported IPA automatically when they run after `export` in the same workflow and no explicit `ipa` / `ipa_path` is set.
 - `validate` reports an error when `testflight` or `upload` has no explicit IPA and no prior export context.
+- Human output from `shipit run <workflow>` now prints per-step summaries when available, including test pass/fail/skip counts, version strings, and archive artifact filenames.
 
 ## `custom_actions`
 
@@ -428,7 +453,6 @@ Platform-specific Android configuration. These values are merged on top of share
 | `keystore_password`  | string | —                    | `ANDROID_KEYSTORE_PASSWORD`          | Keystore password                                                     |
 | `keystore_alias`     | string | —                    | `ANDROID_KEY_ALIAS`                  | Key alias in the keystore                                             |
 | `key_password`       | string | —                    | `ANDROID_KEY_PASSWORD`               | Key password                                                          |
-| `play_track`         | string | `internal`           | —                                    | Google Play release track (`internal`, `alpha`, `beta`, `production`) |
 | `rollout_fraction`   | float  | —                    | —                                    | Staged rollout fraction (0.0–1.0), for `production` track             |
 | `gradle_properties`  | map    | `{}`                 | —                                    | Extra `-P key=value` properties passed to Gradle                      |
 | `gradlew_path`       | string | —                    | `SHIPIT_ANDROID__GRADLEW_PATH`       | Explicit path to the `gradlew` script (auto-detected when omitted)    |
@@ -447,7 +471,7 @@ Set these environment variables for Google Play upload actions:
 Lookup notes:
 
 - `package_name` is your Android `applicationId`, usually from `app/build.gradle` or `app/build.gradle.kts`
-- `play_track` maps to the Play Console track you are targeting: `internal`, `alpha`, `beta`, or `production`
+- `play-store` steps require a `track` option (or `--track` on the CLI) to target a Play Console track such as `internal`, `alpha`, `beta`, or `production`
 - Create the service account in Google Cloud, enable the `Google Play Developer API`, then invite that service account in Play Console `Users and permissions`
 - Give the service account Play Console permissions that match the rollout you want to perform
 
