@@ -21,7 +21,7 @@
     "title": "API Reference",
     "section": "Browse the API",
     "group": "API Reference",
-    "content": "The full API reference is generated from DocC and published with GitHub Pages: Open the ShipItKit API reference."
+    "content": "The full API reference is generated from DocC and rendered on this site: Open the ShipItKit API reference."
   },
   {
     "id": "/docs/getting-started/android-quickstart",
@@ -53,7 +53,7 @@
     "title": "Android Quickstart",
     "section": "2. Auto-detect your project",
     "group": "Getting Started",
-    "content": "Run generate from your Android project root. ShipItSwifty detects gradlew, walks through the missing values, and writes an Android-ready Shipfile.yml: The generated setup includes: Detected platform (.android) Required secrets (GOOGLEPLAYSERVICEACCOUNTJSON) A ready-to-use Shipfile.yml draft The next recommended command"
+    "content": "Run generate from your Android project root. ShipItSwifty detects gradlew, walks through the missing values, and writes an Android-ready Shipfile.yml: If Google Play upload is enabled, generate now asks which Play track that workflow should target. The generated setup includes: Detected platform (.android) Required secrets (GOOGLEPLAYSERVICEACCOUNTJSON) A ready-to-use Shipfile.yml draft The next recommended command"
   },
   {
     "id": "/docs/getting-started/android-quickstart#3-create-a-shipfile",
@@ -77,7 +77,7 @@
     "title": "Android Quickstart",
     "section": "5. Run a dry-run",
     "group": "Getting Started",
-    "content": ""
+    "content": "Human output for shipit run beta now prints a short summary for each workflow step when available, including test counts, version strings, and archive artifact filenames."
   },
   {
     "id": "/docs/getting-started/android-quickstart#6-ship-it",
@@ -109,7 +109,7 @@
     "title": "Android Quickstart",
     "section": "Google Play service account setup",
     "group": "Getting Started",
-    "content": "Use these values for Android setup: packagename — Your Android application ID, usually applicationId in app/build.gradle or app/build.gradle.kts (for example com.example.myapp) playtrack — The Play Console release track you want to target: typically internal, alpha, beta, or production GOOGLEPLAYSERVICEACCOUNTJSON — Raw contents of the service account key JSON file GOOGLEPLAYSERVICEACCOUNTJSONPATH — Local filesystem path to that JSON key file Set up Play API access: Open Google Cloud Console and create or choose a project. Go to APIs & Services and enable the Google Play Developer API. Go to S"
+    "content": "Use these values for Android setup: packagename — Your Android application ID, usually applicationId in app/build.gradle or app/build.gradle.kts (for example com.example.myapp) track — Set this on each play-store workflow step, or pass --track on the CLI. Valid values are typically internal, alpha, beta, or production GOOGLEPLAYSERVICEACCOUNTJSON — Raw contents of the service account key JSON file GOOGLEPLAYSERVICEACCOUNTJSONPATH — Local filesystem path to that JSON key file Set up Play API access: Open Google Cloud Console and create or choose a project. Go to APIs & Services and enable the G"
   },
   {
     "id": "/docs/getting-started/android-quickstart#troubleshooting",
@@ -141,7 +141,7 @@
     "title": "Installation",
     "section": "Homebrew",
     "group": "Getting Started",
-    "content": "The fastest way to get started. One command, always up to date:"
+    "content": "There is not a published Homebrew tap yet. The formula template lives upstream, but today you need to either build from source or copy the formula into your own tap."
   },
   {
     "id": "/docs/getting-started/installation#swift-package-manager",
@@ -237,7 +237,7 @@
     "title": "iOS Quickstart",
     "section": "Release (submit for review)",
     "group": "Getting Started",
-    "content": "Run a workflow:"
+    "content": "Run a workflow: Human output from shipit run now prints per-step summaries when available, including test pass/fail/skip counts, version strings, and archive artifact filenames."
   },
   {
     "id": "/docs/getting-started/ios-quickstart#dry-run",
@@ -312,6 +312,62 @@
     "content": "Installation — install and verify your environment iOS Quickstart — end-to-end guide from config to TestFlight Android Quickstart — set up Gradle builds and Play Store uploads"
   },
   {
+    "id": "/docs/guides/agent-fast-start",
+    "url": "/docs/guides/agent-fast-start",
+    "title": "Agent Fast Start",
+    "section": null,
+    "group": "Guides",
+    "content": "This page is a compact navigation guide for coding agents working in the ShipItSwifty repository."
+  },
+  {
+    "id": "/docs/guides/agent-fast-start#purpose",
+    "url": "/docs/guides/agent-fast-start#purpose",
+    "title": "Agent Fast Start",
+    "section": "Purpose",
+    "group": "Guides",
+    "content": "ShipItSwifty is a Swift 6 release-automation toolkit for iOS and Android. ShipItKit contains the domain logic and machine-facing contracts. shipit is the CLI layer over that library."
+  },
+  {
+    "id": "/docs/guides/agent-fast-start#authoritative-sources",
+    "url": "/docs/guides/agent-fast-start#authoritative-sources",
+    "title": "Agent Fast Start",
+    "section": "Authoritative sources",
+    "group": "Guides",
+    "content": "| Concern | Source of truth | | --- | --- | | Runtime config resolution | Sources/ShipItKit/Config/ConfigResolver.swift, Sources/ShipItKit/Config/ResolvedConfig.swift | | Shipfile model | Sources/ShipItKit/Config/Shipfile.swift | | Environment variable mapping | Sources/ShipItKit/Config/Environment.swift | | Built-in action option schema | Sources/ShipItKit/Introspection/BuiltInSchemaCatalog.swift | | AI-session JSON contract | Sources/ShipItKit/Introspection/AISessionTypes.swift, Sources/ShipItKit/Introspection/AISessionBuilder.swift | | Action behavior | Sources/ShipItKit/Actions/ .swift | |"
+  },
+  {
+    "id": "/docs/guides/agent-fast-start#start-here-by-task",
+    "url": "/docs/guides/agent-fast-start#start-here-by-task",
+    "title": "Agent Fast Start",
+    "section": "Start here by task",
+    "group": "Guides",
+    "content": "| Task | Start here | | --- | --- | | Config resolution bug or feature | Sources/ShipItKit/Config/ConfigResolver.swift, ResolvedConfig.swift, Environment.swift, Shipfile.swift | | Action implementation or regression | Sources/ShipItKit/Actions/, matching tests in Tests/ShipItKitTests/ | | Workflow or custom action behavior | Sources/ShipItKit/Actions/WorkflowTypes.swift, CompositeAction.swift, workflow-related tests | | Schema or validation drift | BuiltInSchemaCatalog.swift, SchemaValidator, ShipfileValidator, related tests | | AI-session output drift | AISessionTypes.swift, AISessionBuilder."
+  },
+  {
+    "id": "/docs/guides/agent-fast-start#change-impact-map",
+    "url": "/docs/guides/agent-fast-start#change-impact-map",
+    "title": "Agent Fast Start",
+    "section": "Change impact map",
+    "group": "Guides",
+    "content": "| If you change... | Also check/update... | | --- | --- | | An action Options or Result type | BuiltInSchemaCatalog.swift, tests, docs/features.md, AGENTS.md if command guidance changed, AISessionBuilder.swift if agent-facing guidance changed | | Shipfile schema | Shipfile.swift, BuiltInSchemaCatalog.swift, docs/configuration-reference.md, validation tests | | ai-session payload shape or semantics | AISessionTypes.swift, AISessionBuilder.swift, docs/architecture.md, AGENTS.md, AISessionTests.swift | | CLI command flags or subcommands | Sources/CLI/Commands/, AGENTS.md, docs/features.md, CLI te"
+  },
+  {
+    "id": "/docs/guides/agent-fast-start#recommended-first-read-paths",
+    "url": "/docs/guides/agent-fast-start#recommended-first-read-paths",
+    "title": "Agent Fast Start",
+    "section": "Recommended first-read paths",
+    "group": "Guides",
+    "content": "Package.swift AGENTS.md Sources/ShipItKit/Config/ConfigResolver.swift Sources/ShipItKit/Config/ResolvedConfig.swift Sources/ShipItKit/Actions/ Sources/ShipItKit/Introspection/ Tests/ShipItKitTests/"
+  },
+  {
+    "id": "/docs/guides/agent-fast-start#validation-commands",
+    "url": "/docs/guides/agent-fast-start#validation-commands",
+    "title": "Agent Fast Start",
+    "section": "Validation commands",
+    "group": "Guides",
+    "content": "Use more targeted filters when the change is localized, for example:"
+  },
+  {
     "id": "/docs/guides/ci-setup#github-actions",
     "url": "/docs/guides/ci-setup#github-actions",
     "title": "CI Setup",
@@ -333,7 +389,7 @@
     "title": "CI Setup",
     "section": "Example workflow",
     "group": "Guides",
-    "content": "A typical release workflow installs shipit via Homebrew and runs a workflow:"
+    "content": "A typical release workflow builds shipit from source and runs a workflow:"
   },
   {
     "id": "/docs/guides/ci-setup#ci-with-tests",
@@ -342,6 +398,46 @@
     "section": "CI with tests",
     "group": "Guides",
     "content": "If you want to run tests before shipping: If your CI stores the config at a non-default path, pass it explicitly:"
+  },
+  {
+    "id": "/docs/guides/ci-setup#basic-ci-steps",
+    "url": "/docs/guides/ci-setup#basic-ci-steps",
+    "title": "CI Setup",
+    "section": "Basic CI steps",
+    "group": "Guides",
+    "content": ""
+  },
+  {
+    "id": "/docs/guides/ci-setup#json-output-in-ci",
+    "url": "/docs/guides/ci-setup#json-output-in-ci",
+    "title": "CI Setup",
+    "section": "JSON output in CI",
+    "group": "Guides",
+    "content": "Use --output json for machine-readable results:"
+  },
+  {
+    "id": "/docs/guides/ci-setup#linux-and-cross-platform-ci",
+    "url": "/docs/guides/ci-setup#linux-and-cross-platform-ci",
+    "title": "CI Setup",
+    "section": "Linux and cross-platform CI",
+    "group": "Guides",
+    "content": "Android actions can run on Linux. iOS distribution still requires macOS because it depends on Xcode and Apple signing tooling."
+  },
+  {
+    "id": "/docs/guides/ci-setup#kotlin-multiplatform",
+    "url": "/docs/guides/ci-setup#kotlin-multiplatform",
+    "title": "CI Setup",
+    "section": "Kotlin Multiplatform",
+    "group": "Guides",
+    "content": "KMP iOS pipelines still run on macOS because they eventually invoke xcodebuild. Android-only KMP workflows can run on Linux. Notes: JDK 17+ is required for modern Android and KMP builds. shipit doctor --ci is the fastest way to fail early on missing Java, Gradle, or Apple credentials. If reproducibility matters on macOS runners, pin explicit simulator destinations for iOS test jobs."
+  },
+  {
+    "id": "/docs/guides/ci-setup#flutter-and-react-native",
+    "url": "/docs/guides/ci-setup#flutter-and-react-native",
+    "title": "CI Setup",
+    "section": "Flutter and React Native",
+    "group": "Guides",
+    "content": "Framework-specific workflows need their usual toolchains installed before shipit runs. Use macOS runners for Flutter iOS or React Native iOS distribution."
   },
   {
     "id": "/docs/guides/plugin-development#overview",
@@ -445,7 +541,7 @@
     "title": "Documentation",
     "section": "Where to start",
     "group": "Getting Started",
-    "content": "New here? Begin with the Installation guide. Coming from fastlane? Read the migration guide. Setting up CI? See the CI Setup guide. Need the Swift API? Browse the API Reference."
+    "content": "New here? Begin with the Installation guide. Coming from fastlane? Read the migration guide. Setting up CI? See the CI Setup guide. Using a coding agent in the upstream repo? Start with the Agent Fast Start guide. Need the Swift API? Browse the API Reference."
   },
   {
     "id": "/docs#versioning",
@@ -453,7 +549,7 @@
     "title": "Documentation",
     "section": "Versioning",
     "group": "Getting Started",
-    "content": "The docs in this site track the latest published release of shipit. The Swift API reference is generated from DocC and published separately on GitHub Pages."
+    "content": "The docs in this site are maintained alongside the website. The Swift API reference is generated from DocC and rendered directly at /docs/api/shipitkit when synced data is available."
   },
   {
     "id": "/docs/reference/configuration",
@@ -589,7 +685,7 @@
     "title": "Configuration Reference",
     "section": "`test` action options",
     "group": "Reference",
-    "content": "The test action is configured inline in a workflow step. It does not have a top-level Shipfile section. | Option | Type | Default | Description | | ---------------------- | ------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | | destinations | list | — | Required. One or more xcodebuild destination strings. Each entry triggers a separate xcodebuild test pass; pass/fail/skip counts are aggregated. D"
+    "content": "The test action is configured inline in a workflow step. It does not have a top-level Shipfile section. For Android workflows, buildvariant is respected when ShipItSwifty derives the Gradle task name. You can also bypass variant-based task selection entirely with an explicit task value. | Option | Type | Default | Description | | ---------------------- | ------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
   },
   {
     "id": "/docs/reference/configuration#notificationsslack",
@@ -669,7 +765,7 @@
     "title": "Configuration Reference",
     "section": "Google Play credentials",
     "group": "Reference",
-    "content": "Set these environment variables for Google Play upload actions: | Variable | Description | | --------------------------------------- | ------------------------------------------------- | | GOOGLEPLAYSERVICEACCOUNTJSON | Full JSON content of the service account key file | | GOOGLEPLAYSERVICEACCOUNTJSONPATH | Path to the service account key JSON file | Lookup notes: packagename is your Android applicationId, usually from app/build.gradle or app/build.gradle.kts playtrack maps to the Play Console track you are targeting: internal, alpha, beta, or production Create the service account in Google Cl"
+    "content": "Set these environment variables for Google Play upload actions: | Variable | Description | | --------------------------------------- | ------------------------------------------------- | | GOOGLEPLAYSERVICEACCOUNTJSON | Full JSON content of the service account key file | | GOOGLEPLAYSERVICEACCOUNTJSONPATH | Path to the service account key JSON file | Lookup notes: packagename is your Android applicationId, usually from app/build.gradle or app/build.gradle.kts play-store steps require a track option (or --track on the CLI) to target a Play Console track such as internal, alpha, beta, or product"
   },
   {
     "id": "/docs/reference/configuration#ios",
