@@ -429,7 +429,7 @@
     "title": "CI Setup",
     "section": "Kotlin Multiplatform",
     "group": "Guides",
-    "content": "KMP iOS pipelines still run on macOS because they eventually invoke xcodebuild. Android-only KMP workflows can run on Linux. Notes: JDK 17+ is required for modern Android and KMP builds. shipit doctor --ci is the fastest way to fail early on missing Java, Gradle, or Apple credentials. If reproducibility matters on macOS runners, pin explicit simulator destinations for iOS test jobs."
+    "content": "KMP iOS pipelines still run on macOS because they eventually invoke xcodebuild. Android-only KMP workflows can run on Linux. Notes: JDK 17+ is required for modern Android and KMP builds. Gradle cache is essential — the first KMP framework link is slow; subsequent runs are nearly free if /.gradle is cached. shipit doctor --ci fails fast on missing Java, Gradle, or Apple credentials. If reproducibility matters on macOS runners, pin explicit simulator destinations for iOS test jobs."
   },
   {
     "id": "/docs/guides/ci-setup#flutter-and-react-native",
@@ -437,7 +437,7 @@
     "title": "CI Setup",
     "section": "Flutter and React Native",
     "group": "Guides",
-    "content": "Framework-specific workflows need their usual toolchains installed before shipit runs. Use macOS runners for Flutter iOS or React Native iOS distribution."
+    "content": "Flutter workflows need the Flutter SDK; React Native workflows need Node and the project package manager before shipit runs. Use macOS runners for Flutter iOS or React Native iOS distribution — both require Xcode and Apple signing tooling."
   },
   {
     "id": "/docs/guides/plugin-development#overview",
@@ -568,6 +568,14 @@
     "content": ""
   },
   {
+    "id": "/docs/reference/configuration#env-file-auto-loading",
+    "url": "/docs/reference/configuration#env-file-auto-loading",
+    "title": "Configuration Reference",
+    "section": "`.env` file auto-loading",
+    "group": "Reference",
+    "content": "ShipIt automatically loads a .env file from the same directory as Shipfile.yml before resolving configuration. Variables already in the process environment take precedence and are never overwritten. Supported formats: KEY=VALUE, export KEY=VALUE, quoted values, and # comments. Use shipit generate to create a pre-populated .env file; it is automatically added to .gitignore."
+  },
+  {
     "id": "/docs/reference/configuration#environment-variable-naming-convention",
     "url": "/docs/reference/configuration#environment-variable-naming-convention",
     "title": "Configuration Reference",
@@ -605,7 +613,7 @@
     "title": "Configuration Reference",
     "section": "`code_signing`",
     "group": "Reference",
-    "content": "| Key | Type | Default | Description | | ---------------- | ------ | ------- | ---------------------------------- | | type | string | vault | automatic, vault, or manual | | storage | string | git | git, s3, or gcs | | giturl | string | — | URL of the certificate repo | | appidentifier | string | — | Bundle ID for matching | | profiletype | string | — | appstore, adhoc, development | Set VAULTPASSWORD env var for the encrypted repo passphrase. With type: automatic, ShipIt passes -allowProvisioningUpdates to Xcode build/export operations and writes signingStyle=automatic into export options."
+    "content": "| Key | Type | Default | Description | | ------------------------------- | ------ | ------- | -------------------------------------------------------------- | | type | string | vault | automatic, vault, or manual | | storage | string | git | git, s3, or gcs | | giturl | string | — | URL of the certificate repo | | appidentifier | string | — | Bundle ID for matching | | profiletype | string | — | appstore, adhoc, development | | p12path | string | — | Local .p12 certificate path (manual signing) | | p12base64 | string | — | Base64-encoded .p12 for CI / manual signing | | p12password | string | "
   },
   {
     "id": "/docs/reference/configuration#build",
@@ -621,7 +629,7 @@
     "title": "Configuration Reference",
     "section": "`archive`",
     "group": "Reference",
-    "content": "| Key | Type | Default | Description | | ----------------- | ------ | ----------- | -------------------------------------------------- | | exportmethod | string | app-store | app-store, ad-hoc, enterprise, development | | includesymbols | bool | true | Include dSYMs | | includebitcode | bool | — | Include bitcode (deprecated Xcode 14+) | | outputpath | string | — | Output path for .xcarchive |"
+    "content": "Top-level archive keys apply to iOS archives. Android archive options are set per workflow step (see archive action options). | Key | Type | Default | Description | | ----------------- | ------ | ----------- | -------------------------------------------------- | | exportmethod | string | app-store | app-store, ad-hoc, enterprise, development | | includesymbols | bool | true | Include dSYMs | | includebitcode | bool | — | Include bitcode (deprecated Xcode 14+) | | outputpath | string | — | Output path for .xcarchive |"
   },
   {
     "id": "/docs/reference/configuration#export",
@@ -672,6 +680,22 @@
     "content": "The version action accepts a bump option that selects which counter to change: | bump value | Changes | Leaves untouched | | ------------ | ------------------------------------------------------------------------------ | ---------------------------- | | build | CFBundleVersion (integer) | CFBundleShortVersionString | | patch | Patch segment of CFBundleShortVersionString; resets CFBundleVersion to 1 | Major and minor segments | | minor | Minor segment; resets patch and CFBundleVersion to 1 | Major segment | | major | Major segment; resets minor, patch, and CFBundleVersion to 1 | — |"
   },
   {
+    "id": "/docs/reference/configuration#version-dry-run-preview",
+    "url": "/docs/reference/configuration#version-dry-run-preview",
+    "title": "Configuration Reference",
+    "section": "Version dry-run preview",
+    "group": "Reference",
+    "content": "Use --dry-run to see the computed before/after version values without writing anything:"
+  },
+  {
+    "id": "/docs/reference/configuration#safe-bump-ordering",
+    "url": "/docs/reference/configuration#safe-bump-ordering",
+    "title": "Configuration Reference",
+    "section": "Safe bump ordering",
+    "group": "Reference",
+    "content": "When a workflow bumps the marketing version (patch/minor/major) and the build number in the same run, place the marketing version bump first. A marketing version bump resets the build number to 1, so running it after a build bump would discard the incremented value. Pair each version step with an immediate git commit so a late-stage failure leaves a clean rollback target."
+  },
+  {
     "id": "/docs/reference/configuration#beta-workflow-pattern-local-only-apple-semantics",
     "url": "/docs/reference/configuration#beta-workflow-pattern-local-only-apple-semantics",
     "title": "Configuration Reference",
@@ -685,7 +709,23 @@
     "title": "Configuration Reference",
     "section": "`test` action options",
     "group": "Reference",
-    "content": "The test action is configured inline in a workflow step. It does not have a top-level Shipfile section. For Android workflows, buildvariant is respected when ShipItSwifty derives the Gradle task name. You can also bypass variant-based task selection entirely with an explicit task value. | Option | Type | Default | Description | | ---------------------- | ------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+    "content": "The test action is configured inline in a workflow step. It does not have a top-level Shipfile section. retryonfailure and infrastructureretry solve different problems. Use retryonfailure for iOS test-case retries after assertion failures. Use infrastructureretry for whole-run failures such as simulator launch crashes, Android emulator disconnects, Flutter tool crashes, or JS worker failures. shipit generate asks whether to enable infrastructureretry on generated test steps. | Option | Type | Default | Description | | ---------------------- | ------ | ------------ | ---------------------------"
+  },
+  {
+    "id": "/docs/reference/configuration#archive-action-options",
+    "url": "/docs/reference/configuration#archive-action-options",
+    "title": "Configuration Reference",
+    "section": "Archive action options",
+    "group": "Reference",
+    "content": "The archive action accepts inline step options for both iOS and Android: | Option | Type | Default | Description | | ---------------------- | ------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- | | scheme | string | app.scheme | Xcode scheme to archive (iOS). | | configuration | string | Release | Build configuration. | | exportmethod | string | app-store| Distribution method (iOS only): app-store, ad-hoc, development, enterprise. | | outputpath | string | — | Output .xcarchive path "
+  },
+  {
+    "id": "/docs/reference/configuration#project_generation",
+    "url": "/docs/reference/configuration#project_generation",
+    "title": "Configuration Reference",
+    "section": "`project_generation`",
+    "group": "Reference",
+    "content": "Configuration for automatic project file generation (XcodeGen, Tuist) before Xcode-dependent steps. | Key | Type | Default | Description | | ---------------- | ------ | ------- | -------------------------------------------------------------------------------------------- | | tool | string | — | Generation tool: xcodegen or tuist | | command | string | — | Custom shell command (overrides tool) | | specpath | string | — | Path to the project spec file (e.g. project.yml for XcodeGen) | | outputproject | string | — | Expected output .xcodeproj path (used to verify generation succeeded) | | autogen"
   },
   {
     "id": "/docs/reference/configuration#notificationsslack",
@@ -757,7 +797,7 @@
     "title": "Configuration Reference",
     "section": "`android`",
     "group": "Reference",
-    "content": "Platform-specific Android configuration. These values are merged on top of shared config when --platform android is active or the platform is auto-detected as Android. | Key | Type | Default | Env Var | Description | | -------------------- | ------ | -------------------- | ------------------------------------ | --------------------------------------------------------------------- | | buildsystem | string | native | SHIPITANDROIDBUILDSYSTEM | Build system that produces the Android artifact. | | module | string | app | — | Gradle module to build/bundle | | buildvariant | string | release | — | G"
+    "content": "Platform-specific Android configuration. These values are merged on top of shared config when --platform android is active or the platform is auto-detected as Android. | Key | Type | Default | Env Var | Description | | -------------------- | ------ | -------------------- | ------------------------------------ | --------------------------------------------------------------------- | | buildsystem | string | native | SHIPITANDROIDBUILDSYSTEM | Build system: native, flutter, reactnative, or kmp. See Build systems. | | module | string | app | — | Gradle module to build/bundle | | buildvariant | st"
   },
   {
     "id": "/docs/reference/configuration#google-play-credentials",
@@ -773,6 +813,38 @@
     "title": "Configuration Reference",
     "section": "`ios`",
     "group": "Reference",
-    "content": "Platform-specific iOS overrides. Merged on top of shared config when --platform ios is active. All top-level app, codesigning, archive, export, testflight, and screenshots keys can appear here to override the shared defaults for iOS only."
+    "content": "Platform-specific iOS overrides. Merged on top of shared config when --platform ios is active. All top-level app, codesigning, archive, export, testflight, and screenshots keys can appear here to override the shared defaults for iOS only. | Key | Type | Default | Env Var | Description | | -------------------- | ------ | ------------------- | -------------------------------- | --------------------------------------------------------------------------------------- | | buildsystem | string | native | SHIPITIOSBUILDSYSTEM | native, flutter, reactnative, or kmp. See Build systems. | | kmpsharedmodu"
+  },
+  {
+    "id": "/docs/reference/configuration#build-systems",
+    "url": "/docs/reference/configuration#build-systems",
+    "title": "Configuration Reference",
+    "section": "Build systems",
+    "group": "Reference",
+    "content": "buildsystem is orthogonal to platform: a single Kotlin Multiplatform or Flutter source tree can produce both an iOS .ipa and an Android .aab. | Value | iOS compilation | Android compilation | | -------------- | ------------------------------------------------------ | ------------------------------------------------------- | | native | xcodebuild | gradlew assemble / bundle | | kmp | link KMP shared framework via Gradle → xcodebuild | gradlew :androidApp:assembleRelease / bundleRelease | | flutter | flutter build ipa (IPA at build/ios/ipa/) | flutter build apk / flutter build appbundle | | reac"
+  },
+  {
+    "id": "/docs/reference/configuration#auto-detection",
+    "url": "/docs/reference/configuration#auto-detection",
+    "title": "Configuration Reference",
+    "section": "Auto-detection",
+    "group": "Reference",
+    "content": "When buildsystem is unset, ShipItSwifty resolves it automatically: | Project marker | Detected value | | ----------------------------------------------------------------------- | ---------------- | | pubspec.yaml with a flutter: key | flutter | | package.json declaring react-native in dependencies | reactnative | | build.gradle.kts applying kotlin(\"multiplatform\") | kmp | | None of the above | native |"
+  },
+  {
+    "id": "/docs/reference/configuration#kmp-example",
+    "url": "/docs/reference/configuration#kmp-example",
+    "title": "Configuration Reference",
+    "section": "KMP example",
+    "group": "Reference",
+    "content": ""
+  },
+  {
+    "id": "/docs/reference/configuration#coverage-action-options",
+    "url": "/docs/reference/configuration#coverage-action-options",
+    "title": "Configuration Reference",
+    "section": "`coverage` action options",
+    "group": "Reference",
+    "content": "The coverage action reads native coverage artifacts — it does not generate them. | Option | Type | Default | Description | | ---------------- | ------ | -------------- | ------------------------------------------------------------------------------------------------- | | platform | string | auto-detected | ios or android | | xcresult | string | auto-discovered| Explicit .xcresult bundle path (iOS) | | report | string | auto-discovered| Explicit JaCoCo XML report path (Android) | | firstpartyonly | bool | true | Suppress test bundles, SPM deps, and known vendor prefixes | | targets | bool | fal"
   }
 ]

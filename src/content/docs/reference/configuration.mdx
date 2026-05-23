@@ -13,8 +13,14 @@ For config-backed CLI commands, the selected file must exist. A missing `./Shipf
 ## Priority Order
 
 ```
-CLI flags  >  SHIPIT_* env vars  >  config file  >  Built-in defaults
+CLI flags  >  SHIPIT_* env vars  >  .env file  >  config file  >  Built-in defaults
 ```
+
+### `.env` file auto-loading
+
+ShipIt automatically loads a `.env` file from the same directory as `Shipfile.yml` before resolving configuration. Variables already in the process environment take precedence and are never overwritten.
+
+Supported formats: `KEY=VALUE`, `export KEY=VALUE`, quoted values, and `# comments`. Use `shipit generate` to create a pre-populated `.env` file; it is automatically added to `.gitignore`.
 
 ## Environment variable naming convention
 
@@ -36,6 +42,7 @@ Shipfile YAML keys map to env vars by upper-casing and joining path segments wit
 ## Top-Level Structure
 
 ```yaml
+platform:
 app:
 app_store_connect:
 code_signing:
@@ -46,8 +53,10 @@ testflight:
 screenshots:
 metadata:
 versioning:
+project_generation:
 notifications:
 workflows:
+custom_actions:
 # Platform-specific overrides (merged on top of shared config)
 ios:
 android:
@@ -96,17 +105,24 @@ If ShipIt cannot infer `app.team_id`, use the team selected in Xcode for the app
 
 ## `code_signing`
 
-| Key              | Type   | Default | Description                        |
-| ---------------- | ------ | ------- | ---------------------------------- |
-| `type`           | string | `vault` | `automatic`, `vault`, or `manual`  |
-| `storage`        | string | `git`   | `git`, `s3`, or `gcs`              |
-| `git_url`        | string | —       | URL of the certificate repo        |
-| `app_identifier` | string | —       | Bundle ID for matching             |
-| `profile_type`   | string | —       | `appstore`, `adhoc`, `development` |
+| Key                             | Type   | Default | Description                                                    |
+| ------------------------------- | ------ | ------- | -------------------------------------------------------------- |
+| `type`                          | string | `vault` | `automatic`, `vault`, or `manual`                              |
+| `storage`                       | string | `git`   | `git`, `s3`, or `gcs`                                          |
+| `git_url`                       | string | —       | URL of the certificate repo                                    |
+| `app_identifier`                | string | —       | Bundle ID for matching                                         |
+| `profile_type`                  | string | —       | `appstore`, `adhoc`, `development`                             |
+| `p12_path`                      | string | —       | Local `.p12` certificate path (manual signing)                 |
+| `p12_base64`                    | string | —       | Base64-encoded `.p12` for CI / manual signing                  |
+| `p12_password`                  | string | —       | `.p12` certificate password                                    |
+| `provisioning_profile_path`     | string | —       | Local `.mobileprovision` path (manual signing)                 |
+| `provisioning_profile_base64`   | string | —       | Base64-encoded `.mobileprovision` for CI / manual signing      |
 
 Set `VAULT_PASSWORD` env var for the encrypted repo passphrase.
 
 With `type: automatic`, ShipIt passes `-allowProvisioningUpdates` to Xcode build/export operations and writes `signingStyle=automatic` into export options.
+
+With `type: manual`, `shipit sign sync` installs the configured `.p12` certificate and provisioning profile. Local paths are preferred when they exist; base64 values are used as a CI fallback.
 
 ## `build`
 
@@ -117,6 +133,8 @@ With `type: automatic`, ShipIt passes `-allowProvisioningUpdates` to Xcode build
 | `xcargs`            | map    | `{}`      | Extra flags for `xcodebuild` |
 
 ## `archive`
+
+Top-level `archive` keys apply to iOS archives. Android archive options are set per workflow step (see [archive action options](#archive-action-options)).
 
 | Key               | Type   | Default     | Description                                        |
 | ----------------- | ------ | ----------- | -------------------------------------------------- |
@@ -170,10 +188,13 @@ ShipItSwifty follows Apple's two-version model:
 
 The `versioning` section controls how `CFBundleVersion` is incremented. `CFBundleShortVersionString` is only changed when the `version` action is called with `bump: major`, `bump: minor`, or `bump: patch`.
 
-| Key        | Type   | Default      | Description                                                                                                                                                                                                                                                      |
-| ---------- | ------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `strategy` | string | `sequential` | `sequential` — adds 1 each run (guarantees a plain integer). `timestamp` — uses `YYYYMMDDHHmm` format.                                                                                                                                                           |
-| `source`   | string | `xcodeproj`  | `xcodeproj` — reads `MARKETING_VERSION`/`CURRENT_PROJECT_VERSION` from `xcodebuild -showBuildSettings`; falls back to `agvtool`, then `plutil` on Info.plist. `asc` — reads current build number from App Store Connect; same fallback chain for the read phase. |
+| Key            | Type   | Default      | Description                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| -------------- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `strategy`     | string | `sequential` | `sequential` — adds 1 each run (guarantees a plain integer). `timestamp` — uses `YYYYMMDDHHmm` format.                                                                                                                                                                                                                                                                                                                                           |
+| `source`       | string | `xcodeproj`  | `xcodeproj` — reads `MARKETING_VERSION`/`CURRENT_PROJECT_VERSION` from `xcodebuild -showBuildSettings`; falls back to `agvtool`, then `plutil` on Info.plist. `asc` — reads current build number from App Store Connect. `project_spec` — reads/writes version values in a YAML spec file (XcodeGen/Tuist). `kmp` — reads/writes `versionName`/`versionCode` in `gradle.properties`. `gradle` — reads/writes directly in `build.gradle.kts` or `build.gradle`; default for Android projects. |
+| `spec_path`    | string | —            | Path to the project spec file (used with `source: project_spec`).                                                                                                                                                                                                                                                                                                                                                                               |
+| `build_key`    | string | —            | YAML key path for the build number in the spec file (e.g. `settings.CURRENT_PROJECT_VERSION`).                                                                                                                                                                                                                                                                                                                                                   |
+| `marketing_key`| string | —            | YAML key path for the marketing version in the spec file (e.g. `settings.MARKETING_VERSION`).                                                                                                                                                                                                                                                                                                                                                   |
 
 ### `version` action options
 
@@ -185,6 +206,34 @@ The `version` action accepts a `bump` option that selects which counter to chang
 | `patch`      | Patch segment of `CFBundleShortVersionString`; resets `CFBundleVersion` to `1` | Major and minor segments     |
 | `minor`      | Minor segment; resets patch and `CFBundleVersion` to `1`                       | Major segment                |
 | `major`      | Major segment; resets minor, patch, and `CFBundleVersion` to `1`               | —                            |
+
+### Version dry-run preview
+
+Use `--dry-run` to see the computed before/after version values without writing anything:
+
+```bash
+shipit version --bump build --dry-run
+shipit version --bump patch --dry-run --output json
+```
+
+### Safe bump ordering
+
+When a workflow bumps the marketing version (`patch`/`minor`/`major`) and the build number in the same run, place the marketing version bump first. A marketing version bump resets the build number to `1`, so running it after a build bump would discard the incremented value. Pair each version step with an immediate git commit so a late-stage failure leaves a clean rollback target.
+
+```yaml
+workflows:
+  beta:
+    - action: test
+    - action: archive
+    - action: version          # bump only after build succeeds
+      options: { bump: build }
+    - action: git
+      options:
+        commit: "chore: bump build number [skip ci]"
+        files: ["MyApp.xcodeproj/project.pbxproj"]
+    - action: export
+    - action: testflight
+```
 
 ### Beta workflow pattern (local-only, Apple semantics)
 
@@ -227,7 +276,7 @@ To add a TestFlight upload later, append a `testflight` step and uncomment the `
 
 The `test` action is configured inline in a workflow step. It does **not** have a top-level Shipfile section.
 
-For Android workflows, `build_variant` is respected when ShipItSwifty derives the Gradle task name. You can also bypass variant-based task selection entirely with an explicit `task` value.
+`retry_on_failure` and `infrastructure_retry` solve different problems. Use `retry_on_failure` for iOS test-case retries after assertion failures. Use `infrastructure_retry` for whole-run failures such as simulator launch crashes, Android emulator disconnects, Flutter tool crashes, or JS worker failures. `shipit generate` asks whether to enable `infrastructure_retry` on generated test steps.
 
 | Option                 | Type   | Default      | Description                                                                                                                                                                                                                        |
 | ---------------------- | ------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -241,10 +290,13 @@ For Android workflows, `build_variant` is respected when ShipItSwifty derives th
 | `only_testing`         | list   | —            | Restrict to specific targets or test cases. Each entry maps to `-only-testing`.                                                                                                                                                    |
 | `skip_testing`         | list   | —            | Skip specific targets or test cases. Each entry maps to `-skip-testing`.                                                                                                                                                           |
 | `retry_on_failure`     | bool   | `false`      | Pass `-retry-tests-on-failure` to retry each failing test once.                                                                                                                                                                    |
-| `module`               | string | `android.module` | Android only. Gradle module whose tests should run. Set `module: ""` with `task` to run a root-level aggregate Gradle task.                                                                                                   |
-| `build_variant`        | string | `debug`      | Android only. Overrides `android.build_variant` for this test step when ShipItSwifty derives the Gradle task name.                                                                                                                |
-| `instrumented`         | bool   | `false`      | Android only. Runs connected device or emulator tests instead of JVM unit tests.                                                                                                                                                   |
-| `task`                 | string | —            | Android only. Explicit Gradle task name such as `testDebugUnitTest` or `testProdDebugUnitTest`. Overrides variant-based task selection.                                                                                          |
+| `infrastructure_retry` | object | —            | Retry the entire test invocation for transient infrastructure failures (iOS simulator crashes, Android emulator disconnects, Flutter tool crashes, JS worker failures). Presence of this block enables retries; omit to disable. Recommended default: `{ max_attempts: 3, initial_delay_seconds: 2, max_delay_seconds: 30 }`. |
+| `module`               | string | `android.module` | Android/KMP. Gradle module whose tests should run.                                                                                                                                                                        |
+| `kind`                 | string | `unit`       | Android only. `unit` for JVM tests (no device), `instrumented` for on-device tests, `e2e` for end-to-end.                                                                                                                       |
+| `scope`                | string | auto         | Android only. Gradle task scope: `module` qualifies the task with the module path; `root` runs the root-level task (cascades across all modules). When `kind: instrumented` and scope is unset, defaults to `root`. Set `scope: module` explicitly for single-module behaviour. |
+| `build_variant`        | string | `debug`      | Android only. Overrides `android.build_variant` for this test step.                                                                                                                                                              |
+| `task`                 | string | —            | Android only. Explicit Gradle task name (e.g. `testDebugUnitTest`). Overrides variant-based task selection.                                                                                                                      |
+| `devices`              | object | —            | Android only. Device config for instrumented runs. Fields: `strategy` (`none`/`connected`/`named_emulators`/`managed`), `emulators` (AVD names), `group` (managed device group), `prompt_locally` (interactive selection outside CI). |
 
 **Destination string format**
 
@@ -265,17 +317,60 @@ Android examples:
 workflows:
   beta:
     steps:
+      # JVM unit tests for a single module
       - action: test
         options:
+          kind: unit
           build_variant: debug
 
+      # Instrumented tests — defaults to scope:root for multi-module projects
       - action: test
         options:
-          module: ""
+          kind: instrumented
+          devices:
+            strategy: named_emulators
+            emulators: [Pixel_9_API_35]
+
+      # Explicit root-level aggregate task
+      - action: test
+        options:
           task: testDebugUnitTest
+          scope: root
 ```
 
-For Android aggregate tasks, ShipItSwifty now falls back to JUnit XML reports under `build/test-results/<taskName>/` when Gradle stdout does not include a test summary.
+For Android aggregate tasks, ShipItSwifty falls back to JUnit XML reports under `build/test-results/<taskName>/` when Gradle stdout does not include a test summary.
+
+## Archive action options
+
+The `archive` action accepts inline step options for both iOS and Android:
+
+| Option                 | Type   | Default    | Description                                                                                                                                   |
+| ---------------------- | ------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scheme`               | string | `app.scheme` | Xcode scheme to archive (iOS).                                                                                                              |
+| `configuration`        | string | `Release`  | Build configuration.                                                                                                                          |
+| `export_method`        | string | `app-store`| Distribution method (iOS only): `app-store`, `ad-hoc`, `development`, `enterprise`.                                                          |
+| `output_path`          | string | —          | Output `.xcarchive` path (iOS) or `.aab` path (Android).                                                                                      |
+| `include_symbols`      | bool   | `true`     | Include dSYMs (iOS only).                                                                                                                     |
+| `module`               | string | `android.module` | Gradle module to bundle (Android).                                                                                                      |
+| `build_variant`        | string | `release`  | Gradle bundle variant (Android).                                                                                                              |
+| `flavor`               | string | —          | Product flavor name. Combined with `build_variant` for Gradle task names. Also used by Flutter and React Native archives.                      |
+| `scope`                | string | `module`   | Android Gradle task scope: `module` or `root`.                                                                                                |
+| `gradle_properties`    | object | `{}`       | Additional `-P key=value` properties passed to the Gradle bundle task (Android).                                                              |
+| `infrastructure_retry` | object | —          | Retry the iOS archive for transient Apple provisioning-server failures that occur when `-allowProvisioningUpdates` contacts Apple's servers. Presence enables retries; omit to disable. Permanent failures (missing certificate, invalid team ID) are never retried. Recommended: `{ max_attempts: 3, initial_delay_seconds: 5, max_delay_seconds: 30 }`. |
+
+## `project_generation`
+
+Configuration for automatic project file generation (XcodeGen, Tuist) before Xcode-dependent steps.
+
+| Key              | Type   | Default | Description                                                                                  |
+| ---------------- | ------ | ------- | -------------------------------------------------------------------------------------------- |
+| `tool`           | string | —       | Generation tool: `xcodegen` or `tuist`                                                       |
+| `command`        | string | —       | Custom shell command (overrides `tool`)                                                       |
+| `spec_path`      | string | —       | Path to the project spec file (e.g. `project.yml` for XcodeGen)                             |
+| `output_project` | string | —       | Expected output `.xcodeproj` path (used to verify generation succeeded)                      |
+| `auto_generate`  | bool   | `true`  | Automatically run generation before Xcode-dependent actions. Set to `false` to skip.         |
+
+When `project_generation.tool` is configured, `Workflow.run()` automatically generates the Xcode project before the first Xcode-dependent step (build, test, archive, etc.), including steps reached through nested `custom_actions`. Generation is skipped when the output project already exists.
 
 ## `notifications.slack`
 
@@ -444,10 +539,12 @@ Platform-specific Android configuration. These values are merged on top of share
 
 | Key                  | Type   | Default              | Env Var                              | Description                                                           |
 | -------------------- | ------ | -------------------- | ------------------------------------ | --------------------------------------------------------------------- |
-| `build_system`       | string | `native`             | `SHIPIT_ANDROID__BUILD_SYSTEM`       | Build system that produces the Android artifact.                      |
+| `build_system`       | string | `native`             | `SHIPIT_ANDROID__BUILD_SYSTEM`       | Build system: `native`, `flutter`, `react_native`, or `kmp`. See [Build systems](#build-systems). |
 | `module`             | string | `app`                | —                                    | Gradle module to build/bundle                                         |
 | `build_variant`      | string | `release`            | —                                    | Gradle build variant (e.g. `release`, `debug`)                        |
 | `build_type`         | string | `aab`                | —                                    | `aab` (Android App Bundle) or `apk`                                   |
+| `scope`              | string | `module`             | —                                    | Default Gradle task scope: `module` qualifies tasks with the module; `root` runs from the Gradle root. |
+| `test_kind`          | string | `unit`               | —                                    | Default test kind: `unit` (JVM tests), `instrumented` (on-device), `e2e` (end-to-end). |
 | `package_name`       | string | —                    | `SHIPIT_ANDROID__PACKAGE_NAME`       | Android application ID (e.g. `com.example.app`)                       |
 | `keystore_path`      | string | —                    | —                                    | Path to the release keystore                                          |
 | `keystore_password`  | string | —                    | `ANDROID_KEYSTORE_PASSWORD`          | Keystore password                                                     |
@@ -481,10 +578,80 @@ Lookup notes:
 
 Platform-specific iOS overrides. Merged on top of shared config when `--platform ios` is active. All top-level `app`, `code_signing`, `archive`, `export`, `testflight`, and `screenshots` keys can appear here to override the shared defaults for iOS only.
 
+| Key                  | Type   | Default             | Env Var                          | Description                                                                             |
+| -------------------- | ------ | ------------------- | -------------------------------- | --------------------------------------------------------------------------------------- |
+| `build_system`       | string | `native`            | `SHIPIT_IOS__BUILD_SYSTEM`       | `native`, `flutter`, `react_native`, or `kmp`. See [Build systems](#build-systems).     |
+| `kmp_shared_module`  | string | `shared`            | `SHIPIT_IOS__KMP_SHARED_MODULE`  | Gradle module containing KMP framework/test tasks                                       |
+| `kmp_build_target`   | string | `IosSimulatorArm64` | `SHIPIT_IOS__KMP_BUILD_TARGET`   | KMP target linked before local `xcodebuild build`                                       |
+| `kmp_archive_target` | string | `IosArm64`          | `SHIPIT_IOS__KMP_ARCHIVE_TARGET` | KMP target linked before `xcodebuild archive`                                           |
+| `kmp_test_task`      | string | `iosSimulatorArm64Test` | `SHIPIT_IOS__KMP_TEST_TASK`  | KMP Gradle task used by `shipit test --platform ios`                                    |
+| `scheme`             | string | —                   | `SHIPIT_IOS__SCHEME`             | iOS-specific Xcode scheme override                                                      |
+| `workspace`          | string | —                   | `SHIPIT_IOS__WORKSPACE`          | iOS-specific Xcode workspace override                                                   |
+| `project`            | string | —                   | `SHIPIT_IOS__PROJECT`            | iOS-specific Xcode project override                                                     |
+
 ```yaml
 ios:
-  app:
-    scheme: MyApp
-  archive:
-    export_method: app-store
+  build_system: native      # native (default) | flutter | react_native | kmp
+  scheme: MyApp
+archive:
+  export_method: app-store
 ```
+
+## Build systems
+
+`build_system` is **orthogonal** to `platform`: a single Kotlin Multiplatform or Flutter source tree can produce both an iOS `.ipa` and an Android `.aab`.
+
+| Value          | iOS compilation                                        | Android compilation                                     |
+| -------------- | ------------------------------------------------------ | ------------------------------------------------------- |
+| `native`       | `xcodebuild`                                           | `gradlew assemble` / `bundle`                           |
+| `kmp`          | link KMP shared framework via Gradle → `xcodebuild`    | `gradlew :androidApp:assembleRelease` / `bundleRelease` |
+| `flutter`      | `flutter build ipa` (IPA at `build/ios/ipa/`)          | `flutter build apk` / `flutter build appbundle`         |
+| `react_native` | Metro bundle → `xcodebuild archive` + export           | `npx react-native build-android --tasks bundleRelease`  |
+
+### Auto-detection
+
+When `build_system` is unset, ShipItSwifty resolves it automatically:
+
+| Project marker                                                          | Detected value   |
+| ----------------------------------------------------------------------- | ---------------- |
+| `pubspec.yaml` with a `flutter:` key                                    | `flutter`        |
+| `package.json` declaring `react-native` in `dependencies`               | `react_native`   |
+| `build.gradle.kts` applying `kotlin("multiplatform")`                   | `kmp`            |
+| None of the above                                                       | `native`         |
+
+### KMP example
+
+```yaml
+ios:
+  build_system: kmp
+  scheme: iosApp
+  workspace: iosApp/iosApp.xcworkspace
+  kmp_shared_module: shared
+  kmp_build_target: IosSimulatorArm64
+  kmp_archive_target: IosArm64
+android:
+  build_system: kmp
+  module: androidApp
+  gradle_project_dir: .
+versioning:
+  source: kmp
+  spec_path: gradle.properties
+```
+
+## `coverage` action options
+
+The `coverage` action reads native coverage artifacts — it does not generate them.
+
+| Option           | Type   | Default        | Description                                                                                       |
+| ---------------- | ------ | -------------- | ------------------------------------------------------------------------------------------------- |
+| `platform`       | string | auto-detected  | `ios` or `android`                                                                                |
+| `xcresult`       | string | auto-discovered| Explicit `.xcresult` bundle path (iOS)                                                            |
+| `report`         | string | auto-discovered| Explicit JaCoCo XML report path (Android)                                                         |
+| `first_party_only` | bool | `true`         | Suppress test bundles, SPM deps, and known vendor prefixes                                        |
+| `targets`        | bool   | `false`        | Show per-target (iOS) or per-module (Android) breakdown                                           |
+| `files`          | bool   | `false`        | Show per-file breakdown                                                                           |
+| `include_target` | list   | `[]`           | Include only these targets (overrides first-party filter)                                         |
+| `exclude_target` | list   | `[]`           | Exclude specific targets                                                                          |
+| `sort`           | string | `coverage`     | `coverage` (lowest first — most actionable) or `name`                                             |
+| `limit`          | int    | —              | Cap number of entries shown                                                                       |
+| `format`         | string | `text`         | `text`, `json`, or `markdown`                                                                     |
