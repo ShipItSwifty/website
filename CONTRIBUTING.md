@@ -4,7 +4,7 @@ Thanks for your interest in contributing! Here's how to get started.
 
 ## Prerequisites
 
-- **Node.js 22+**
+- **Node.js 24+**
 - **pnpm 10** (enabled via Corepack: `corepack enable`)
 
 ## Setup
