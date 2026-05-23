@@ -1,31 +1,33 @@
 "use client";
 
 import { useState, type ComponentType } from "react";
-import { Cpu, Upload, Bot, Shield, GitBranch } from "lucide-react";
+import { Bot, ChartNoAxesColumn, GitBranch, Shield, Smartphone, Upload } from "lucide-react";
 
 interface Feature {
   Icon: ComponentType<{ size?: number; className?: string }>;
   title: string;
-  tag?: "iOS";
+  tag?: "iOS" | "Android" | "Cross-platform";
   desc: string;
 }
 
 const featureData: Feature[] = [
   {
-    Icon: Cpu,
-    title: "Build & Archive",
-    desc: "Compile with xcodebuild. Archive to .xcarchive, export your IPA, and move straight to distribution — one step, no shell scripts.",
+    Icon: Smartphone,
+    title: "One CLI, two stores",
+    tag: "Cross-platform",
+    desc: "Build, test, archive, and distribute iOS and Android apps from the same Shipfile.yml whether you are targeting App Store Connect or Google Play.",
   },
   {
     Icon: Upload,
-    title: "TestFlight & App Store",
-    tag: "iOS",
-    desc: "Upload IPA, distribute to beta groups, push metadata, and submit for review — all automated.",
+    title: "Store delivery",
+    tag: "Android",
+    desc: "Upload to TestFlight, App Store Connect, or Google Play with native clients, release tracks, metadata flows, and CI-friendly credentials.",
   },
   {
-    Icon: Bot,
-    title: "Guided Setup",
-    desc: "Start with shipit generate to scaffold Shipfile.yml from the real project, then use ai-session when you want an agent-ready JSON hand-off.",
+    Icon: ChartNoAxesColumn,
+    title: "Coverage & validation",
+    tag: "Cross-platform",
+    desc: "Run lint, tests, coverage, and validation commands before shipping. ShipItSwifty reads native build outputs and keeps dry-runs machine-readable.",
   },
   {
     Icon: Shield,
@@ -34,9 +36,15 @@ const featureData: Feature[] = [
     desc: "Encrypted cert vault from a Git repo. Create certs and profiles via ASC API. CI-safe keychain management.",
   },
   {
+    Icon: Bot,
+    title: "Guided setup",
+    tag: "Cross-platform",
+    desc: "Start with shipit generate to infer config from Xcode, Gradle, or shared projects, then use ai-session when you want an agent-ready JSON hand-off.",
+  },
+  {
     Icon: GitBranch,
     title: "Composable Workflows",
-    desc: "Define reusable step sequences in Shipfile.yml. Parameterized custom actions with cycle detection.",
+    desc: "Define reusable step sequences in Shipfile.yml. Parameterized custom actions, plugins, KMP projects, and framework-aware builds all fit the same workflow model.",
   },
 ];
 
@@ -44,6 +52,8 @@ function FeatureCard({ Icon, title, desc, tag }: Feature) {
   const [hov, setHov] = useState(false);
   const tagCols: Record<string, { c: string; bg: string }> = {
     iOS: { c: "var(--brand)", bg: "var(--brand-muted)" },
+    Android: { c: "#3DDC84", bg: "rgba(61,220,132,0.14)" },
+    "Cross-platform": { c: "var(--blue)", bg: "rgba(88,166,255,0.14)" },
   };
   return (
     <div
@@ -114,7 +124,7 @@ export function Features() {
             className="mt-3.5 max-w-[480px] text-base leading-[1.65]"
             style={{ color: "var(--fg2)" }}
           >
-            From first build to App Store submission. No Ruby, no Fastfile, no surprises.
+            From local validation to App Store Connect and Google Play. No Ruby, no Fastfile, no fragile shell glue.
           </p>
         </div>
 
