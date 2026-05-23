@@ -143,7 +143,7 @@ export function Overview() {
             className="max-w-[560px] text-[40px] leading-[1.15] font-bold tracking-[-0.025em]"
             style={{ fontFamily: "var(--font-display)", color: "var(--fg1)" }}
           >
-            From zero to TestFlight
+            From zero to release automation
             <br />
             in four steps.
           </h2>

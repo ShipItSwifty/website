@@ -3,7 +3,7 @@ export const siteConfig = {
   url: "https://shipitswifty.tools",
   tagline: "Swift-native release automation for iOS and Android.",
   description:
-    "ShipItSwifty is a Swift-native CLI for iOS and Android release automation. Build, archive, sign, and ship to TestFlight and the App Store from a single YAML config — no Ruby required.",
+    "ShipItSwifty is a Swift-native CLI for iOS and Android release automation. Build, test, archive, sign, and ship to App Store Connect or Google Play from a single YAML config.",
   github: {
     cli: "https://github.com/ShipItSwifty/shipitswifty",
     cliRepo: "ShipItSwifty/shipitswifty",
@@ -18,7 +18,7 @@ export const siteConfig = {
   },
   install: {
     // Flip this once the public tap exists.
-    homebrewAvailable: true as boolean,
+    homebrewAvailable: false as boolean,
     homebrewCommand: "brew install shipitswifty/tap/shipit",
   },
 } as const;
