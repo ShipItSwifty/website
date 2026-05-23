@@ -38,7 +38,7 @@ base64 -i MyCert.p12 | pbcopy
 
 ### Example workflow
 
-A typical release workflow installs `shipit` via Homebrew and runs a workflow:
+A typical release workflow builds `shipit` from source and runs a workflow:
 
 ```yaml
 name: Release
@@ -58,7 +58,11 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Install shipit
-        run: brew install shipitswifty/tap/shipit
+        run: |
+          git clone https://github.com/ShipItSwifty/shipitswifty.git
+          cd shipitswifty
+          swift build -c release
+          sudo cp .build/release/shipit /usr/local/bin/shipit
 
       - name: Run workflow
         env:
@@ -80,7 +84,11 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Install shipit
-        run: brew install shipitswifty/tap/shipit
+        run: |
+          git clone https://github.com/ShipItSwifty/shipitswifty.git
+          cd shipitswifty
+          swift build -c release
+          sudo cp .build/release/shipit /usr/local/bin/shipit
 
       - name: Run tests
         run: shipit test --ci
