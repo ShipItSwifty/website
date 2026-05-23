@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Shield, GitBranch, type LucideIcon } from "lucide-react";
+import { GitBranch, Shield, Smartphone, type LucideIcon } from "lucide-react";
 import { GithubIcon as Github } from "@/components/icons/github";
 import { siteConfig } from "@/lib/site";
 
@@ -15,6 +15,13 @@ interface DocCard {
 }
 
 const cards: DocCard[] = [
+  {
+    Icon: Smartphone,
+    title: "Android Quickstart",
+    desc: "Generate config, run Gradle workflows, and ship to Google Play.",
+    href: "/docs/getting-started/android-quickstart",
+    link: "Read quickstart →",
+  },
   {
     Icon: Shield,
     title: "CI Setup Guide",

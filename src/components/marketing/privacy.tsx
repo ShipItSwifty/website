@@ -6,8 +6,8 @@ import { Lock, EyeOff, HardDrive } from "lucide-react";
 const points = [
   {
     Icon: HardDrive,
-    title: "Runs entirely on your Mac",
-    desc: "ShipItSwifty is a native Swift CLI. Every build, archive, signing, and upload step executes locally — there is no cloud backend processing your project.",
+    title: "Runs on your machine",
+    desc: "ShipItSwifty is a native Swift CLI. Every build, archive, signing, and upload step executes locally on your Mac or Linux box — there is no cloud backend processing your project.",
   },
   {
     Icon: Lock,
@@ -84,7 +84,7 @@ export function Privacy() {
             className="text-[40px] leading-[1.15] font-bold tracking-[-0.025em]"
             style={{ fontFamily: "var(--font-display)", color: "var(--fg1)" }}
           >
-            Your data never leaves your Mac.
+            Your data never leaves your machine.
           </h2>
           <p
             className="mt-3.5 max-w-[520px] text-base leading-[1.65]"

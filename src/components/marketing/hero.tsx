@@ -33,6 +33,7 @@ const heroLines: TerminalLine[] = [
 const pills = [
   { t: "Swift 6", c: "#8B5CF6" },
   { t: "Linux", c: "#58A6FF" },
+  { t: "KMP", c: "#3DDC84" },
   { t: "AI-first", c: "#58A6FF" },
 ];
 
@@ -49,7 +50,7 @@ export function Hero() {
           <span style={{ color: "var(--brand)" }}>shipit generate.</span>
         </h1>
         <p className="mb-9 max-w-[460px] text-[17px] leading-[1.7]" style={{ color: "var(--fg2)" }}>
-          Start with <code>shipit generate</code> to build a real config from your project, reuse existing env values, and keep secrets out of <code>Shipfile.yml</code>.
+          Start with <code>shipit generate</code> to build a real config from your project, reuse existing env values, and ship iOS or Android from the same workflow without leaking secrets into <code>Shipfile.yml</code>.
         </p>
         <a
           href={siteConfig.github.cli}
