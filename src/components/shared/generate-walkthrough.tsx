@@ -54,7 +54,7 @@ swift build -c release
 dependencies: [
   .package(
     url: "${siteConfig.github.cli}.git",
-    from: "0.1.0"
+    branch: "main"
   )
 ]`,
     desc: "Add ShipItSwifty as a library dependency to embed ShipItKit in your own tooling.",
@@ -137,14 +137,16 @@ function WalkthroughBody({
           Before you start
         </div>
         <p className="mb-4 text-[13px] leading-[1.65]" style={{ color: "var(--fg2)" }}>
-          ShipItSwifty drives Xcode directly, so it needs a Mac with a modern Swift toolchain.
-          The API key is only required for commands that talk to App Store Connect — local builds work without one.
+          ShipItSwifty runs iOS workflows on macOS and Android workflows on macOS or Linux.
+          Store credentials are only required for upload flows, so local builds and tests can start much earlier.
         </p>
         {[
-          { item: "macOS 15+, Xcode 16+", why: "ShipItSwifty calls xcodebuild under the hood" },
+          { item: "macOS 15+, Xcode 16+", why: "required for iOS builds, archives, signing, and uploads" },
+          { item: "Linux or macOS + JDK 17+", why: "supported for Android build, test, lint, archive, and Play Store flows" },
           { item: "Swift 6 toolchain", why: "the CLI is built with Swift 6 concurrency" },
-          { item: "Apple Developer account", why: "required for code signing and provisioning" },
-          { item: "App Store Connect API key", why: "needed only for upload, testflight, and metadata commands" },
+          { item: "Apple Developer account", why: "required for iOS code signing and provisioning" },
+          { item: "App Store Connect API key", why: "needed only for iOS upload, testflight, metadata, and provision commands" },
+          { item: "Google Play service account", why: "needed only for Android play-store uploads" },
         ].map(({ item, why }) => (
           <div key={item} className="mb-2.5 flex items-start gap-2.5 text-[13px]" style={{ color: "var(--fg2)" }}>
             <Check size={14} className="mt-0.5 shrink-0" style={{ color: "var(--green)" }} />
