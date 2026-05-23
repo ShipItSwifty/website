@@ -13,7 +13,7 @@ Deployed to **[shipitswifty.tools](https://shipitswifty.tools)** on Vercel.
 - **next/og** — statically-prerendered Open Graph image
 - **next-themes** — light / dark / system, defaults to dark
 - **Vercel Web Analytics + Speed Insights**
-- **pnpm 10**, **Node 22+**
+- **pnpm 10**, **Node 24+**
 
 ## Repo layout
 
@@ -23,7 +23,6 @@ src/
     layout.tsx            # fonts, theme, search, analytics
     page.tsx              # marketing home
     docs/                 # docs shell + catch-all MDX route
-    changelog/            # release notes (from data/releases.json)
     sitemap.ts            # auto-generated sitemap
     robots.ts             # robots.txt
     opengraph-image.tsx   # 1200×630 OG card (static PNG)
@@ -35,7 +34,7 @@ src/
   content/docs/           # MDX docs (frontmatter: title, description, group, order, sourcePath)
   lib/                    # site config, docs walker, toc extractor
 data/
-  releases.json           # synced from upstream GitHub Releases at build
+  releases.json           # synced from upstream GitHub Releases for release metadata
   docc/                   # synced DocC JSON tarball (when available)
 public/
   search-index.json       # built from MDX at build time (~57 KB)
@@ -50,7 +49,7 @@ scripts/
 
 ## Local development
 
-Requires **Node 22+** and **pnpm 10** (managed via Corepack). The repo uses `nodenv`/`fnm`-friendly `.nvmrc`.
+Requires **Node 24+** and **pnpm 10** (managed via Corepack). The repo uses `nodenv`/`fnm`-friendly `.nvmrc`.
 
 ```bash
 pnpm install
@@ -122,9 +121,9 @@ After editing, the search index is regenerated on `pnpm build` (or `pnpm dev` af
 
 Cmd-K / Ctrl-K opens a FlexSearch-powered docs search. The index is built from MDX at build time and shipped as static JSON under `/search-index.json` (~57 KB). The dialog lazy-loads it on first open.
 
-## Changelog
+## Release metadata
 
-`/changelog` reads `data/releases.json` (populated by `sync-changelog.mjs` from `https://github.com/ShipItSwifty/shipitswifty/releases`). Release bodies are rendered through the same MDX pipeline as docs.
+`data/releases.json` is populated by `sync-changelog.mjs` from `https://github.com/ShipItSwifty/shipitswifty/releases`. The website does not currently expose a dedicated changelog route, but the synced data is available for future release surfaces.
 
 ## Deployment
 
@@ -132,7 +131,7 @@ The site deploys to Vercel via the connected `ShipItSwifty/website` GitHub repo.
 
 - **Production domain**: `shipitswifty.tools` (apex). Set up `www.shipitswifty.tools` → 308 redirect via the Vercel domain UI.
 - **Build command**: `pnpm build` (Vercel detects automatically; `prebuild` runs sync scripts).
-- **Node version**: `22` (set in `package.json#engines` and respected by Vercel).
+- **Node version**: `24` (set in `package.json#engines` and respected by Vercel).
 - **Required env vars**:
   - `GITHUB_TOKEN` (optional but recommended) — boosts the GitHub API rate limit during `prebuild` (60 req/h anonymous → 5000 req/h authenticated). Read-only, public-repo scope is enough.
 - **Cache + security headers**: see `vercel.json`.

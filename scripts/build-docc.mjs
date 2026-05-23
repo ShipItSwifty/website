@@ -3,15 +3,16 @@
  * scripts/build-docc.mjs
  *
  * macOS-only. Clones the upstream ShipItSwifty repo at a given tag (defaults
- * to the latest published release), runs `swift package generate-documentation`
+ * to the latest published release, then latest tag, then default branch), runs `swift package generate-documentation`
  * to produce DocC's static-hosting output, then strips DocC's HTML/CSS/JS and
  * keeps only the structured JSON we render natively (data/, index/,
  * metadata.json). Tarballs the result as `docc-<tag>.tar.gz` for upload as a
  * GitHub release asset on the website repo.
  *
  * Inputs (env):
- *   TAG              — upstream release tag (e.g. v1.2.3). If unset, queries
- *                      GitHub for the latest non-prerelease tag.
+ *   TAG              — upstream ref (e.g. v1.2.3 or main). If unset, queries
+ *                      GitHub for the latest release, then latest tag, then
+ *                      the repo default branch.
  *   GITHUB_TOKEN     — optional. Avoids unauthenticated rate limiting.
  *   WORK_DIR         — workspace dir (default: ./.docc-build)
  *   OUTPUT_DIR       — final website data dir (default: ./data/docc)
@@ -40,20 +41,50 @@ if (platform() !== "darwin") {
 const WORK_DIR = resolve(process.env.WORK_DIR ?? "./.docc-build");
 const OUTPUT_DIR = resolve(process.env.OUTPUT_DIR ?? "./data/docc");
 
-async function fetchLatestTag() {
+async function fetchDefaultBranch(headers) {
+  const res = await fetch(`https://api.github.com/repos/${UPSTREAM_REPO}`, {
+    headers,
+  });
+  if (!res.ok) {
+    console.error(`[build-docc] failed to fetch repo metadata: ${res.status}`);
+    process.exit(2);
+  }
+  const data = await res.json();
+  return data.default_branch;
+}
+
+async function fetchLatestRef() {
   const headers = { "User-Agent": "shipitswifty-website-build" };
   if (process.env.GITHUB_TOKEN) {
     headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
   }
-  const res = await fetch(`https://api.github.com/repos/${UPSTREAM_REPO}/releases/latest`, {
+  const releaseRes = await fetch(`https://api.github.com/repos/${UPSTREAM_REPO}/releases/latest`, {
     headers,
   });
-  if (!res.ok) {
-    console.error(`[build-docc] failed to fetch latest release: ${res.status}`);
+  if (releaseRes.ok) {
+    const data = await releaseRes.json();
+    return data.tag_name;
+  }
+
+  if (releaseRes.status !== 404) {
+    console.error(`[build-docc] failed to fetch latest release: ${releaseRes.status}`);
     process.exit(2);
   }
-  const data = await res.json();
-  return data.tag_name;
+
+  const tagsRes = await fetch(`https://api.github.com/repos/${UPSTREAM_REPO}/tags?per_page=1`, {
+    headers,
+  });
+  if (!tagsRes.ok) {
+    console.error(`[build-docc] failed to fetch tags: ${tagsRes.status}`);
+    process.exit(2);
+  }
+
+  const tags = await tagsRes.json();
+  if (Array.isArray(tags) && tags.length > 0 && tags[0]?.name) {
+    return tags[0].name;
+  }
+
+  return await fetchDefaultBranch(headers);
 }
 
 function run(cmd, args, opts = {}) {
@@ -65,7 +96,7 @@ function run(cmd, args, opts = {}) {
   }
 }
 
-const tag = process.env.TAG ?? (await fetchLatestTag());
+const tag = process.env.TAG ?? (await fetchLatestRef());
 console.log(`[build-docc] target tag: ${tag}`);
 
 // Clean workspace

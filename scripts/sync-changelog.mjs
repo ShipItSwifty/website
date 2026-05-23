@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Fetches the latest releases from the upstream ShipItSwifty CLI repo and
- * writes them to data/releases.json for use by the /changelog page.
+ * writes them to data/releases.json for website release metadata.
  *
  * Auth: optional GITHUB_TOKEN. Without it we get 60 req/hr unauthenticated.
  * One call is fine in dev; CI should set the token.
