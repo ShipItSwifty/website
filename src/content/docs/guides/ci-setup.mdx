@@ -55,7 +55,7 @@ jobs:
   release:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Install shipit
         run: |
@@ -69,7 +69,7 @@ jobs:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
-        run: shipit run ${{ github.event.inputs.workflow }} --ci
+        run: shipit run ${{ github.event.inputs.workflow }} --ci --output json
 ```
 
 ### CI with tests
@@ -81,7 +81,7 @@ jobs:
   test-and-ship:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Install shipit
         run: |
@@ -98,7 +98,7 @@ jobs:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
-        run: shipit run beta --ci
+        run: shipit run beta --ci --output json
 ```
 
 If your CI stores the config at a non-default path, pass it explicitly:
@@ -136,11 +136,19 @@ jobs:
   ios-beta:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-java@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
+      - uses: gradle/actions/setup-gradle@v3
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('**/*.gradle.kts', 'gradle.properties') }}
       - run: shipit doctor --ci
       - run: shipit run beta-ios --ci --output json
         env:
@@ -151,11 +159,12 @@ jobs:
   android-beta:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-java@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
+      - uses: gradle/actions/setup-gradle@v3
       - run: shipit run beta-android --ci --output json
         env:
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
@@ -163,20 +172,21 @@ jobs:
 
 Notes:
 
-- JDK 17+ is required for modern Android and KMP builds.
-- `shipit doctor --ci` is the fastest way to fail early on missing Java, Gradle, or Apple credentials.
+- **JDK 17+ is required** for modern Android and KMP builds.
+- **Gradle cache is essential** — the first KMP framework link is slow; subsequent runs are nearly free if `~/.gradle` is cached.
+- `shipit doctor --ci` fails fast on missing Java, Gradle, or Apple credentials.
 - If reproducibility matters on macOS runners, pin explicit simulator destinations for iOS test jobs.
 
 ### Flutter and React Native
 
-Framework-specific workflows need their usual toolchains installed before `shipit` runs.
+Flutter workflows need the Flutter SDK; React Native workflows need Node and the project package manager before `shipit` runs.
 
 ```yaml
 jobs:
   flutter-android:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -186,11 +196,12 @@ jobs:
   react-native-android:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 24
-      - uses: actions/setup-java@v5
+          node-version: 20
+          cache: npm
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
@@ -198,4 +209,4 @@ jobs:
       - run: shipit run beta-android --ci --output json
 ```
 
-Use macOS runners for Flutter iOS or React Native iOS distribution.
+Use macOS runners for Flutter iOS or React Native iOS distribution — both require Xcode and Apple signing tooling.
