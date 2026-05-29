@@ -373,7 +373,15 @@
     "title": "CI Setup",
     "section": "GitHub Actions",
     "group": "Guides",
-    "content": ""
+    "content": "The repository includes two pre-built workflows: | Workflow | File | Trigger | | -------- | ---- | ------- | | Build & Test | .github/workflows/ci.yml | Push / PR to main | | Build DocC | .github/workflows/docc.yml | Push to main + manual | The Build & Test workflow runs three jobs in parallel after lint passes: | Job | Runner | Scope | | --- | ------ | ----- | | build-and-test | macos-latest | Main build, unit tests, CLI tests | | cross-platform-fixture-integration | macos-latest | Blocking Flutter + React Native + KMP fixture integration suites | | build-and-test-linux | ubuntu-latest | Skip"
+  },
+  {
+    "id": "/docs/guides/ci-setup#swiftyshell-dependency",
+    "url": "/docs/guides/ci-setup#swiftyshell-dependency",
+    "title": "CI Setup",
+    "section": "SwiftyShell dependency",
+    "group": "Guides",
+    "content": "ShipItSwifty depends on the remote SwiftyShell Swift package. CI runners must have network and authentication access to fetch Swift package dependencies during swift build and swift test."
   },
   {
     "id": "/docs/guides/ci-setup#required-secrets",
@@ -381,29 +389,21 @@
     "title": "CI Setup",
     "section": "Required Secrets",
     "group": "Guides",
-    "content": "For App Store Connect API actions, CI needs ASCKEYID, ASCISSUERID, and ASCPRIVATEKEY. ASCPRIVATEKEY must be the raw contents of the downloaded .p8 file. ASCISSUERID comes from the App Store Connect API Keys page, not from the key file. If your CI only runs local validation like shipit build, shipit test, shipit archive, or shipit export, you can skip these secrets. Add these under Settings → Secrets → Actions: | Secret | Description | | -------------------------- | --------------------------------------------------------------- | | ASCKEYID | App Store Connect API key ID | | ASCISSUERID | App "
+    "content": "For App Store Connect API actions, CI needs ASCKEYID, ASCISSUERID, and ASCPRIVATEKEY. ASCPRIVATEKEY must be the raw contents of the downloaded .p8 file. ASCISSUERID comes from the App Store Connect API Keys page, not from the key file. If your CI only runs local validation like swift test, shipit build, shipit test, shipit archive, or shipit export, you can skip these ASC secrets. Add these under Settings → Secrets → Actions: | Secret | Description | | -------------------------- | --------------------------------------------------------------- | | ASCKEYID | App Store Connect API key ID | | AS"
   },
   {
-    "id": "/docs/guides/ci-setup#example-workflow",
-    "url": "/docs/guides/ci-setup#example-workflow",
+    "id": "/docs/guides/ci-setup#example-release-workflow",
+    "url": "/docs/guides/ci-setup#example-release-workflow",
     "title": "CI Setup",
-    "section": "Example workflow",
+    "section": "Example release workflow",
     "group": "Guides",
-    "content": "A typical release workflow builds shipit from source and runs a workflow:"
-  },
-  {
-    "id": "/docs/guides/ci-setup#ci-with-tests",
-    "url": "/docs/guides/ci-setup#ci-with-tests",
-    "title": "CI Setup",
-    "section": "CI with tests",
-    "group": "Guides",
-    "content": "If you want to run tests before shipping: If your CI stores the config at a non-default path, pass it explicitly:"
+    "content": "If your CI stores the config at a non-default path, pass it explicitly:"
   },
   {
     "id": "/docs/guides/ci-setup#basic-ci-steps",
     "url": "/docs/guides/ci-setup#basic-ci-steps",
     "title": "CI Setup",
-    "section": "Basic CI steps",
+    "section": "Basic CI Steps",
     "group": "Guides",
     "content": ""
   },
@@ -411,17 +411,25 @@
     "id": "/docs/guides/ci-setup#json-output-in-ci",
     "url": "/docs/guides/ci-setup#json-output-in-ci",
     "title": "CI Setup",
-    "section": "JSON output in CI",
+    "section": "JSON Output in CI",
     "group": "Guides",
     "content": "Use --output json for machine-readable results:"
   },
   {
-    "id": "/docs/guides/ci-setup#linux-and-cross-platform-ci",
-    "url": "/docs/guides/ci-setup#linux-and-cross-platform-ci",
+    "id": "/docs/guides/ci-setup#linux-swift-version",
+    "url": "/docs/guides/ci-setup#linux-swift-version",
     "title": "CI Setup",
-    "section": "Linux and cross-platform CI",
+    "section": "Linux Swift Version",
     "group": "Guides",
-    "content": "Android actions can run on Linux. iOS distribution still requires macOS because it depends on Xcode and Apple signing tooling."
+    "content": "The Linux CI job uses swift:6.3.1-noble (Ubuntu 24.04, current stable Swift). To update it, change the container.image value in .github/workflows/ci.yml and the SWIFTIMAGE variable at the top of the Makefile."
+  },
+  {
+    "id": "/docs/guides/ci-setup#cross-platform-build-systems-on-ci",
+    "url": "/docs/guides/ci-setup#cross-platform-build-systems-on-ci",
+    "title": "CI Setup",
+    "section": "Cross-platform build systems on CI",
+    "group": "Guides",
+    "content": "When buildsystem resolves to anything other than native, ShipItSwifty layers a pre-build step on top of the regular pipeline. Each build system needs its own toolchain on the runner."
   },
   {
     "id": "/docs/guides/ci-setup#kotlin-multiplatform",
@@ -709,7 +717,15 @@
     "title": "Configuration Reference",
     "section": "`test` action options",
     "group": "Reference",
-    "content": "The test action is configured inline in a workflow step. It does not have a top-level Shipfile section. retryonfailure and infrastructureretry solve different problems. Use retryonfailure for iOS test-case retries after assertion failures. Use infrastructureretry for whole-run failures such as simulator launch crashes, Android emulator disconnects, Flutter tool crashes, or JS worker failures. shipit generate asks whether to enable infrastructureretry on generated test steps. | Option | Type | Default | Description | | ---------------------- | ------ | ------------ | ---------------------------"
+    "content": "The test action is configured inline in a workflow step. It does not have a top-level Shipfile section. retryonfailure, rerunfailedtests, and infrastructureretry solve different problems. Use retryonfailure for xcodebuild's built-in one-pass iOS retry behavior. Use rerunfailedtests when you want ShipIt to collect the initial failures, rerun those specific tests once, and emit flaky/persistent failure information in TestRunReport. Use infrastructureretry for whole-run failures such as simulator launch crashes, Android emulator disconnects, Flutter tool crashes, or JS worker failures. shipit gen"
+  },
+  {
+    "id": "/docs/reference/configuration#test-results-action-options",
+    "url": "/docs/reference/configuration#test-results-action-options",
+    "title": "Configuration Reference",
+    "section": "`test-results` action options",
+    "group": "Reference",
+    "content": "Use test-results to parse an existing .xcresult bundle or Gradle JUnit XML directory into a normalized JSON report. | Option | Type | Default | Description | | -------------------- | ------ | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | | format | string | text | Output format hint: text, json, or markdown. | | platform | string | resolved platform | Explicit platform override when parsing outside a Shipfile-backed context. | | xcresultpath | string | auto-disco"
   },
   {
     "id": "/docs/reference/configuration#archive-action-options",

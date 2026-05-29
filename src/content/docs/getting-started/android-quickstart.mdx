@@ -21,7 +21,7 @@ Get your first Android build shipped with ShipItSwifty.
 git clone https://github.com/shipitswifty/shipitswifty
 cd shipitswifty
 swift build -c release
-alias shipit="$(pwd)/.build/release/shipit"
+cp .build/release/shipit /usr/local/bin/shipit
 ```
 
 ## 2. Auto-detect your project
@@ -65,13 +65,12 @@ android:
 
 workflows:
   beta:
-    steps:
-      - action: test
-      - action: archive
-      - action: validate-bundle
-      - action: play-store
-        options:
-          track: internal
+    - action: test
+    - action: archive
+    - action: validate-bundle
+    - action: play-store
+      options:
+        track: internal
 ```
 
 ## 4. Set credentials

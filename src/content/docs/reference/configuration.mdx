@@ -276,7 +276,9 @@ To add a TestFlight upload later, append a `testflight` step and uncomment the `
 
 The `test` action is configured inline in a workflow step. It does **not** have a top-level Shipfile section.
 
-`retry_on_failure` and `infrastructure_retry` solve different problems. Use `retry_on_failure` for iOS test-case retries after assertion failures. Use `infrastructure_retry` for whole-run failures such as simulator launch crashes, Android emulator disconnects, Flutter tool crashes, or JS worker failures. `shipit generate` asks whether to enable `infrastructure_retry` on generated test steps.
+`retry_on_failure`, `rerun_failed_tests`, and `infrastructure_retry` solve different problems. Use `retry_on_failure` for xcodebuild's built-in one-pass iOS retry behavior. Use `rerun_failed_tests` when you want ShipIt to collect the initial failures, rerun those specific tests once, and emit flaky/persistent failure information in `TestRunReport`. Use `infrastructure_retry` for whole-run failures such as simulator launch crashes, Android emulator disconnects, Flutter tool crashes, or JS worker failures.
+
+`shipit generate` asks whether generated test steps should enable `infrastructure_retry`. `shipit ai-session` includes the same guidance in the agent prompt so AI-assisted workflow creation asks the same question.
 
 | Option                 | Type   | Default      | Description                                                                                                                                                                                                                        |
 | ---------------------- | ------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -290,6 +292,8 @@ The `test` action is configured inline in a workflow step. It does **not** have 
 | `only_testing`         | list   | —            | Restrict to specific targets or test cases. Each entry maps to `-only-testing`.                                                                                                                                                    |
 | `skip_testing`         | list   | —            | Skip specific targets or test cases. Each entry maps to `-skip-testing`.                                                                                                                                                           |
 | `retry_on_failure`     | bool   | `false`      | Pass `-retry-tests-on-failure` to retry each failing test once.                                                                                                                                                                    |
+| `rerun_failed_tests`   | object | —            | Selectively rerun only the failed tests when the runner supports it. Supports `enabled` and `max_attempts` (default `2`).                                                                                                                                                                                                                                                                    |
+| `report_path`          | string | —            | Optional path to write the structured JSON `TestRunReport` for CI artifact upload.                                                                                                                                                                                                                                                                                                          |
 | `infrastructure_retry` | object | —            | Retry the entire test invocation for transient infrastructure failures (iOS simulator crashes, Android emulator disconnects, Flutter tool crashes, JS worker failures). Presence of this block enables retries; omit to disable. Recommended default: `{ max_attempts: 3, initial_delay_seconds: 2, max_delay_seconds: 30 }`. |
 | `module`               | string | `android.module` | Android/KMP. Gradle module whose tests should run.                                                                                                                                                                        |
 | `kind`                 | string | `unit`       | Android only. `unit` for JVM tests (no device), `instrumented` for on-device tests, `e2e` for end-to-end.                                                                                                                       |
@@ -339,6 +343,20 @@ workflows:
 ```
 
 For Android aggregate tasks, ShipItSwifty falls back to JUnit XML reports under `build/test-results/<taskName>/` when Gradle stdout does not include a test summary.
+
+## `test-results` action options
+
+Use `test-results` to parse an existing `.xcresult` bundle or Gradle JUnit XML directory into a normalized JSON report.
+
+| Option               | Type   | Default            | Description                                                                                                                                                 |
+| -------------------- | ------ | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `format`             | string | `text`             | Output format hint: `text`, `json`, or `markdown`.                                                                                                          |
+| `platform`           | string | resolved platform  | Explicit platform override when parsing outside a Shipfile-backed context.                                                                                  |
+| `xcresult_path`      | string | auto-discover      | Explicit path to a `.xcresult` bundle (iOS). Falls back to `./build/<scheme>-tests.xcresult` or the first `.xcresult` under `./build/`.                     |
+| `report_path`        | string | auto-discover      | Explicit path to a JUnit XML report directory (Android). Falls back to common Gradle `build/test-results/...` locations.                                    |
+| `failed_only`        | bool   | `false`            | Only include failed and errored tests in the parsed output.                                                                                                 |
+| `include_passed`     | bool   | `true`             | Include passed tests in the parsed output.                                                                                                                  |
+| `report_output_path` | string | —                  | Optional path to write the structured JSON report to disk.                                                                                                  |
 
 ## Archive action options
 
