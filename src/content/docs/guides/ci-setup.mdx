@@ -8,13 +8,32 @@ sourcePath: "upstream:docs/ci-setup.md"
 
 ## GitHub Actions
 
+The repository includes two pre-built workflows:
+
+| Workflow | File | Trigger |
+| -------- | ---- | ------- |
+| Build & Test | `.github/workflows/ci.yml` | Push / PR to `main` |
+| Build DocC | `.github/workflows/docc.yml` | Push to `main` + manual |
+
+The `Build & Test` workflow runs three jobs in parallel after lint passes:
+
+| Job | Runner | Scope |
+| --- | ------ | ----- |
+| `build-and-test` | `macos-latest` | Main build, unit tests, CLI tests |
+| `cross-platform-fixture-integration` | `macos-latest` | Blocking Flutter + React Native + KMP fixture integration suites |
+| `build-and-test-linux` | `ubuntu-latest` | Skips `XcodeBuildKitTests`, `XcodeGenKitTests`, `IntegrationTests` |
+
+### SwiftyShell dependency
+
+ShipItSwifty depends on the remote `SwiftyShell` Swift package. CI runners must have network and authentication access to fetch Swift package dependencies during `swift build` and `swift test`.
+
 ### Required Secrets
 
 For App Store Connect API actions, CI needs `ASC_KEY_ID`, `ASC_ISSUER_ID`, and `ASC_PRIVATE_KEY`.
 
 `ASC_PRIVATE_KEY` must be the raw contents of the downloaded `.p8` file. `ASC_ISSUER_ID` comes from the App Store Connect API Keys page, not from the key file.
 
-If your CI only runs local validation like `shipit build`, `shipit test`, `shipit archive`, or `shipit export`, you can skip these secrets.
+If your CI only runs local validation like `swift test`, `shipit build`, `shipit test`, `shipit archive`, or `shipit export`, you can skip these ASC secrets.
 
 Add these under **Settings → Secrets → Actions**:
 
@@ -36,9 +55,9 @@ To produce the base64 value from a `.p12` file:
 base64 -i MyCert.p12 | pbcopy
 ```
 
-### Example workflow
+See `CONTRIBUTING.md` for full signing credential setup instructions.
 
-A typical release workflow builds `shipit` from source and runs a workflow:
+### Example release workflow
 
 ```yaml
 name: Release
@@ -58,11 +77,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install shipit
-        run: |
-          git clone https://github.com/ShipItSwifty/shipitswifty.git
-          cd shipitswifty
-          swift build -c release
-          sudo cp .build/release/shipit /usr/local/bin/shipit
+        run: brew install shipitswifty/tap/shipit
 
       - name: Run workflow
         env:
@@ -72,50 +87,22 @@ jobs:
         run: shipit run ${{ github.event.inputs.workflow }} --ci --output json
 ```
 
-### CI with tests
-
-If you want to run tests before shipping:
-
-```yaml
-jobs:
-  test-and-ship:
-    runs-on: macos-15
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install shipit
-        run: |
-          git clone https://github.com/ShipItSwifty/shipitswifty.git
-          cd shipitswifty
-          swift build -c release
-          sudo cp .build/release/shipit /usr/local/bin/shipit
-
-      - name: Run tests
-        run: shipit test --ci
-
-      - name: Ship beta
-        env:
-          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
-          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
-        run: shipit run beta --ci --output json
-```
-
 If your CI stores the config at a non-default path, pass it explicitly:
 
 ```bash
 shipit run beta --ci --shipfile ./config/Shipfile.ci.yml
 ```
 
-## Basic CI steps
+## Basic CI Steps
 
 ```bash
+brew install shipitswifty/tap/shipit
 shipit doctor --ci
 shipit test --ci
 shipit run beta --ci --output json
 ```
 
-## JSON output in CI
+## JSON Output in CI
 
 Use `--output json` for machine-readable results:
 
@@ -123,9 +110,13 @@ Use `--output json` for machine-readable results:
 shipit run beta --ci --output json | jq .status
 ```
 
-## Linux and cross-platform CI
+## Linux Swift Version
 
-Android actions can run on Linux. iOS distribution still requires macOS because it depends on Xcode and Apple signing tooling.
+The Linux CI job uses `swift:6.3.1-noble` (Ubuntu 24.04, current stable Swift). To update it, change the `container.image` value in `.github/workflows/ci.yml` and the `SWIFT_IMAGE` variable at the top of the `Makefile`.
+
+## Cross-platform build systems on CI
+
+When `build_system` resolves to anything other than `native`, ShipItSwifty layers a pre-build step on top of the regular pipeline. Each build system needs its own toolchain on the runner.
 
 ### Kotlin Multiplatform
 
