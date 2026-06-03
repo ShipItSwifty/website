@@ -17,11 +17,11 @@ The repository includes two pre-built workflows:
 
 The `Build & Test` workflow runs three jobs in parallel after lint passes:
 
-| Job | Runner | Scope |
-| --- | ------ | ----- |
-| `build-and-test` | `macos-latest` | Main build, unit tests, CLI tests |
-| `cross-platform-fixture-integration` | `macos-latest` | Blocking Flutter + React Native + KMP fixture integration suites |
-| `build-and-test-linux` | `ubuntu-latest` | Skips `XcodeBuildKitTests`, `XcodeGenKitTests`, `IntegrationTests` |
+| Job | Runner | Xcode | Scope |
+| --- | ------ | ----- | ----- |
+| `build-and-test` | `macos-26` | 26.4 | Main build, unit tests, CLI tests |
+| `cross-platform-fixture-integration` | `macos-26` | 26.4 | Blocking Flutter + React Native + KMP fixture integration suites |
+| `build-and-test-linux` | `ubuntu-latest` | — | Skips `XcodeBuildKitTests`, `XcodeGenKitTests`, `IntegrationTests` |
 
 ### SwiftyShell dependency
 
