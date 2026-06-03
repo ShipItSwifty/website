@@ -272,6 +272,102 @@
     "content": "Full code-signing flows (sign, provision) require vault configuration (an encrypted certificate repo). Some advanced ASC features are still under active development."
   },
   {
+    "id": "/docs/getting-started/kmp-quickstart",
+    "url": "/docs/getting-started/kmp-quickstart",
+    "title": "KMP Quickstart",
+    "section": null,
+    "group": "Getting Started",
+    "content": "Ship a Kotlin Multiplatform Mobile (KMP) app to both the App Store and Google Play from a single Shipfile."
+  },
+  {
+    "id": "/docs/getting-started/kmp-quickstart#what-you-get",
+    "url": "/docs/getting-started/kmp-quickstart#what-you-get",
+    "title": "KMP Quickstart",
+    "section": "What you get",
+    "group": "Getting Started",
+    "content": "One source tree → both .ipa and .aab The same App Store Connect / Google Play distribution pipeline as native projects Automatic build system detection from build.gradle.kts Shared version source via gradle.properties (versionName + versionCode)"
+  },
+  {
+    "id": "/docs/getting-started/kmp-quickstart#prerequisites",
+    "url": "/docs/getting-started/kmp-quickstart#prerequisites",
+    "title": "KMP Quickstart",
+    "section": "Prerequisites",
+    "group": "Getting Started",
+    "content": "Xcode 15+ with command-line tools (xcode-select --install) JDK 17+ on PATH (java -version) A KMP project layout like: A Google Play service account JSON key (for Play Store uploads) App Store Connect API key (for TestFlight uploads)"
+  },
+  {
+    "id": "/docs/getting-started/kmp-quickstart#1-detect-the-project",
+    "url": "/docs/getting-started/kmp-quickstart#1-detect-the-project",
+    "title": "KMP Quickstart",
+    "section": "1. Detect the project",
+    "group": "Getting Started",
+    "content": "From the project root, run: You should see: If detectedBuildSystem is empty, ensure your root build.gradle.kts applies kotlin(\"multiplatform\") or the org.jetbrains.kotlin.multiplatform plugin."
+  },
+  {
+    "id": "/docs/getting-started/kmp-quickstart#2-write-a-shipfile",
+    "url": "/docs/getting-started/kmp-quickstart#2-write-a-shipfile",
+    "title": "KMP Quickstart",
+    "section": "2. Write a Shipfile",
+    "group": "Getting Started",
+    "content": "Ensure gradle.properties contains the version keys:"
+  },
+  {
+    "id": "/docs/getting-started/kmp-quickstart#3-run-doctor",
+    "url": "/docs/getting-started/kmp-quickstart#3-run-doctor",
+    "title": "KMP Quickstart",
+    "section": "3. Run doctor",
+    "group": "Getting Started",
+    "content": "When a KMP build system is detected, doctor adds toolchain probes: If java or ./gradlew is missing, fix that before proceeding — neither the iOS nor Android KMP path can run without them."
+  },
+  {
+    "id": "/docs/getting-started/kmp-quickstart#4-build-each-platform",
+    "url": "/docs/getting-started/kmp-quickstart#4-build-each-platform",
+    "title": "KMP Quickstart",
+    "section": "4. Build each platform",
+    "group": "Getting Started",
+    "content": "The iOS build path links the simulator framework first, then invokes xcodebuild against the wrapper workspace. Archives link the device target (IosArm64) before xcodebuild archive. The Android path is identical to a module-qualified native Gradle build."
+  },
+  {
+    "id": "/docs/getting-started/kmp-quickstart#5-bump-the-shared-version",
+    "url": "/docs/getting-started/kmp-quickstart#5-bump-the-shared-version",
+    "title": "KMP Quickstart",
+    "section": "5. Bump the shared version",
+    "group": "Getting Started",
+    "content": "With versioning.source: kmp, this writes to gradle.properties instead of Info.plist. Both targets pick up the new value on the next build."
+  },
+  {
+    "id": "/docs/getting-started/kmp-quickstart#6-run-a-full-release-workflow",
+    "url": "/docs/getting-started/kmp-quickstart#6-run-a-full-release-workflow",
+    "title": "KMP Quickstart",
+    "section": "6. Run a full release workflow",
+    "group": "Getting Started",
+    "content": ""
+  },
+  {
+    "id": "/docs/getting-started/kmp-quickstart#build-system-auto-detection",
+    "url": "/docs/getting-started/kmp-quickstart#build-system-auto-detection",
+    "title": "KMP Quickstart",
+    "section": "Build system auto-detection",
+    "group": "Getting Started",
+    "content": "When buildsystem is omitted, ShipItSwifty detects it automatically: | Project marker | Detected value | | --- | --- | | pubspec.yaml with flutter: key | flutter | | package.json with react-native dependency | reactnative | | build.gradle.kts applying kotlin(\"multiplatform\") | kmp | | None of the above | native |"
+  },
+  {
+    "id": "/docs/getting-started/kmp-quickstart#common-pitfalls",
+    "url": "/docs/getting-started/kmp-quickstart#common-pitfalls",
+    "title": "KMP Quickstart",
+    "section": "Common pitfalls",
+    "group": "Getting Started",
+    "content": "| Symptom | Likely cause | Fix | | --- | --- | --- | | xcodebuild reports Shared.framework not found | Framework wasn't linked before xcodebuild | Ensure ios.buildsystem: kmp is set | | Wrong simulator architecture during link | Targeting Intel sim on Apple silicon | Set ios.kmpbuildtarget: IosX64 for the matching target | | versionName not updated | Custom key names in gradle.properties | Override via versioning.marketingkey / versioning.buildkey | | Gradle re-links every run | Expected — Gradle's incremental check runs but skips when inputs unchanged | No action needed |"
+  },
+  {
+    "id": "/docs/getting-started/kmp-quickstart#next-steps",
+    "url": "/docs/getting-started/kmp-quickstart#next-steps",
+    "title": "KMP Quickstart",
+    "section": "Next steps",
+    "group": "Getting Started",
+    "content": "CI Setup — KMP-on-CI checklist with GitHub Actions examples Configuration Reference — full buildsystem reference Android Quickstart — native Android setup"
+  },
+  {
     "id": "/docs/getting-started/migrating-from-fastlane#why-migrate",
     "url": "/docs/getting-started/migrating-from-fastlane#why-migrate",
     "title": "Migrating from fastlane",
@@ -373,7 +469,7 @@
     "title": "CI Setup",
     "section": "GitHub Actions",
     "group": "Guides",
-    "content": "The repository includes two pre-built workflows: | Workflow | File | Trigger | | -------- | ---- | ------- | | Build & Test | .github/workflows/ci.yml | Push / PR to main | | Build DocC | .github/workflows/docc.yml | Push to main + manual | The Build & Test workflow runs three jobs in parallel after lint passes: | Job | Runner | Scope | | --- | ------ | ----- | | build-and-test | macos-latest | Main build, unit tests, CLI tests | | cross-platform-fixture-integration | macos-latest | Blocking Flutter + React Native + KMP fixture integration suites | | build-and-test-linux | ubuntu-latest | Skip"
+    "content": "The repository includes two pre-built workflows: | Workflow | File | Trigger | | -------- | ---- | ------- | | Build & Test | .github/workflows/ci.yml | Push / PR to main | | Build DocC | .github/workflows/docc.yml | Push to main + manual | The Build & Test workflow runs three jobs in parallel after lint passes: | Job | Runner | Xcode | Scope | | --- | ------ | ----- | ----- | | build-and-test | macos-26 | 26.4 | Main build, unit tests, CLI tests | | cross-platform-fixture-integration | macos-26 | 26.4 | Blocking Flutter + React Native + KMP fixture integration suites | | build-and-test-linux "
   },
   {
     "id": "/docs/guides/ci-setup#swiftyshell-dependency",
@@ -549,7 +645,7 @@
     "title": "Documentation",
     "section": "Where to start",
     "group": "Getting Started",
-    "content": "New here? Begin with the Installation guide. Coming from fastlane? Read the migration guide. Setting up CI? See the CI Setup guide. Using a coding agent in the upstream repo? Start with the Agent Fast Start guide. Need the Swift API? Browse the API Reference."
+    "content": "New here? Begin with the Installation guide. Shipping iOS? See the iOS Quickstart. Shipping Android? See the Android Quickstart. Using Flutter, React Native, or Kotlin Multiplatform? See the KMP Quickstart. Coming from fastlane? Read the migration guide. Setting up CI? See the CI Setup guide. Using a coding agent in the upstream repo? Start with the Agent Fast Start guide. Need the Swift API? Browse the API Reference."
   },
   {
     "id": "/docs#versioning",
