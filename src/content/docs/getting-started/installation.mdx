@@ -17,12 +17,17 @@ ShipItSwifty is a Swift CLI that drives Xcode and Gradle to build, sign, and shi
 
 ## Homebrew
 
-There is not a published Homebrew tap yet. The formula template lives upstream, but today you need to either build from source or copy the formula into your own tap.
+> **Beta:** ShipItSwifty is in active development. APIs and behaviour may change between releases.
 
 ```bash
-brew tap-new <you>/shipit
-cp Formula/shipit.rb "$(brew --repository)/Library/Taps/<you>/homebrew-shipit/Formula/shipit.rb"
-brew install --HEAD <you>/shipit/shipit
+brew tap shipitswifty/tap
+brew install shipit
+```
+
+Or in a single step:
+
+```bash
+brew install shipitswifty/tap/shipit
 ```
 
 ## Swift Package Manager
