@@ -1,0 +1,78 @@
+---
+title: "CLI Command Reference"
+description: "Every shipit command, what it does, and where to learn more."
+group: "Reference"
+order: 2
+---
+
+The `shipit` CLI ships with 27 commands covering the full release pipeline — from generating your first config to uploading to the stores. Run `shipit <command> --help` for the complete flag reference of any command, and pass `--shipfile ./path/to/config.yml` anywhere your config isn't the default `Shipfile.yml`.
+
+## Project setup & configuration
+
+| Command                 | What it does                                                                                                     |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `shipit generate`       | Generate `Shipfile.yml` from project inspection and guided prompts — the recommended starting point              |
+| `shipit suggest-config` | Generate a suggested Shipfile for a release goal                                                                 |
+| `shipit inspect`        | Inspect the current project (Xcode containers, schemes, release-related files) for AI-assisted config generation |
+| `shipit schema`         | Print the Shipfile and workflow action schema                                                                    |
+| `shipit env`            | Print resolved config, environment variables, and processed files (secrets are redacted)                         |
+| `shipit doctor`         | Diagnose common setup issues for the selected Shipfile                                                           |
+| `shipit validate`       | Validate Shipfile structure, App Store metadata, archive readiness, and Android bundles                          |
+| `shipit precheck`       | Validate metadata against App Store guidelines (alias for `validate metadata`)                                   |
+
+See the [Configuration Reference](/docs/reference/configuration) for every Shipfile key.
+
+## Build, test & quality
+
+| Command               | What it does                                                                             |
+| --------------------- | ---------------------------------------------------------------------------------------- |
+| `shipit build`        | Compile the app (iOS: `xcodebuild build`, Android: `gradlew assemble`)                   |
+| `shipit test`         | Run unit and UI tests using `xcodebuild test`                                            |
+| `shipit lint`         | Run static analysis and lint checks (iOS: `xcodebuild analyze`, Android: `gradlew lint`) |
+| `shipit coverage`     | Read and summarize native coverage artifacts (iOS: xcresult/xccov, Android: JaCoCo XML)  |
+| `shipit test-results` | Read and normalize test-result artifacts (iOS: xcresult, Android: JUnit XML)             |
+| `shipit version`      | Bump `CFBundleVersion` and/or `CFBundleShortVersionString`                               |
+
+## Archive & export
+
+| Command          | What it does                               |
+| ---------------- | ------------------------------------------ |
+| `shipit archive` | Archive the app using `xcodebuild archive` |
+| `shipit export`  | Export an IPA from an xcarchive            |
+
+## Signing & provisioning
+
+| Command            | What it does                                                                                              |
+| ------------------ | --------------------------------------------------------------------------------------------------------- |
+| `shipit sign`      | Code-signing subcommands: `init`, `sync`, `import`, `cleanup` — backed by the encrypted certificate vault |
+| `shipit provision` | Manage App IDs, devices, and provisioning profiles                                                        |
+
+See [Security & Credentials](/docs/guides/security-and-credentials) for how the encrypted vault works and where credentials live.
+
+## Distribution
+
+| Command             | What it does                                                                            |
+| ------------------- | --------------------------------------------------------------------------------------- |
+| `shipit upload`     | Upload an IPA and metadata to App Store Connect                                         |
+| `shipit testflight` | Upload to TestFlight and manage beta testers                                            |
+| `shipit metadata`   | Pull/push App Store metadata from/to App Store Connect                                  |
+| `shipit play-store` | Upload an Android release artifact to Google Play and assign it to a distribution track |
+
+## Screenshots
+
+| Command           | What it does                                |
+| ----------------- | ------------------------------------------- |
+| `shipit snapshot` | Capture localized screenshots on simulators |
+| `shipit frame`    | Overlay device frames on screenshots        |
+
+## Workflows & automation
+
+| Command             | What it does                                                                           |
+| ------------------- | -------------------------------------------------------------------------------------- |
+| `shipit run`        | Execute a named workflow from `Shipfile.yml` — supports `--dry-run` and `--ci`         |
+| `shipit notify`     | Send build notifications to Slack, Teams, or webhooks                                  |
+| `shipit ai-session` | Structured AI-agent session bootstrap — emits a stable JSON contract for coding agents |
+
+`shipit run <workflow> --dry-run` previews exactly which actions would execute, in what order, with what options. `--ci` disables TTY prompts and enables structured logging — see [CI Setup](/docs/guides/ci-setup).
+
+For agent-driven workflows with `ai-session`, see the [Agent Fast Start](/docs/guides/agent-fast-start) guide.

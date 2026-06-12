@@ -157,21 +157,21 @@ shipit run beta-android   # test → archive (.aab) → Play Store
 
 When `build_system` is omitted, ShipItSwifty detects it automatically:
 
-| Project marker | Detected value |
-| --- | --- |
-| `pubspec.yaml` with `flutter:` key | `flutter` |
-| `package.json` with `react-native` dependency | `react_native` |
-| `build.gradle.kts` applying `kotlin("multiplatform")` | `kmp` |
-| None of the above | `native` |
+| Project marker                                        | Detected value |
+| ----------------------------------------------------- | -------------- |
+| `pubspec.yaml` with `flutter:` key                    | `flutter`      |
+| `package.json` with `react-native` dependency         | `react_native` |
+| `build.gradle.kts` applying `kotlin("multiplatform")` | `kmp`          |
+| None of the above                                     | `native`       |
 
 ## Common pitfalls
 
-| Symptom | Likely cause | Fix |
-| --- | --- | --- |
-| `xcodebuild` reports `Shared.framework not found` | Framework wasn't linked before `xcodebuild` | Ensure `ios.build_system: kmp` is set |
-| Wrong simulator architecture during link | Targeting Intel sim on Apple silicon | Set `ios.kmp_build_target: IosX64` for the matching target |
-| `versionName` not updated | Custom key names in `gradle.properties` | Override via `versioning.marketing_key` / `versioning.build_key` |
-| Gradle re-links every run | Expected — Gradle's incremental check runs but skips when inputs unchanged | No action needed |
+| Symptom                                           | Likely cause                                                               | Fix                                                              |
+| ------------------------------------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `xcodebuild` reports `Shared.framework not found` | Framework wasn't linked before `xcodebuild`                                | Ensure `ios.build_system: kmp` is set                            |
+| Wrong simulator architecture during link          | Targeting Intel sim on Apple silicon                                       | Set `ios.kmp_build_target: IosX64` for the matching target       |
+| `versionName` not updated                         | Custom key names in `gradle.properties`                                    | Override via `versioning.marketing_key` / `versioning.build_key` |
+| Gradle re-links every run                         | Expected — Gradle's incremental check runs but skips when inputs unchanged | No action needed                                                 |
 
 ## Next steps
 

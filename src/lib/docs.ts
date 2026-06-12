@@ -96,11 +96,7 @@ function inferGroup(slugParts: string[]): string {
 export async function getDocBySlug(slug: string[]): Promise<DocPage | null> {
   const all = await getAllDocPages();
   const target = slug.join("/");
-  return (
-    all.find((p) => p.slug.join("/") === target) ??
-    all.find((p) => p.slug.join("/") === target + "/index") ??
-    null
-  );
+  return all.find((p) => p.slug.join("/") === target) ?? null;
 }
 
 export async function getDocSource(

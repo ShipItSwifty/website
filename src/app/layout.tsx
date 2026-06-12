@@ -68,9 +68,6 @@ export const metadata: Metadata = {
     shortcut: [{ url: "/favicon.ico?v=5", type: "image/x-icon" }],
     apple: [{ url: "/logo.png?v=6", type: "image/png" }],
   },
-  alternates: {
-    canonical: siteConfig.url,
-  },
 };
 
 export const viewport: Viewport = {

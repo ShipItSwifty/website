@@ -7,7 +7,10 @@ import { Check, Copy } from "lucide-react";
  * Wraps rehype-pretty-code <pre> blocks with a copy button.
  * Used as a custom `pre` component in MDX rendering.
  */
-export function Pre({ children, ...props }: { children: ReactNode } & React.HTMLAttributes<HTMLPreElement>) {
+export function Pre({
+  children,
+  ...props
+}: { children: ReactNode } & React.HTMLAttributes<HTMLPreElement>) {
   const [copied, setCopied] = useState(false);
   const preRef = useRef<HTMLPreElement>(null);
 

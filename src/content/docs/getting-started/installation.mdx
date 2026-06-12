@@ -9,7 +9,10 @@ ShipItSwifty is a Swift CLI that drives Xcode and Gradle to build, sign, and shi
 
 ## Prerequisites
 
-- **macOS 15+, Xcode 16+** — ShipItSwifty calls `xcodebuild` under the hood for builds, archives, and exports.
+iOS workflows require macOS. Android workflows run on macOS **or Linux** — build, test, lint, archive, and Play Store flows all work anywhere Gradle does.
+
+- **macOS 15+, Xcode 16+** _(iOS workflows)_ — ShipItSwifty calls `xcodebuild` under the hood for builds, archives, and exports.
+- **JDK 17+** _(Android workflows)_ — ShipItSwifty drives your project's Gradle wrapper for Android builds, on macOS or Linux.
 - **Swift 6 toolchain** — the CLI is built with Swift 6 structured concurrency.
 - **Apple Developer account** — required for code signing and provisioning profiles.
 - **App Store Connect API key** _(optional)_ — only needed for commands that talk to Apple's servers: `upload`, `testflight`, `metadata`, and `provision`. Local builds work without one.

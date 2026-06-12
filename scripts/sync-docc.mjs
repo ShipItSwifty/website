@@ -83,6 +83,21 @@ async function main() {
   // Extract via system tools to avoid shipping tar/zip libs.
   const { spawnSync } = await import("node:child_process");
   const isZip = asset.name.endsWith(".zip");
+
+  // Refuse archives with absolute or parent-escaping entry paths so a
+  // tampered release asset can't write outside data/docc.
+  const list = isZip
+    ? spawnSync("unzip", ["-Z1", tmpFile], { encoding: "utf8" })
+    : spawnSync("tar", ["-tzf", tmpFile], { encoding: "utf8" });
+  if (list.status !== 0) throw new Error("Could not list archive contents");
+  const unsafe = list.stdout
+    .split("\n")
+    .filter(Boolean)
+    .filter((p) => p.startsWith("/") || p.split("/").includes(".."));
+  if (unsafe.length > 0) {
+    throw new Error(`Archive contains unsafe paths: ${unsafe.slice(0, 3).join(", ")}`);
+  }
+
   const r = isZip
     ? spawnSync("unzip", ["-q", tmpFile, "-d", OUT_DIR], { stdio: "inherit" })
     : spawnSync("tar", ["-xzf", tmpFile, "-C", OUT_DIR], { stdio: "inherit" });

@@ -90,8 +90,8 @@ export function Privacy() {
             className="mt-3.5 max-w-[520px] text-base leading-[1.65]"
             style={{ color: "var(--fg2)" }}
           >
-            No third-party services. No AI calls baked in. No hidden network requests.
-            ShipItSwifty is a local CLI — what happens on your machine stays on your machine.
+            No third-party services. No AI calls baked in. No hidden network requests. ShipItSwifty
+            is a local CLI — what happens on your machine stays on your machine.
           </p>
         </div>
 
@@ -122,9 +122,9 @@ export function Privacy() {
             >
               shipit ai-session
             </code>{" "}
-            generates a machine-readable JSON snapshot of your project and shipit documentation.
-            You paste that into your own AI agent — ShipItSwifty itself never calls any LLM or
-            sends data to any third-party service.
+            generates a machine-readable JSON snapshot of your project and shipit documentation. You
+            paste that into your own AI agent — ShipItSwifty itself never calls any LLM or sends
+            data to any third-party service.
           </p>
         </div>
       </div>

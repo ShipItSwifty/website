@@ -112,7 +112,7 @@ export function AISession() {
                       {s.title}
                     </div>
                     <p
-                      className="text-[13.5px] leading-[1.65] [&_code]:rounded [&_code]:bg-[var(--brand-muted)] [&_code]:px-1.5 [&_code]:py-px [&_code]:text-[11px] [&_code]:text-[var(--brand)] [&_code]:font-[var(--font-mono)]"
+                      className="text-[13.5px] leading-[1.65] [&_code]:rounded [&_code]:bg-[var(--brand-muted)] [&_code]:px-1.5 [&_code]:py-px [&_code]:text-[11px] [&_code]:font-[var(--font-mono)] [&_code]:text-[var(--brand)]"
                       style={{
                         color: "var(--fg2)",
                         fontFamily: "var(--font-body)",

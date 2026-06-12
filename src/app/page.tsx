@@ -8,6 +8,11 @@ import { Privacy } from "@/components/marketing/privacy";
 import { DocsCTA } from "@/components/marketing/docs-cta";
 import { Footer } from "@/components/marketing/footer";
 import { siteConfig } from "@/lib/site";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 export default function HomePage() {
   const jsonLd = {
