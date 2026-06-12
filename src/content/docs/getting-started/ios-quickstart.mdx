@@ -66,13 +66,13 @@ For actions that call the App Store Connect API, you need `ASC_KEY_ID`, `ASC_ISS
 
 If you only plan to use local build flows (`build`, `test`, `archive`, `export`), skip this step.
 
-| Value | Where to find it |
-| ----- | ---------------- |
-| `team_id` | Usually auto-detected by `shipit generate` from Xcode signing settings. If manual, use the 10-character Team ID from your Apple Developer account. |
-| `ASC_KEY_ID` | App Store Connect → Users and Access → Integrations → App Store Connect API → Key ID |
-| `ASC_ISSUER_ID` | Same page — this is account-level metadata, not part of the `.p8` file. |
-| `ASC_PRIVATE_KEY_PATH` | Local path to the `.p8` file downloaded when creating the API key |
-| `ASC_PRIVATE_KEY` | Raw `.p8` contents, typically stored in CI secrets |
+| Value                  | Where to find it                                                                                                                                   |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `team_id`              | Usually auto-detected by `shipit generate` from Xcode signing settings. If manual, use the 10-character Team ID from your Apple Developer account. |
+| `ASC_KEY_ID`           | App Store Connect → Users and Access → Integrations → App Store Connect API → Key ID                                                               |
+| `ASC_ISSUER_ID`        | Same page — this is account-level metadata, not part of the `.p8` file.                                                                            |
+| `ASC_PRIVATE_KEY_PATH` | Local path to the `.p8` file downloaded when creating the API key                                                                                  |
+| `ASC_PRIVATE_KEY`      | Raw `.p8` contents, typically stored in CI secrets                                                                                                 |
 
 For local development, point at the file:
 
@@ -118,10 +118,10 @@ shipit testflight
 
 Workflows chain actions into repeatable sequences. ShipItSwifty uses Apple's two-version model:
 
-| Plist key | Format | Role |
-| --------- | ------ | ---- |
+| Plist key                    | Format              | Role                                           |
+| ---------------------------- | ------------------- | ---------------------------------------------- |
 | `CFBundleShortVersionString` | `MAJOR.MINOR.PATCH` | Marketing version. Bump manually for releases. |
-| `CFBundleVersion` | plain integer | Build counter. Auto-incremented on beta runs. |
+| `CFBundleVersion`            | plain integer       | Build counter. Auto-incremented on beta runs.  |
 
 ### Local beta (no upload)
 

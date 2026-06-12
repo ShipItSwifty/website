@@ -34,7 +34,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       ?.map((a) => ("text" in a ? a.text : "code" in a ? a.code : ""))
       .join("")
       .trim() || undefined;
-  return { title, description };
+  const canonical = ["/docs/api/shipitkit", ...slug].join("/");
+  return { title, description, alternates: { canonical } };
 }
 
 export default async function ApiRoute({ params }: PageProps) {

@@ -11,7 +11,6 @@ import { dirname, resolve } from "node:path";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const scripts = [
-  ["sync-changelog.mjs", { required: false }],
   ["sync-docc.mjs", { required: false }],
   ["build-search-index.mjs", { required: true }],
 ];

@@ -10,15 +10,15 @@
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-body: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --color-brand: #8B5CF6;
-  --color-brand-hover: #7C3AED;
+  --color-brand: #8b5cf6;
+  --color-brand-hover: #7c3aed;
 }
 
 @layer base {
   :root {
     color-scheme: light;
-    --brand: #8B5CF6;
-    --brand-hover: #7C3AED;
+    --brand: #8b5cf6;
+    --brand-hover: #7c3aed;
     --brand-muted: rgba(139, 92, 246, 0.08);
     --bg: #f7f8fa;
     --surface: #eef1f5;
@@ -40,8 +40,8 @@
 
   :root.dark {
     color-scheme: dark;
-    --brand: #A78BFA;
-    --brand-hover: #8B5CF6;
+    --brand: #a78bfa;
+    --brand-hover: #8b5cf6;
     --brand-muted: rgba(167, 139, 250, 0.1);
     --bg: #191a1d;
     --surface: #222428;

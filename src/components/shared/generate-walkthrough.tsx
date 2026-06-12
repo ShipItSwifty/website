@@ -132,30 +132,62 @@ function WalkthroughBody({
   return (
     <div className="flex max-w-[720px] flex-col gap-12">
       {/* Prerequisites */}
-      <div className="rounded-[10px] border p-6" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
-        <div className="mb-4 text-sm font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--fg1)" }}>
+      <div
+        className="rounded-[10px] border p-6"
+        style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+      >
+        <div
+          className="mb-4 text-sm font-semibold"
+          style={{ fontFamily: "var(--font-display)", color: "var(--fg1)" }}
+        >
           Before you start
         </div>
         <p className="mb-4 text-[13px] leading-[1.65]" style={{ color: "var(--fg2)" }}>
-          ShipItSwifty runs iOS workflows on macOS and Android workflows on macOS or Linux.
-          Store credentials are only required for upload flows, so local builds and tests can start much earlier.
+          ShipItSwifty runs iOS workflows on macOS and Android workflows on macOS or Linux. Store
+          credentials are only required for upload flows, so local builds and tests can start much
+          earlier.
         </p>
         {[
-          { item: "macOS 15+, Xcode 16+", why: "required for iOS builds, archives, signing, and uploads" },
-          { item: "Linux or macOS + JDK 17+", why: "supported for Android build, test, lint, archive, and Play Store flows" },
+          {
+            item: "macOS 15+, Xcode 16+",
+            why: "required for iOS builds, archives, signing, and uploads",
+          },
+          {
+            item: "Linux or macOS + JDK 17+",
+            why: "supported for Android build, test, lint, archive, and Play Store flows",
+          },
           { item: "Swift 6 toolchain", why: "the CLI is built with Swift 6 concurrency" },
-          { item: "Apple Developer account", why: "required for iOS code signing and provisioning" },
-          { item: "App Store Connect API key", why: "needed only for iOS upload, testflight, metadata, and provision commands" },
-          { item: "Google Play service account", why: "needed only for Android play-store uploads" },
+          {
+            item: "Apple Developer account",
+            why: "required for iOS code signing and provisioning",
+          },
+          {
+            item: "App Store Connect API key",
+            why: "needed only for iOS upload, testflight, metadata, and provision commands",
+          },
+          {
+            item: "Google Play service account",
+            why: "needed only for Android play-store uploads",
+          },
         ].map(({ item, why }) => (
-          <div key={item} className="mb-2.5 flex items-start gap-2.5 text-[13px]" style={{ color: "var(--fg2)" }}>
+          <div
+            key={item}
+            className="mb-2.5 flex items-start gap-2.5 text-[13px]"
+            style={{ color: "var(--fg2)" }}
+          >
             <Check size={14} className="mt-0.5 shrink-0" style={{ color: "var(--green)" }} />
-            <span><strong style={{ color: "var(--fg1)" }}>{item}</strong> — {why}</span>
+            <span>
+              <strong style={{ color: "var(--fg1)" }}>{item}</strong> — {why}
+            </span>
           </div>
         ))}
         {showDocsLink ? (
           <div className="mt-4 border-t pt-4" style={{ borderColor: "var(--border)" }}>
-            <Link href="/docs/getting-started/ios-quickstart" className="inline-flex items-center gap-1 text-[13px]" style={{ color: "var(--blue)" }}>
+            <Link
+              href="/docs/getting-started/ios-quickstart"
+              className="inline-flex items-center gap-1 text-[13px]"
+              style={{ color: "var(--blue)" }}
+            >
               Read the full quickstart →
             </Link>
           </div>
@@ -166,7 +198,8 @@ function WalkthroughBody({
       <div>
         <StepHeader n="1" title="Install shipit" />
         <p className="mb-4 text-sm leading-[1.7]" style={{ color: "var(--fg2)" }}>
-          ShipItSwifty is a single static binary with no runtime dependencies. Pick whichever install method suits your workflow.
+          ShipItSwifty is a single static binary with no runtime dependencies. Pick whichever
+          install method suits your workflow.
         </p>
         <div className="mb-4 flex flex-wrap gap-1.5" role="tablist" aria-label="Install method">
           {installTabs.map((t, i) => {
@@ -228,9 +261,21 @@ function WalkthroughBody({
       <div>
         <StepHeader n="2" title="Generate your config" />
         <p className="mb-4 text-sm leading-[1.7]" style={{ color: "var(--fg2)" }}>
-          Instead of writing YAML by hand, let ShipItSwifty inspect your Xcode project. It detects your scheme, bundle ID, and team — then writes a{" "}
-          <code className="rounded px-1.5 py-px text-xs" style={{ fontFamily: "var(--font-mono)", color: "var(--fg2)", background: "var(--elevated)" }}>Shipfile.yml</code>{" "}
-          you can review and commit. It can also reuse existing env values or write a local <code>.env</code> for signing setup. This is the recommended starting point for every project.
+          Instead of writing YAML by hand, let ShipItSwifty inspect your Xcode project. It detects
+          your scheme, bundle ID, and team — then writes a{" "}
+          <code
+            className="rounded px-1.5 py-px text-xs"
+            style={{
+              fontFamily: "var(--font-mono)",
+              color: "var(--fg2)",
+              background: "var(--elevated)",
+            }}
+          >
+            Shipfile.yml
+          </code>{" "}
+          you can review and commit. It can also reuse existing env values or write a local{" "}
+          <code>.env</code> for signing setup. This is the recommended starting point for every
+          project.
         </p>
         <CodeBlock lang="bash">{`shipit generate
 
@@ -242,13 +287,26 @@ shipit generate --goal beta --non-interactive --output json`}</CodeBlock>
       </div>
 
       {/* Terminal demo */}
-      <div className="rounded-[10px] border p-6" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+      <div
+        className="rounded-[10px] border p-6"
+        style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+      >
         <div className="mb-3.5 flex items-center gap-2.5">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: "var(--brand-muted)", border: "1px solid rgba(240,81,56,0.2)", color: "var(--brand)" }}>
+          <div
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+            style={{
+              background: "var(--brand-muted)",
+              border: "1px solid rgba(240,81,56,0.2)",
+              color: "var(--brand)",
+            }}
+          >
             <Terminal size={16} />
           </div>
           <div>
-            <div className="text-sm font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--fg1)" }}>
+            <div
+              className="text-sm font-semibold"
+              style={{ fontFamily: "var(--font-display)", color: "var(--fg1)" }}
+            >
               shipit generate in action
             </div>
             <div className="text-[13px]" style={{ color: "var(--fg2)" }}>
@@ -257,7 +315,10 @@ shipit generate --goal beta --non-interactive --output json`}</CodeBlock>
           </div>
         </div>
         {videoEmbedUrl ? (
-          <div className="overflow-hidden rounded-lg border" style={{ borderColor: "var(--border)" }}>
+          <div
+            className="overflow-hidden rounded-lg border"
+            style={{ borderColor: "var(--border)" }}
+          >
             <div className="aspect-video">
               <iframe
                 src={videoEmbedUrl}
@@ -277,10 +338,29 @@ shipit generate --goal beta --non-interactive --output json`}</CodeBlock>
       <div>
         <StepHeader n="3" title="Verify your environment" />
         <p className="mb-4 text-sm leading-[1.7]" style={{ color: "var(--fg2)" }}>
-          Before running a build, confirm that Xcode, credentials, and provisioning profiles are wired up correctly.{" "}
-          <code className="rounded px-1.5 py-px text-xs" style={{ fontFamily: "var(--font-mono)", color: "var(--brand)", background: "var(--brand-muted)" }}>shipit env</code>{" "}
+          Before running a build, confirm that Xcode, credentials, and provisioning profiles are
+          wired up correctly.{" "}
+          <code
+            className="rounded px-1.5 py-px text-xs"
+            style={{
+              fontFamily: "var(--font-mono)",
+              color: "var(--brand)",
+              background: "var(--brand-muted)",
+            }}
+          >
+            shipit env
+          </code>{" "}
           prints every resolved value, and{" "}
-          <code className="rounded px-1.5 py-px text-xs" style={{ fontFamily: "var(--font-mono)", color: "var(--brand)", background: "var(--brand-muted)" }}>shipit doctor</code>{" "}
+          <code
+            className="rounded px-1.5 py-px text-xs"
+            style={{
+              fontFamily: "var(--font-mono)",
+              color: "var(--brand)",
+              background: "var(--brand-muted)",
+            }}
+          >
+            shipit doctor
+          </code>{" "}
           checks for common issues like missing entitlements or expired certificates.
         </p>
         <CodeBlock lang="bash">{`shipit env\nshipit doctor`}</CodeBlock>
@@ -290,7 +370,8 @@ shipit generate --goal beta --non-interactive --output json`}</CodeBlock>
       <div>
         <StepHeader n="4" title="Run your first workflow" />
         <p className="mb-4 text-sm leading-[1.7]" style={{ color: "var(--fg2)" }}>
-          Always dry-run first to see exactly what ShipItSwifty will do — which actions run, in what order, and with what options. Once you are satisfied, drop the flag and ship.
+          Always dry-run first to see exactly what ShipItSwifty will do — which actions run, in what
+          order, and with what options. Once you are satisfied, drop the flag and ship.
         </p>
         <CodeBlock lang="bash">{`# Preview without executing
 shipit run beta --dry-run
@@ -300,14 +381,29 @@ shipit run beta --ci`}</CodeBlock>
       </div>
 
       {/* CI callout */}
-      <div className="rounded-[10px] border p-6" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
-        <div className="mb-3 text-sm font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--fg1)" }}>
+      <div
+        className="rounded-[10px] border p-6"
+        style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+      >
+        <div
+          className="mb-3 text-sm font-semibold"
+          style={{ fontFamily: "var(--font-display)", color: "var(--fg1)" }}
+        >
           Running in CI?
         </div>
         <p className="mb-3.5 text-[13px] leading-[1.65]" style={{ color: "var(--fg2)" }}>
-          Every command is non-interactive by default. Export credentials as environment
-          variables and pass{" "}
-          <code className="rounded px-1.5 py-px text-xs" style={{ fontFamily: "var(--font-mono)", color: "var(--brand)", background: "var(--brand-muted)" }}>--ci</code>{" "}
+          Every command is non-interactive by default. Export credentials as environment variables
+          and pass{" "}
+          <code
+            className="rounded px-1.5 py-px text-xs"
+            style={{
+              fontFamily: "var(--font-mono)",
+              color: "var(--brand)",
+              background: "var(--brand-muted)",
+            }}
+          >
+            --ci
+          </code>{" "}
           to disable TTY prompts and enable structured logging.
         </p>
         <CodeBlock lang="yaml">{`# GitHub Actions
@@ -334,14 +430,23 @@ export function GenerateWalkthrough({
   return (
     <section id={sectionId} className="mx-auto max-w-[1200px] scroll-mt-24 px-6 py-24">
       <div className="mb-14">
-        <div className="mb-4 inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.12em] uppercase" style={{ color: "var(--brand)" }}>
+        <div
+          className="mb-4 inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.12em] uppercase"
+          style={{ color: "var(--brand)" }}
+        >
           <div className="h-px w-4" style={{ background: "var(--brand)" }} />
           Getting Started
         </div>
-        <h2 className="text-[40px] leading-[1.15] font-bold tracking-[-0.025em]" style={{ fontFamily: "var(--font-display)", color: "var(--fg1)" }}>
+        <h2
+          className="text-[40px] leading-[1.15] font-bold tracking-[-0.025em]"
+          style={{ fontFamily: "var(--font-display)", color: "var(--fg1)" }}
+        >
           Up and running in minutes.
         </h2>
-        <p className="mt-3.5 max-w-[500px] text-base leading-[1.65]" style={{ color: "var(--fg2)" }}>
+        <p
+          className="mt-3.5 max-w-[500px] text-base leading-[1.65]"
+          style={{ color: "var(--fg2)" }}
+        >
           Install the binary, generate a config, and run your first workflow. No Gemfile. No
           Bundler. No Ruby.
         </p>

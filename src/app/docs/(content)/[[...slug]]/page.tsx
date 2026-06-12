@@ -31,6 +31,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: page.frontmatter.title,
     description: page.frontmatter.description,
+    alternates: { canonical: page.href },
   };
 }
 

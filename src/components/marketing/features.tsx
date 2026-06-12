@@ -124,7 +124,8 @@ export function Features() {
             className="mt-3.5 max-w-[480px] text-base leading-[1.65]"
             style={{ color: "var(--fg2)" }}
           >
-            From local validation to App Store Connect and Google Play. No Ruby, no Fastfile, no fragile shell glue.
+            From local validation to App Store Connect and Google Play. No Ruby, no Fastfile, no
+            fragile shell glue.
           </p>
         </div>
 

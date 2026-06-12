@@ -17,8 +17,7 @@ export const siteConfig = {
     // Add Twitter/Mastodon/Bluesky here once they exist.
   },
   install: {
-    // Flip this once the public tap exists.
-    homebrewAvailable: false as boolean,
+    homebrewAvailable: true as boolean,
     homebrewCommand: "brew install shipitswifty/tap/shipit",
   },
 } as const;

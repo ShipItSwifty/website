@@ -24,8 +24,8 @@
  *   2  upstream metadata fetch failed
  *   3  unsupported platform (non-darwin)
  */
-import { execSync, spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, rmSync, cpSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { existsSync, mkdirSync, rmSync, cpSync, appendFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { platform } from "node:os";
 
@@ -96,7 +96,9 @@ function run(cmd, args, opts = {}) {
   }
 }
 
-const tag = process.env.TAG ?? (await fetchLatestRef());
+// `||` (not `??`): CI passes TAG="" when no override is given, which should
+// also fall back to resolving the latest ref.
+const tag = process.env.TAG || (await fetchLatestRef());
 console.log(`[build-docc] target tag: ${tag}`);
 
 // Clean workspace
@@ -144,15 +146,9 @@ const tarball = process.env.TARBALL_PATH ?? resolve(`./docc-${tag}.tar.gz`);
 run("tar", ["-czf", tarball, "-C", resolve(OUTPUT_DIR, ".."), "docc"]);
 console.log(`[build-docc] tarball: ${tarball}`);
 
-// Stamp the tag for downstream consumers (release upload step)
-console.log(`::set-output name=tag::${tag}`);
-console.log(`::set-output name=tarball::${tarball}`);
-console.log(`[build-docc] done`);
-
-// Best-effort GitHub Actions output (modern syntax)
+// Stamp the tag for downstream consumers (release upload step). Written
+// directly — never through a shell — so a hostile tag name can't inject.
 if (process.env.GITHUB_OUTPUT) {
-  execSync(`printf 'tag=%s\\ntarball=%s\\n' '${tag}' '${tarball}' >> "$GITHUB_OUTPUT"`, {
-    stdio: "inherit",
-    shell: "/bin/bash",
-  });
+  appendFileSync(process.env.GITHUB_OUTPUT, `tag=${tag}\ntarball=${tarball}\n`);
 }
+console.log(`[build-docc] done`);

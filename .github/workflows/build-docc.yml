@@ -37,68 +37,27 @@ jobs:
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode_26.4.app
 
-      - name: Resolve target tag
+      # An empty tag is fine: scripts/build-docc.mjs resolves the latest
+      # release → latest tag → default branch when TAG is unset or empty.
+      - name: Resolve requested tag
         id: tag
         env:
           DISPATCH_TAG: ${{ github.event.client_payload.tag }}
           INPUT_TAG: ${{ inputs.tag }}
         run: |
           TAG="${INPUT_TAG:-$DISPATCH_TAG}"
-          if [ -z "$TAG" ]; then
-            TAG=$(node --input-type=module <<'EOF'
-const headers = {
-  "User-Agent": "shipitswifty-website-ci",
-  Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-};
-
-const releaseRes = await fetch("https://api.github.com/repos/ShipItSwifty/shipitswifty/releases/latest", { headers });
-if (releaseRes.ok) {
-  const data = await releaseRes.json();
-  process.stdout.write(data.tag_name);
-  process.exit(0);
-}
-
-if (releaseRes.status !== 404) {
-  console.error(`Failed to resolve latest release: ${releaseRes.status}`);
-  process.exit(1);
-}
-
-const tagsRes = await fetch("https://api.github.com/repos/ShipItSwifty/shipitswifty/tags?per_page=1", { headers });
-if (!tagsRes.ok) {
-  console.error(`Failed to resolve tags: ${tagsRes.status}`);
-  process.exit(1);
-}
-
-const tags = await tagsRes.json();
-if (Array.isArray(tags) && tags.length > 0 && tags[0]?.name) {
-  process.stdout.write(tags[0].name);
-  process.exit(0);
-}
-
-const repoRes = await fetch("https://api.github.com/repos/ShipItSwifty/shipitswifty", { headers });
-if (!repoRes.ok) {
-  console.error(`Failed to resolve default branch: ${repoRes.status}`);
-  process.exit(1);
-}
-
-const repo = await repoRes.json();
-process.stdout.write(repo.default_branch);
-EOF
-)
-          fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "Resolved tag: $TAG"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          echo "Requested tag: ${TAG:-<latest>}"
 
       - name: Cache SPM checkouts
         uses: actions/cache@v5
         with:
           path: .docc-build/shipitswifty/.build/checkouts
-          key: ${{ runner.os }}-spm-docc-${{ steps.tag.outputs.tag }}
+          key: ${{ runner.os }}-spm-docc-${{ steps.tag.outputs.tag || 'latest' }}
           restore-keys: |
             ${{ runner.os }}-spm-docc-
 
+      # Writes the resolved `tag` and `tarball` to GITHUB_OUTPUT.
       - name: Build DocC and pack tarball
         id: build
         env:
@@ -109,7 +68,7 @@ EOF
       - name: Upload tarball as release asset
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ steps.tag.outputs.tag }}
+          TAG: ${{ steps.build.outputs.tag }}
           TARBALL: ${{ steps.build.outputs.tarball }}
         run: |
           RELEASE_TAG="docs-$TAG"

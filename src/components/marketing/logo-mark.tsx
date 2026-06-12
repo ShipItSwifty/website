@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface LogoMarkProps {
   size?: number;
   className?: string;
@@ -10,8 +12,8 @@ export function LogoMark({ size = 26, className, ...rest }: LogoMarkProps) {
     ? { "aria-hidden": true as const }
     : { role: "img" as const, "aria-label": "ShipItSwifty" };
   return (
-    <img
-      src="/logo.png?v=6"
+    <Image
+      src="/logo.png"
       width={size}
       height={size}
       className={`block object-contain ${className ?? ""}`}

@@ -14,7 +14,10 @@ const heroLines: TerminalLine[] = [
   { t: "prompt", s: "Xcode scheme [MyApp]:" },
   { t: "prompt", s: "Bundle identifier [com.example.myapp]:" },
   { t: "prompt", s: "Apple Developer Team ID [A1A1A1A1A1]:" },
-  { t: "prompt", s: "Do you want this Shipfile to include App Store Connect upload settings? [y/N]: y" },
+  {
+    t: "prompt",
+    s: "Do you want this Shipfile to include App Store Connect upload settings? [y/N]: y",
+  },
   { t: "info", s: "=== App Store Connect Environment ===" },
   { t: "info", s: "ShipIt will reference env vars instead of storing secrets in Shipfile.yml." },
   { t: "info", s: "  ASC_KEY_ID             [set] App Store Connect API key ID" },
@@ -50,7 +53,9 @@ export function Hero() {
           <span style={{ color: "var(--brand)" }}>shipit generate.</span>
         </h1>
         <p className="mb-9 max-w-[460px] text-[17px] leading-[1.7]" style={{ color: "var(--fg2)" }}>
-          Start with <code>shipit generate</code> to build a real config from your project, reuse existing env values, and ship iOS or Android from the same workflow without leaking secrets into <code>Shipfile.yml</code>.
+          Start with <code>shipit generate</code> to build a real config from your project, reuse
+          existing env values, and ship iOS or Android from the same workflow without leaking
+          secrets into <code>Shipfile.yml</code>.
         </p>
         <a
           href={siteConfig.github.cli}
