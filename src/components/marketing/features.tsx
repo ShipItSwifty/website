@@ -44,7 +44,7 @@ const featureData: Feature[] = [
   {
     Icon: GitBranch,
     title: "Composable Workflows",
-    desc: "Define reusable step sequences in Shipfile.yml. Parameterized custom actions, plugins, KMP projects, and framework-aware builds all fit the same workflow model.",
+    desc: "Define reusable step sequences in Shipfile.yml. Parameterized custom actions, version tokens, conditional steps, and a release scaffold that bumps, tags, and pushes in one shipit run.",
   },
 ];
 
