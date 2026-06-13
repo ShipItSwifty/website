@@ -38,6 +38,22 @@ workflows:
     - action: testflight
       options:
         groups: ["Internal QA"]
+
+  release:
+    - action: version
+      options: { bump: patch }
+    - action: archive
+    - action: upload
+      options: { submit_for_review: true }
+    # Tag the released version in the same shipit run.
+    # {{version}} resolves from the version step above.
+    - action: git
+      options: { operation: commit, commit_message: "chore: release v{{version}}" }
+    - action: git
+      when: "{{version_changed}}"           # skipped on build-only bumps
+      options: { operation: tag, tag_name: "v{{version}}" }
+    - action: git
+      options: { operation: push, push_tags: true }
 `,
     lang: "yaml",
   },

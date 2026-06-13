@@ -197,7 +197,7 @@
     "title": "iOS Quickstart",
     "section": "Set App Store Connect credentials",
     "group": "Getting Started",
-    "content": "For actions that call the App Store Connect API, you need ASCKEYID, ASCISSUERID, and exactly one of ASCPRIVATEKEY or ASCPRIVATEKEYPATH. If you only plan to use local build flows (build, test, archive, export), skip this step. | Value | Where to find it | | ----- | ---------------- | | teamid | Usually auto-detected by shipit generate from Xcode signing settings. If manual, use the 10-character Team ID from your Apple Developer account. | | ASCKEYID | App Store Connect → Users and Access → Integrations → App Store Connect API → Key ID | | ASCISSUERID | Same page — this is account-level metadata"
+    "content": "For actions that call the App Store Connect API, you need ASCKEYID, ASCISSUERID, and exactly one of ASCPRIVATEKEY or ASCPRIVATEKEYPATH. If you only plan to use local build flows (build, test, archive, export), skip this step. | Value | Where to find it | | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | | teamid | Usually auto-detected by shipit generate from Xcode signing settings. If manual, use the 10-character Team ID from your Apple Developer account. | | ASCKEYID "
   },
   {
     "id": "/docs/getting-started/ios-quickstart#run-individual-commands",
@@ -213,7 +213,7 @@
     "title": "iOS Quickstart",
     "section": "Define workflows",
     "group": "Getting Started",
-    "content": "Workflows chain actions into repeatable sequences. ShipItSwifty uses Apple's two-version model: | Plist key | Format | Role | | --------- | ------ | ---- | | CFBundleShortVersionString | MAJOR.MINOR.PATCH | Marketing version. Bump manually for releases. | | CFBundleVersion | plain integer | Build counter. Auto-incremented on beta runs. |"
+    "content": "Workflows chain actions into repeatable sequences. ShipItSwifty uses Apple's two-version model: | Plist key | Format | Role | | ---------------------------- | ------------------- | ---------------------------------------------- | | CFBundleShortVersionString | MAJOR.MINOR.PATCH | Marketing version. Bump manually for releases. | | CFBundleVersion | plain integer | Build counter. Auto-incremented on beta runs. |"
   },
   {
     "id": "/docs/getting-started/ios-quickstart#local-beta-no-upload",
@@ -349,7 +349,7 @@
     "title": "KMP Quickstart",
     "section": "Build system auto-detection",
     "group": "Getting Started",
-    "content": "When buildsystem is omitted, ShipItSwifty detects it automatically: | Project marker | Detected value | | --- | --- | | pubspec.yaml with flutter: key | flutter | | package.json with react-native dependency | reactnative | | build.gradle.kts applying kotlin(\"multiplatform\") | kmp | | None of the above | native |"
+    "content": "When buildsystem is omitted, ShipItSwifty detects it automatically: | Project marker | Detected value | | ----------------------------------------------------- | -------------- | | pubspec.yaml with flutter: key | flutter | | package.json with react-native dependency | reactnative | | build.gradle.kts applying kotlin(\"multiplatform\") | kmp | | None of the above | native |"
   },
   {
     "id": "/docs/getting-started/kmp-quickstart#common-pitfalls",
@@ -357,7 +357,7 @@
     "title": "KMP Quickstart",
     "section": "Common pitfalls",
     "group": "Getting Started",
-    "content": "| Symptom | Likely cause | Fix | | --- | --- | --- | | xcodebuild reports Shared.framework not found | Framework wasn't linked before xcodebuild | Ensure ios.buildsystem: kmp is set | | Wrong simulator architecture during link | Targeting Intel sim on Apple silicon | Set ios.kmpbuildtarget: IosX64 for the matching target | | versionName not updated | Custom key names in gradle.properties | Override via versioning.marketingkey / versioning.buildkey | | Gradle re-links every run | Expected — Gradle's incremental check runs but skips when inputs unchanged | No action needed |"
+    "content": "| Symptom | Likely cause | Fix | | ------------------------------------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------- | | xcodebuild reports Shared.framework not found | Framework wasn't linked before xcodebuild | Ensure ios.buildsystem: kmp is set | | Wrong simulator architecture during link | Targeting Intel sim on Apple silicon | Set ios.kmpbuildtarget: IosX64 for the matching target | | versionName not updated | Custom key names in gradle.properties | Override via versioning.marke"
   },
   {
     "id": "/docs/getting-started/kmp-quickstart#next-steps",
@@ -381,7 +381,15 @@
     "title": "Migrating from fastlane",
     "section": "Lane-by-lane mapping",
     "group": "Getting Started",
-    "content": "| fastlane | shipit | | ---------- | ----------------------------------- | | match | shipit sign sync | | gym | shipit archive + shipit export | | pilot | shipit testflight | | deliver | shipit metadata + shipit upload | | scan | shipit test | | snapshot | shipit screenshot (coming soon) | | frameit | shipit screenshot --frame (coming soon) | | pem | covered by ASC API integration | | produce | covered by ASC API integration |"
+    "content": "| fastlane | shipit | | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------- | | match | shipit sign sync | | gym | shipit archive + shipit export | | pilot | shipit testflight | | deliver | shipit metadata + shipit upload | | scan | shipit test | | snapshot | shipit screenshot (coming soon) | | frameit | shipit screenshot --frame (coming soon) | | pem | covered by ASC API integration | | produce | covered by ASC API integration | | incrementbuildnumber / incrementversionnumber | shipit version"
+  },
+  {
+    "id": "/docs/getting-started/migrating-from-fastlane#release-lane-tagging-the-released-version",
+    "url": "/docs/getting-started/migrating-from-fastlane#release-lane-tagging-the-released-version",
+    "title": "Migrating from fastlane",
+    "section": "Release lane: tagging the released version",
+    "group": "Getting Started",
+    "content": "A typical fastlane release lane bumps the version, ships, then tags and pushes: The same flow in Shipfile.yml — note that lanecontext[SharedValues::VERSIONNUMBER] becomes the {{version}} token, and the tag step is gated by when: \"{{versionchanged}}\" so build-only bumps don't re-tag: shipit generate --goal release scaffolds this commit/tag/push tail automatically for both iOS and Android. See Workflow tokens & step conditions for the full list of reserved tokens."
   },
   {
     "id": "/docs/getting-started/migrating-from-fastlane#what-you-gain",
@@ -429,7 +437,7 @@
     "title": "Agent Fast Start",
     "section": "Authoritative sources",
     "group": "Guides",
-    "content": "| Concern | Source of truth | | --- | --- | | Runtime config resolution | Sources/ShipItKit/Config/ConfigResolver.swift, Sources/ShipItKit/Config/ResolvedConfig.swift | | Shipfile model | Sources/ShipItKit/Config/Shipfile.swift | | Environment variable mapping | Sources/ShipItKit/Config/Environment.swift | | Built-in action option schema | Sources/ShipItKit/Introspection/BuiltInSchemaCatalog.swift | | AI-session JSON contract | Sources/ShipItKit/Introspection/AISessionTypes.swift, Sources/ShipItKit/Introspection/AISessionBuilder.swift | | Action behavior | Sources/ShipItKit/Actions/ .swift | |"
+    "content": "| Concern | Source of truth | | ----------------------------- | ---------------------------------------------------------------------------------------------------------------- | | Runtime config resolution | Sources/ShipItKit/Config/ConfigResolver.swift, Sources/ShipItKit/Config/ResolvedConfig.swift | | Shipfile model | Sources/ShipItKit/Config/Shipfile.swift | | Environment variable mapping | Sources/ShipItKit/Config/Environment.swift | | Built-in action option schema | Sources/ShipItKit/Introspection/BuiltInSchemaCatalog.swift | | AI-session JSON contract | Sources/ShipItKit/Introspection/A"
   },
   {
     "id": "/docs/guides/agent-fast-start#start-here-by-task",
@@ -437,7 +445,7 @@
     "title": "Agent Fast Start",
     "section": "Start here by task",
     "group": "Guides",
-    "content": "| Task | Start here | | --- | --- | | Config resolution bug or feature | Sources/ShipItKit/Config/ConfigResolver.swift, ResolvedConfig.swift, Environment.swift, Shipfile.swift | | Action implementation or regression | Sources/ShipItKit/Actions/, matching tests in Tests/ShipItKitTests/ | | Workflow or custom action behavior | Sources/ShipItKit/Actions/WorkflowTypes.swift, CompositeAction.swift, workflow-related tests | | Schema or validation drift | BuiltInSchemaCatalog.swift, SchemaValidator, ShipfileValidator, related tests | | AI-session output drift | AISessionTypes.swift, AISessionBuilder."
+    "content": "| Task | Start here | | ----------------------------------- | -------------------------------------------------------------------------------------------------------------- | | Config resolution bug or feature | Sources/ShipItKit/Config/ConfigResolver.swift, ResolvedConfig.swift, Environment.swift, Shipfile.swift | | Action implementation or regression | Sources/ShipItKit/Actions/, matching tests in Tests/ShipItKitTests/ | | Workflow or custom action behavior | Sources/ShipItKit/Actions/WorkflowTypes.swift, CompositeAction.swift, workflow-related tests | | Schema or validation drift | BuiltInS"
   },
   {
     "id": "/docs/guides/agent-fast-start#change-impact-map",
@@ -445,7 +453,7 @@
     "title": "Agent Fast Start",
     "section": "Change impact map",
     "group": "Guides",
-    "content": "| If you change... | Also check/update... | | --- | --- | | An action Options or Result type | BuiltInSchemaCatalog.swift, tests, docs/features.md, AGENTS.md if command guidance changed, AISessionBuilder.swift if agent-facing guidance changed | | Shipfile schema | Shipfile.swift, BuiltInSchemaCatalog.swift, docs/configuration-reference.md, validation tests | | ai-session payload shape or semantics | AISessionTypes.swift, AISessionBuilder.swift, docs/architecture.md, AGENTS.md, AISessionTests.swift | | CLI command flags or subcommands | Sources/CLI/Commands/, AGENTS.md, docs/features.md, CLI te"
+    "content": "| If you change... | Also check/update... | | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | | An action Options or Result type | BuiltInSchemaCatalog.swift, tests, docs/features.md, AGENTS.md if command guidance changed, AISessionBuilder.swift if agent-facing guidance changed | | Shipfile schema | Shipfile.swift, BuiltInSchemaCatalog.swift, docs/configuration-reference.md, validation tests | | ai-session payload shape or semantics | AISession"
   },
   {
     "id": "/docs/guides/agent-fast-start#recommended-first-read-paths",
@@ -469,7 +477,7 @@
     "title": "CI Setup",
     "section": "GitHub Actions",
     "group": "Guides",
-    "content": "The repository includes two pre-built workflows: | Workflow | File | Trigger | | -------- | ---- | ------- | | Build & Test | .github/workflows/ci.yml | Push / PR to main | | Build DocC | .github/workflows/docc.yml | Push to main + manual | The Build & Test workflow runs three jobs in parallel after lint passes: | Job | Runner | Xcode | Scope | | --- | ------ | ----- | ----- | | build-and-test | macos-26 | 26.4 | Main build, unit tests, CLI tests | | cross-platform-fixture-integration | macos-26 | 26.4 | Blocking Flutter + React Native + KMP fixture integration suites | | build-and-test-linux "
+    "content": "The repository includes two pre-built workflows: | Workflow | File | Trigger | | ------------ | ---------------------------- | ----------------------- | | Build & Test | .github/workflows/ci.yml | Push / PR to main | | Build DocC | .github/workflows/docc.yml | Push to main + manual | The Build & Test workflow runs three jobs in parallel after lint passes: | Job | Runner | Xcode | Scope | | ------------------------------------ | --------------- | ----- | ------------------------------------------------------------------ | | build-and-test | macos-26 | 26.4 | Main build, unit tests, CLI tests | "
   },
   {
     "id": "/docs/guides/ci-setup#swiftyshell-dependency",
@@ -510,6 +518,38 @@
     "section": "JSON Output in CI",
     "group": "Guides",
     "content": "Use --output json for machine-readable results:"
+  },
+  {
+    "id": "/docs/guides/ci-setup#writing-your-own-ci-script",
+    "url": "/docs/guides/ci-setup#writing-your-own-ci-script",
+    "title": "CI Setup",
+    "section": "Writing your own CI script",
+    "group": "Guides",
+    "content": "You have two ways to drive a release from CI. Prefer the first; reach for the second only when a step must live in shell."
+  },
+  {
+    "id": "/docs/guides/ci-setup#approach-1--one-shipfile-workflow-one-command-recommended",
+    "url": "/docs/guides/ci-setup#approach-1--one-shipfile-workflow-one-command-recommended",
+    "title": "CI Setup",
+    "section": "Approach 1 — One Shipfile workflow, one command (recommended)",
+    "group": "Guides",
+    "content": "Put the whole pipeline — build, upload, version bump, commit, and tag — in a Shipfile.yml workflow and invoke it with a single shipit run. This is the only way to get commit/tag/push as managed steps, because git is a workflow action, not a standalone CLI subcommand (there is no shipit git). A non-zero exit from shipit run already fails the job; the jq status check is a belt-and-suspenders guard for pipelines that swallow exit codes. Tagging: the tag step derives its name from the version you just bumped via the {{version}} token — no shell parsing or ${ENVVAR} round-trip needed. {{buildnumber"
+  },
+  {
+    "id": "/docs/guides/ci-setup#approach-2--hand-rolled-shell-script",
+    "url": "/docs/guides/ci-setup#approach-2--hand-rolled-shell-script",
+    "title": "CI Setup",
+    "section": "Approach 2 — Hand-rolled shell script",
+    "group": "Guides",
+    "content": "When you need shell-level control (extra tooling between steps, bespoke conditional logic, or values ShipIt doesn't expose as a token), drive the individual subcommands and parse their JSON. Tagging with the freshly bumped version no longer requires this — use the {{version}} token in Approach 1. Each shipit subcommand emits the envelope { \"action\", \"status\", \"payload\": { … } } and exits non-zero on failure. Why this shape: set -euo pipefail — fail the script the instant any shipit step or jq parse fails, instead of pushing a tag for a build that never uploaded. --output json — every step stay"
+  },
+  {
+    "id": "/docs/guides/ci-setup#preview-without-side-effects",
+    "url": "/docs/guides/ci-setup#preview-without-side-effects",
+    "title": "CI Setup",
+    "section": "Preview without side effects",
+    "group": "Guides",
+    "content": "Add --dry-run to any step to see what it would do without building, uploading, or writing version files:"
   },
   {
     "id": "/docs/guides/ci-setup#linux-swift-version",
@@ -653,7 +693,7 @@
     "title": "Security & Credentials",
     "section": "Where each secret lives",
     "group": "Guides",
-    "content": "| Secret | Storage | | --- | --- | | ASC private key (.p8) | Env var ASCPRIVATEKEY in CI; a local file path outside version control on dev machines | | Vault passphrase | Env var VAULTPASSWORD — encrypts/decrypts the certificate repository | | Google Play service account JSON | Env var GOOGLEPLAYSERVICEACCOUNTJSON in CI; a local file path on dev machines | | Webhook URLs (Slack, Teams) | Env vars | | Keychain password | Auto-generated per CI run, held in memory only |"
+    "content": "| Secret | Storage | | -------------------------------- | ------------------------------------------------------------------------------------------ | | ASC private key (.p8) | Env var ASCPRIVATEKEY in CI; a local file path outside version control on dev machines | | Vault passphrase | Env var VAULTPASSWORD — encrypts/decrypts the certificate repository | | Google Play service account JSON | Env var GOOGLEPLAYSERVICEACCOUNTJSON in CI; a local file path on dev machines | | Webhook URLs (Slack, Teams) | Env vars | | Keychain password | Auto-generated per CI run, held in memory only |"
   },
   {
     "id": "/docs/guides/security-and-credentials#threat-model",
@@ -661,7 +701,7 @@
     "title": "Security & Credentials",
     "section": "Threat model",
     "group": "Guides",
-    "content": "| Threat | Mitigation | | --- | --- | | .p8 key leakage | CI secrets vault; local .p8 paths kept outside version control; key material is never committed | | JWT theft | 15-minute expiry, scoped tokens, HTTPS-only | | Certificate repo exposure | AES-256-GCM encryption; scrypt key derivation with per-file salt resists offline brute force of the passphrase | | .p8 exposure to other local users | Staged key written with 0600 permissions inside a 0700 directory | | CI log exposure | Automatic secret redaction in all log output |"
+    "content": "| Threat | Mitigation | | ----------------------------------- | -------------------------------------------------------------------------------------------------------------- | | .p8 key leakage | CI secrets vault; local .p8 paths kept outside version control; key material is never committed | | JWT theft | 15-minute expiry, scoped tokens, HTTPS-only | | Certificate repo exposure | AES-256-GCM encryption; scrypt key derivation with per-file salt resists offline brute force of the passphrase | | .p8 exposure to other local users | Staged key written with 0600 permissions inside a 0700 directory"
   },
   {
     "id": "/docs/guides/security-and-credentials#the-encrypted-certificate-vault",
@@ -677,7 +717,7 @@
     "title": "Security & Credentials",
     "section": "App Store Connect credentials (iOS)",
     "group": "Guides",
-    "content": "Only Apple-backed commands need these: upload, testflight, metadata, and provision. Local commands like build, test, archive, and export work without them. | Value | Where to find it | | --- | --- | | teamid | Usually auto-detected from Xcode signing. Otherwise: the 10-character Apple Developer Team ID shown in Certificates, IDs & Profiles | | ASCKEYID | App Store Connect → Users and Access → Integrations → App Store Connect API → the key's Key ID | | ASCISSUERID | Same page as the Key ID. This is not stored inside the downloaded .p8 file | | ASCPRIVATEKEYPATH | Local filesystem path to the do"
+    "content": "Only Apple-backed commands need these: upload, testflight, metadata, and provision. Local commands like build, test, archive, and export work without them. | Value | Where to find it | | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | | teamid | Usually auto-detected from Xcode signing. Otherwise: the 10-character Apple Developer Team ID shown in Certificates, IDs & Profiles | | ASCKEYID | App Store Connect → Users and Access → Integrations → App Store Connect API → the key's Key ID |"
   },
   {
     "id": "/docs/guides/security-and-credentials#google-play-credentials-android",
@@ -685,7 +725,7 @@
     "title": "Security & Credentials",
     "section": "Google Play credentials (Android)",
     "group": "Guides",
-    "content": "shipit play-store authenticates with a Google Cloud service account that has Play Console permissions. | Value | Where to find it | | --- | --- | | packagename | Your Android application ID — applicationId in app/build.gradle(.kts) | | GOOGLEPLAYSERVICEACCOUNTJSON | Raw contents of the downloaded service-account JSON key | | GOOGLEPLAYSERVICEACCOUNTJSONPATH | Local filesystem path to that JSON key file | Setup flow: Open the Google Cloud Console and create or select a project. Enable the Google Play Developer API. Create a service account and download a JSON key for it. In Play Console → Users"
+    "content": "shipit play-store authenticates with a Google Cloud service account that has Play Console permissions. | Value | Where to find it | | --------------------------------------- | ------------------------------------------------------------------------- | | packagename | Your Android application ID — applicationId in app/build.gradle(.kts) | | GOOGLEPLAYSERVICEACCOUNTJSON | Raw contents of the downloaded service-account JSON key | | GOOGLEPLAYSERVICEACCOUNTJSONPATH | Local filesystem path to that JSON key file | Setup flow: Open the Google Cloud Console and create or select a project. Enable the G"
   },
   {
     "id": "/docs/guides/security-and-credentials#troubleshooting-403-permission_denied",
@@ -749,7 +789,7 @@
     "title": "CLI Command Reference",
     "section": "Project setup & configuration",
     "group": "Reference",
-    "content": "| Command | What it does | | --- | --- | | shipit generate | Generate Shipfile.yml from project inspection and guided prompts — the recommended starting point | | shipit suggest-config | Generate a suggested Shipfile for a release goal | | shipit inspect | Inspect the current project (Xcode containers, schemes, release-related files) for AI-assisted config generation | | shipit schema | Print the Shipfile and workflow action schema | | shipit env | Print resolved config, environment variables, and processed files (secrets are redacted) | | shipit doctor | Diagnose common setup issues for the s"
+    "content": "| Command | What it does | | ----------------------- | ---------------------------------------------------------------------------------------------------------------- | | shipit generate | Generate Shipfile.yml from project inspection and guided prompts — the recommended starting point | | shipit suggest-config | Generate a suggested Shipfile for a release goal | | shipit inspect | Inspect the current project (Xcode containers, schemes, release-related files) for AI-assisted config generation | | shipit schema | Print the Shipfile and workflow action schema | | shipit env | Print resolved con"
   },
   {
     "id": "/docs/reference/cli-commands#build-test--quality",
@@ -757,7 +797,7 @@
     "title": "CLI Command Reference",
     "section": "Build, test & quality",
     "group": "Reference",
-    "content": "| Command | What it does | | --- | --- | | shipit build | Compile the app (iOS: xcodebuild build, Android: gradlew assemble) | | shipit test | Run unit and UI tests using xcodebuild test | | shipit lint | Run static analysis and lint checks (iOS: xcodebuild analyze, Android: gradlew lint) | | shipit coverage | Read and summarize native coverage artifacts (iOS: xcresult/xccov, Android: JaCoCo XML) | | shipit test-results | Read and normalize test-result artifacts (iOS: xcresult, Android: JUnit XML) | | shipit version | Bump CFBundleVersion and/or CFBundleShortVersionString |"
+    "content": "| Command | What it does | | --------------------- | ---------------------------------------------------------------------------------------- | | shipit build | Compile the app (iOS: xcodebuild build, Android: gradlew assemble) | | shipit test | Run unit and UI tests using xcodebuild test | | shipit lint | Run static analysis and lint checks (iOS: xcodebuild analyze, Android: gradlew lint) | | shipit coverage | Read and summarize native coverage artifacts (iOS: xcresult/xccov, Android: JaCoCo XML) | | shipit test-results | Read and normalize test-result artifacts (iOS: xcresult, Android: JUnit"
   },
   {
     "id": "/docs/reference/cli-commands#archive--export",
@@ -765,7 +805,7 @@
     "title": "CLI Command Reference",
     "section": "Archive & export",
     "group": "Reference",
-    "content": "| Command | What it does | | --- | --- | | shipit archive | Archive the app using xcodebuild archive | | shipit export | Export an IPA from an xcarchive |"
+    "content": "| Command | What it does | | ---------------- | ------------------------------------------ | | shipit archive | Archive the app using xcodebuild archive | | shipit export | Export an IPA from an xcarchive |"
   },
   {
     "id": "/docs/reference/cli-commands#signing--provisioning",
@@ -773,7 +813,7 @@
     "title": "CLI Command Reference",
     "section": "Signing & provisioning",
     "group": "Reference",
-    "content": "| Command | What it does | | --- | --- | | shipit sign | Code-signing subcommands: init, sync, import, cleanup — backed by the encrypted certificate vault | | shipit provision | Manage App IDs, devices, and provisioning profiles | See Security & Credentials for how the encrypted vault works and where credentials live."
+    "content": "| Command | What it does | | ------------------ | --------------------------------------------------------------------------------------------------------- | | shipit sign | Code-signing subcommands: init, sync, import, cleanup — backed by the encrypted certificate vault | | shipit provision | Manage App IDs, devices, and provisioning profiles | See Security & Credentials for how the encrypted vault works and where credentials live."
   },
   {
     "id": "/docs/reference/cli-commands#distribution",
@@ -781,7 +821,7 @@
     "title": "CLI Command Reference",
     "section": "Distribution",
     "group": "Reference",
-    "content": "| Command | What it does | | --- | --- | | shipit upload | Upload an IPA and metadata to App Store Connect | | shipit testflight | Upload to TestFlight and manage beta testers | | shipit metadata | Pull/push App Store metadata from/to App Store Connect | | shipit play-store | Upload an Android release artifact to Google Play and assign it to a distribution track |"
+    "content": "| Command | What it does | | ------------------- | --------------------------------------------------------------------------------------- | | shipit upload | Upload an IPA and metadata to App Store Connect | | shipit testflight | Upload to TestFlight and manage beta testers | | shipit metadata | Pull/push App Store metadata from/to App Store Connect | | shipit play-store | Upload an Android release artifact to Google Play and assign it to a distribution track |"
   },
   {
     "id": "/docs/reference/cli-commands#screenshots",
@@ -789,7 +829,7 @@
     "title": "CLI Command Reference",
     "section": "Screenshots",
     "group": "Reference",
-    "content": "| Command | What it does | | --- | --- | | shipit snapshot | Capture localized screenshots on simulators | | shipit frame | Overlay device frames on screenshots |"
+    "content": "| Command | What it does | | ----------------- | ------------------------------------------- | | shipit snapshot | Capture localized screenshots on simulators | | shipit frame | Overlay device frames on screenshots |"
   },
   {
     "id": "/docs/reference/cli-commands#workflows--automation",
@@ -797,7 +837,7 @@
     "title": "CLI Command Reference",
     "section": "Workflows & automation",
     "group": "Reference",
-    "content": "| Command | What it does | | --- | --- | | shipit run | Execute a named workflow from Shipfile.yml — supports --dry-run and --ci | | shipit notify | Send build notifications to Slack, Teams, or webhooks | | shipit ai-session | Structured AI-agent session bootstrap — emits a stable JSON contract for coding agents | shipit run --dry-run previews exactly which actions would execute, in what order, with what options. --ci disables TTY prompts and enables structured logging — see CI Setup. For agent-driven workflows with ai-session, see the Agent Fast Start guide."
+    "content": "| Command | What it does | | ------------------- | -------------------------------------------------------------------------------------- | | shipit run | Execute a named workflow from Shipfile.yml — supports --dry-run and --ci | | shipit notify | Send build notifications to Slack, Teams, or webhooks | | shipit ai-session | Structured AI-agent session bootstrap — emits a stable JSON contract for coding agents | shipit run --dry-run previews exactly which actions would execute, in what order, with what options. --ci disables TTY prompts and enables structured logging — see CI Setup. For agent-d"
   },
   {
     "id": "/docs/reference/configuration",
@@ -861,7 +901,7 @@
     "title": "Configuration Reference",
     "section": "`code_signing`",
     "group": "Reference",
-    "content": "| Key | Type | Default | Description | | ------------------------------- | ------ | ------- | -------------------------------------------------------------- | | type | string | vault | automatic, vault, or manual | | storage | string | git | git, s3, or gcs | | giturl | string | — | URL of the certificate repo | | appidentifier | string | — | Bundle ID for matching | | profiletype | string | — | appstore, adhoc, development | | p12path | string | — | Local .p12 certificate path (manual signing) | | p12base64 | string | — | Base64-encoded .p12 for CI / manual signing | | p12password | string | "
+    "content": "| Key | Type | Default | Description | | ----------------------------- | ------ | ------- | --------------------------------------------------------- | | type | string | vault | automatic, vault, or manual | | storage | string | git | git, s3, or gcs | | giturl | string | — | URL of the certificate repo | | appidentifier | string | — | Bundle ID for matching | | profiletype | string | — | appstore, adhoc, development | | p12path | string | — | Local .p12 certificate path (manual signing) | | p12base64 | string | — | Base64-encoded .p12 for CI / manual signing | | p12password | string | — | .p1"
   },
   {
     "id": "/docs/reference/configuration#build",
@@ -941,7 +981,7 @@
     "title": "Configuration Reference",
     "section": "Safe bump ordering",
     "group": "Reference",
-    "content": "When a workflow bumps the marketing version (patch/minor/major) and the build number in the same run, place the marketing version bump first. A marketing version bump resets the build number to 1, so running it after a build bump would discard the incremented value. Pair each version step with an immediate git commit so a late-stage failure leaves a clean rollback target."
+    "content": "When a workflow bumps the marketing version (patch/minor/major) and the build number in the same run, place the marketing version bump first. A marketing version bump resets the build number to 1, so running it after a build bump would discard the incremented value. Pair each version step with an immediate git commit so a late-stage failure leaves a clean rollback target. The git action's operation: commit stages every change in the working tree (git add -A) before committing — there is no per-file option. In CI this is usually what you want, since the runner starts from a clean checkout and t"
   },
   {
     "id": "/docs/reference/configuration#beta-workflow-pattern-local-only-apple-semantics",
@@ -965,7 +1005,7 @@
     "title": "Configuration Reference",
     "section": "`test-results` action options",
     "group": "Reference",
-    "content": "Use test-results to parse an existing .xcresult bundle or Gradle JUnit XML directory into a normalized JSON report. | Option | Type | Default | Description | | -------------------- | ------ | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | | format | string | text | Output format hint: text, json, or markdown. | | platform | string | resolved platform | Explicit platform override when parsing outside a Shipfile-backed context. | | xcresultpath | string | auto-disco"
+    "content": "Use test-results to parse an existing .xcresult bundle or Gradle JUnit XML directory into a normalized JSON report. | Option | Type | Default | Description | | -------------------- | ------ | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------- | | format | string | text | Output format hint: text, json, or markdown. | | platform | string | resolved platform | Explicit platform override when parsing outside a Shipfile-backed context. | | xcresultpath | string | auto-discover | Explicit path t"
   },
   {
     "id": "/docs/reference/configuration#archive-action-options",
@@ -973,7 +1013,7 @@
     "title": "Configuration Reference",
     "section": "Archive action options",
     "group": "Reference",
-    "content": "The archive action accepts inline step options for both iOS and Android: | Option | Type | Default | Description | | ---------------------- | ------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- | | scheme | string | app.scheme | Xcode scheme to archive (iOS). | | configuration | string | Release | Build configuration. | | exportmethod | string | app-store| Distribution method (iOS only): app-store, ad-hoc, development, enterprise. | | outputpath | string | — | Output .xcarchive path "
+    "content": "The archive action accepts inline step options for both iOS and Android: | Option | Type | Default | Description | | ---------------------- | ------ | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | | scheme | string | app.scheme | Xcode scheme to archive (iOS). | | configuration "
   },
   {
     "id": "/docs/reference/configuration#project_generation",
@@ -981,7 +1021,7 @@
     "title": "Configuration Reference",
     "section": "`project_generation`",
     "group": "Reference",
-    "content": "Configuration for automatic project file generation (XcodeGen, Tuist) before Xcode-dependent steps. | Key | Type | Default | Description | | ---------------- | ------ | ------- | -------------------------------------------------------------------------------------------- | | tool | string | — | Generation tool: xcodegen or tuist | | command | string | — | Custom shell command (overrides tool) | | specpath | string | — | Path to the project spec file (e.g. project.yml for XcodeGen) | | outputproject | string | — | Expected output .xcodeproj path (used to verify generation succeeded) | | autogen"
+    "content": "Configuration for automatic project file generation (XcodeGen, Tuist) before Xcode-dependent steps. | Key | Type | Default | Description | | ---------------- | ------ | ------- | ------------------------------------------------------------------------------------ | | tool | string | — | Generation tool: xcodegen or tuist | | command | string | — | Custom shell command (overrides tool) | | specpath | string | — | Path to the project spec file (e.g. project.yml for XcodeGen) | | outputproject | string | — | Expected output .xcodeproj path (used to verify generation succeeded) | | autogenerate | "
   },
   {
     "id": "/docs/reference/configuration#notificationsslack",
@@ -1005,7 +1045,7 @@
     "title": "Configuration Reference",
     "section": "Workflow-level overrides",
     "group": "Reference",
-    "content": "| Key | Type | Description | | --------------- | ------ | ------------------------------------------------------------------------------------------------------------ | | buildvariant | string | Overrides android.buildvariant for all steps in this workflow. Used by actions that auto-discover paths. | | flavor | string | Overrides android.gradleproperties.flavor for all steps in this workflow. | | steps | array | Required when using the object format. The ordered sequence of action steps. | Each step: | Key | Description | | --------- | ------------------------------------------- | | action | R"
+    "content": "| Key | Type | Description | | --------------- | ------ | ----------------------------------------------------------------------------------------------------------- | | buildvariant | string | Overrides android.buildvariant for all steps in this workflow. Used by actions that auto-discover paths. | | flavor | string | Overrides android.gradleproperties.flavor for all steps in this workflow. | | steps | array | Required when using the object format. The ordered sequence of action steps. | Each step: | Key | Description | | --------- | -----------------------------------------------------------"
   },
   {
     "id": "/docs/reference/configuration#custom_actions",
@@ -1040,6 +1080,38 @@
     "content": "shipit ai-session includes the user's custom actions in the generated agent prompt (name, description, and declared parameters). Agents are instructed to prefer invoking an existing composite over duplicating its step sequence in a new workflow."
   },
   {
+    "id": "/docs/reference/configuration#workflow-tokens--step-conditions",
+    "url": "/docs/reference/configuration#workflow-tokens--step-conditions",
+    "title": "Configuration Reference",
+    "section": "Workflow tokens & step conditions",
+    "group": "Reference",
+    "content": "Top-level workflow steps support reserved interpolation tokens and an optional when: condition. Together they let a single shipit run bump the version, distribute, then commit and tag the release — no shell or jq glue required."
+  },
+  {
+    "id": "/docs/reference/configuration#reserved-tokens",
+    "url": "/docs/reference/configuration#reserved-tokens",
+    "title": "Configuration Reference",
+    "section": "Reserved tokens",
+    "group": "Reference",
+    "content": "| Token | Resolves to | | --------------------- | ---------------------------------------------------------------------------------------------------------------------- | | {{version}} | The marketing version (e.g. 1.2.3), from a prior version step or the current versioning source. | | {{buildnumber}} | The build number (e.g. 42). | | {{versionchanged}} | true/false — whether the marketing version changed (false for a build-only bump, or when no version step ran). | Rules: Tokens are substituted into string leaves of a step's options: and into its when: value, at run time. Values come from the"
+  },
+  {
+    "id": "/docs/reference/configuration#when-conditions",
+    "url": "/docs/reference/configuration#when-conditions",
+    "title": "Configuration Reference",
+    "section": "`when:` conditions",
+    "group": "Reference",
+    "content": "A step may carry when: \" \". Reserved tokens are substituted first, then the result is evaluated for truthiness: true, 1, or yes (case-insensitive) run the step; anything else — including an unresolved literal token — skips it (recorded with status skipped; the workflow continues). v1 supports a single truthy token, not operators or comparisons. Skips are the only exception to fail-fast workflow semantics. A failing step still aborts the workflow as before."
+  },
+  {
+    "id": "/docs/reference/configuration#example-tag-the-released-version-in-one-shipit-run",
+    "url": "/docs/reference/configuration#example-tag-the-released-version-in-one-shipit-run",
+    "title": "Configuration Reference",
+    "section": "Example: tag the released version in one `shipit run`",
+    "group": "Reference",
+    "content": "shipit generate --goal release scaffolds this commit/tag/push tail for you — for both iOS and Android — and offers to drive the bump from CI via ${RELEASEBUMP}. CI prerequisites the generator prints: a full-history checkout, write permission on the repo, and a configured git identity (user.name / user.email)."
+  },
+  {
     "id": "/docs/reference/configuration#environment-variables-summary",
     "url": "/docs/reference/configuration#environment-variables-summary",
     "title": "Configuration Reference",
@@ -1053,7 +1125,7 @@
     "title": "Configuration Reference",
     "section": "`android`",
     "group": "Reference",
-    "content": "Platform-specific Android configuration. These values are merged on top of shared config when --platform android is active or the platform is auto-detected as Android. | Key | Type | Default | Env Var | Description | | -------------------- | ------ | -------------------- | ------------------------------------ | --------------------------------------------------------------------- | | buildsystem | string | native | SHIPITANDROIDBUILDSYSTEM | Build system: native, flutter, reactnative, or kmp. See Build systems. | | module | string | app | — | Gradle module to build/bundle | | buildvariant | st"
+    "content": "Platform-specific Android configuration. These values are merged on top of shared config when --platform android is active or the platform is auto-detected as Android. | Key | Type | Default | Env Var | Description | | -------------------- | ------ | ------------------ | ------------------------------------ | ------------------------------------------------------------------------------------------------------ | | buildsystem | string | native | SHIPITANDROIDBUILDSYSTEM | Build system: native, flutter, reactnative, or kmp. See Build systems. | | module | string | app | — | Gradle module to bui"
   },
   {
     "id": "/docs/reference/configuration#google-play-credentials",
@@ -1069,7 +1141,7 @@
     "title": "Configuration Reference",
     "section": "`ios`",
     "group": "Reference",
-    "content": "Platform-specific iOS overrides. Merged on top of shared config when --platform ios is active. All top-level app, codesigning, archive, export, testflight, and screenshots keys can appear here to override the shared defaults for iOS only. | Key | Type | Default | Env Var | Description | | -------------------- | ------ | ------------------- | -------------------------------- | --------------------------------------------------------------------------------------- | | buildsystem | string | native | SHIPITIOSBUILDSYSTEM | native, flutter, reactnative, or kmp. See Build systems. | | kmpsharedmodu"
+    "content": "Platform-specific iOS overrides. Merged on top of shared config when --platform ios is active. All top-level app, codesigning, archive, export, testflight, and screenshots keys can appear here to override the shared defaults for iOS only. | Key | Type | Default | Env Var | Description | | -------------------- | ------ | ----------------------- | -------------------------------- | ----------------------------------------------------------------------------------- | | buildsystem | string | native | SHIPITIOSBUILDSYSTEM | native, flutter, reactnative, or kmp. See Build systems. | | kmpsharedmodu"
   },
   {
     "id": "/docs/reference/configuration#build-systems",
@@ -1077,7 +1149,7 @@
     "title": "Configuration Reference",
     "section": "Build systems",
     "group": "Reference",
-    "content": "buildsystem is orthogonal to platform: a single Kotlin Multiplatform or Flutter source tree can produce both an iOS .ipa and an Android .aab. | Value | iOS compilation | Android compilation | | -------------- | ------------------------------------------------------ | ------------------------------------------------------- | | native | xcodebuild | gradlew assemble / bundle | | kmp | link KMP shared framework via Gradle → xcodebuild | gradlew :androidApp:assembleRelease / bundleRelease | | flutter | flutter build ipa (IPA at build/ios/ipa/) | flutter build apk / flutter build appbundle | | reac"
+    "content": "buildsystem is orthogonal to platform: a single Kotlin Multiplatform or Flutter source tree can produce both an iOS .ipa and an Android .aab. | Value | iOS compilation | Android compilation | | -------------- | --------------------------------------------------- | ------------------------------------------------------- | | native | xcodebuild | gradlew assemble / bundle | | kmp | link KMP shared framework via Gradle → xcodebuild | gradlew :androidApp:assembleRelease / bundleRelease | | flutter | flutter build ipa (IPA at build/ios/ipa/) | flutter build apk / flutter build appbundle | | reactna"
   },
   {
     "id": "/docs/reference/configuration#auto-detection",
@@ -1085,7 +1157,7 @@
     "title": "Configuration Reference",
     "section": "Auto-detection",
     "group": "Reference",
-    "content": "When buildsystem is unset, ShipItSwifty resolves it automatically: | Project marker | Detected value | | ----------------------------------------------------------------------- | ---------------- | | pubspec.yaml with a flutter: key | flutter | | package.json declaring react-native in dependencies | reactnative | | build.gradle.kts applying kotlin(\"multiplatform\") | kmp | | None of the above | native |"
+    "content": "When buildsystem is unset, ShipItSwifty resolves it automatically: | Project marker | Detected value | | --------------------------------------------------------- | -------------- | | pubspec.yaml with a flutter: key | flutter | | package.json declaring react-native in dependencies | reactnative | | build.gradle.kts applying kotlin(\"multiplatform\") | kmp | | None of the above | native |"
   },
   {
     "id": "/docs/reference/configuration#kmp-example",
@@ -1101,7 +1173,7 @@
     "title": "Configuration Reference",
     "section": "`coverage` action options",
     "group": "Reference",
-    "content": "The coverage action reads native coverage artifacts — it does not generate them. | Option | Type | Default | Description | | ---------------- | ------ | -------------- | ------------------------------------------------------------------------------------------------- | | platform | string | auto-detected | ios or android | | xcresult | string | auto-discovered| Explicit .xcresult bundle path (iOS) | | report | string | auto-discovered| Explicit JaCoCo XML report path (Android) | | firstpartyonly | bool | true | Suppress test bundles, SPM deps, and known vendor prefixes | | targets | bool | fal"
+    "content": "The coverage action reads native coverage artifacts — it does not generate them. | Option | Type | Default | Description | | ------------------ | ------ | --------------- | ---------------------------------------------------------- | | platform | string | auto-detected | ios or android | | xcresult | string | auto-discovered | Explicit .xcresult bundle path (iOS) | | report | string | auto-discovered | Explicit JaCoCo XML report path (Android) | | firstpartyonly | bool | true | Suppress test bundles, SPM deps, and known vendor prefixes | | targets | bool | false | Show per-target (iOS) or per-"
   },
   {
     "id": "/docs/api/shipitkit/action/description",
