@@ -146,7 +146,7 @@ The site rebuilds automatically on push to `main`. To trigger a rebuild when the
    Required GitHub secret on the website repo for the dispatch flow:
    - `VERCEL_DEPLOY_HOOK_URL` (optional) — if set, the DocC workflow triggers a Vercel rebuild after publishing the asset, so docs go live without waiting for the next manual deploy.
 
-These upstream hooks are not yet wired up — see the project planning notes for the exact upstream YAML snippets.
+The upstream release workflow dispatches `upstream-release` to this repository. Keep the Vercel deploy hook configured as well so release notes and generated API docs reach production without a manual website push.
 
 ### DocC pipeline (advanced)
 

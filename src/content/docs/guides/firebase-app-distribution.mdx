@@ -1,0 +1,105 @@
+---
+title: "Firebase App Distribution"
+description: "Deliver signed iOS and Android builds to Firebase tester groups from a Shipfile workflow."
+group: "Guides"
+order: 4
+---
+
+ShipIt `0.4.0` adds the `firebase-app-distribution` workflow action. It uploads a signed iOS IPA or Android APK/AAB to Firebase App Distribution, attaches release notes, and distributes the build to Firebase tester groups or individual testers.
+
+## What you need
+
+- A Firebase project with an iOS or Android app registered for App Distribution
+- The Firebase app ID, found under **Project settings -> Your apps -> App ID**
+- At least one Firebase tester group alias or tester email address
+- A Google service-account JSON key with access to the Firebase project
+- A signed artifact produced earlier in the workflow
+
+Create the service account in Google Cloud IAM for the same Firebase project, grant it the Firebase App Distribution Admin role, and create a JSON key. Store the key in your CI secret manager, not in the repository.
+
+## Configure credentials
+
+Choose one credential source. ShipIt checks them in this order:
+
+1. `service_account_path` on the workflow action
+2. `FIREBASE_SERVICE_ACCOUNT_JSON`, containing the raw JSON key
+3. `GOOGLE_APPLICATION_CREDENTIALS`, containing the local path to the JSON key
+
+For CI, pass the raw JSON from a secret:
+
+```bash
+export FIREBASE_SERVICE_ACCOUNT_JSON="${FIREBASE_SERVICE_ACCOUNT_JSON}"
+export FIREBASE_IOS_QA_APP_ID="1:1234567890:ios:abc123"
+```
+
+Do not inline the JSON key in `Shipfile.yml`.
+
+## iOS workflow
+
+Export an ad-hoc IPA, then send it to a Firebase tester group:
+
+```yaml
+app:
+  scheme: MyApp
+
+archive:
+  export_method: ad-hoc
+
+workflows:
+  beta:
+    - action: archive
+    - action: export
+      options:
+        output_directory: ./build/firebase
+    - action: firebase-app-distribution
+      options:
+        app_id: ${FIREBASE_IOS_QA_APP_ID}
+        artifact_path: ./build/firebase/MyApp.ipa
+        groups: [qa-testers]
+        release_notes: "Build {{build_number}}"
+```
+
+## Android workflow
+
+Build an APK for direct tester installation, then distribute it:
+
+```yaml
+platform: android
+
+android:
+  module: app
+  build_variant: release
+
+workflows:
+  beta:
+    - action: build
+    - action: firebase-app-distribution
+      options:
+        app_id: ${FIREBASE_ANDROID_QA_APP_ID}
+        artifact_path: ./app/build/outputs/apk/release/app-release.apk
+        groups: [qa-testers]
+        release_notes: "Build {{build_number}}"
+```
+
+Firebase app IDs encode their platform. ShipIt validates that an iOS app ID receives an IPA, and an Android app ID receives an APK or AAB, before uploading.
+
+## Verify safely
+
+Run the workflow-level dry run first:
+
+```bash
+shipit run beta --dry-run --output json
+```
+
+For a Firebase-only preview, set `dry_run: true` on the action. This validates the app ID, artifact path, and audience without uploading.
+
+```yaml
+- action: firebase-app-distribution
+  options:
+    app_id: ${FIREBASE_ANDROID_QA_APP_ID}
+    artifact_path: ./app/build/outputs/apk/release/app-release.apk
+    groups: [qa-testers]
+    dry_run: true
+```
+
+When a distribution succeeds, structured output includes Firebase's tester installation URL and console URL when they are available. Tester email addresses are not included in the output.
