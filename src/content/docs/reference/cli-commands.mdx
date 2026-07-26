@@ -5,7 +5,7 @@ group: "Reference"
 order: 2
 ---
 
-The `shipit` CLI ships with 27 commands covering the full release pipeline — from generating your first config to uploading to the stores. Run `shipit <command> --help` for the complete flag reference of any command, and pass `--shipfile ./path/to/config.yml` anywhere your config isn't the default `Shipfile.yml`.
+The `shipit` CLI ships with 27 commands and workflow actions covering the full release pipeline — from generating your first config to delivering builds to stores and testers. Run `shipit <command> --help` for the complete flag reference of any command, and pass `--shipfile ./path/to/config.yml` anywhere your config isn't the default `Shipfile.yml`.
 
 ## Project setup & configuration
 
@@ -57,6 +57,8 @@ See [Security & Credentials](/docs/guides/security-and-credentials) for how the 
 | `shipit testflight` | Upload to TestFlight and manage beta testers                                            |
 | `shipit metadata`   | Pull/push App Store metadata from/to App Store Connect                                  |
 | `shipit play-store` | Upload an Android release artifact to Google Play and assign it to a distribution track |
+
+The `firebase-app-distribution` workflow action uploads signed iOS IPAs and Android APKs or AABs to Firebase App Distribution and releases them to tester groups or individual testers. See [Firebase App Distribution](/docs/guides/firebase-app-distribution).
 
 ## Screenshots
 

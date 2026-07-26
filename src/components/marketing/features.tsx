@@ -19,9 +19,9 @@ const featureData: Feature[] = [
   },
   {
     Icon: Upload,
-    title: "Store delivery",
-    tag: "Android",
-    desc: "Upload to TestFlight, App Store Connect, or Google Play with native clients, release tracks, metadata flows, and CI-friendly credentials.",
+    title: "Store & tester delivery",
+    tag: "Cross-platform",
+    desc: "Upload to TestFlight, App Store Connect, Google Play, or Firebase App Distribution with native clients, release tracks, tester groups, and CI-friendly credentials.",
   },
   {
     Icon: ChartNoAxesColumn,
@@ -124,8 +124,8 @@ export function Features() {
             className="mt-3.5 max-w-[480px] text-base leading-[1.65]"
             style={{ color: "var(--fg2)" }}
           >
-            From local validation to App Store Connect and Google Play. No Ruby, no Fastfile, no
-            fragile shell glue.
+            From local validation to App Store Connect, Google Play, and Firebase App Distribution.
+            No Ruby, no Fastfile, no fragile shell glue.
           </p>
         </div>
 
