@@ -123,6 +123,45 @@ shipit validate bundle --bundle ./app/build/outputs/bundle/release/app-release.a
 shipit play-store --platform android --track internal
 ```
 
+## Optional AndroidCLI integration
+
+ShipItSwifty supports Google's preview AndroidCLI as an optional companion to Gradle and ADB. Use it for project description, layout and screen inspection, emulator and SDK management, documentation search, skills, and Android Studio integration. Gradle remains responsible for build, test, lint, and archive tasks.
+
+Direct commands do not require Shipfile opt-in:
+
+```bash
+shipit android-cli describe
+shipit android-cli emulator list
+shipit android-cli layout --pretty
+shipit android-cli skills list --long
+```
+
+Enable AndroidCLI only when workflows need the `android-*` actions:
+
+```yaml
+android:
+  cli:
+    enabled: true
+    executable_path: android
+    sdk_path: /opt/android-sdk
+```
+
+ShipIt requires AndroidCLI 1.0 or newer when enabled. It never installs or updates AndroidCLI or its skills automatically. Workflow operations that change a device or development environment require `allow_mutation: true`:
+
+```yaml
+workflows:
+  device-check:
+    - action: android-layout
+      options: { operation: layout, arguments: ["--pretty"] }
+    - action: android-install
+      options:
+        operation: install
+        arguments: ["./app/build/outputs/apk/debug/app-debug.apk"]
+        allow_mutation: true
+```
+
+AndroidCLI is preview software and may report basic command/option telemetry. AndroidCLI emulator management is currently unavailable on Windows. Leave `android.cli.enabled` off when AndroidCLI is unavailable or when you require the established Gradle/ADB-only behavior.
+
 ## Platform auto-detection
 
 When `--platform` is omitted, ShipItSwifty checks the current directory:
