@@ -96,6 +96,14 @@
     "content": ""
   },
   {
+    "id": "/docs/getting-started/android-quickstart#optional-androidcli-integration",
+    "url": "/docs/getting-started/android-quickstart#optional-androidcli-integration",
+    "title": "Android Quickstart",
+    "section": "Optional AndroidCLI integration",
+    "group": "Getting Started",
+    "content": "ShipItSwifty supports Google's preview AndroidCLI as an optional companion to Gradle and ADB. Use it for project description, layout and screen inspection, emulator and SDK management, documentation search, skills, and Android Studio integration. Gradle remains responsible for build, test, lint, and archive tasks. Direct commands do not require Shipfile opt-in: Enable AndroidCLI only when workflows need the android- actions: ShipIt requires AndroidCLI 1.0 or newer when enabled. It never installs or updates AndroidCLI or its skills automatically. Workflow operations that change a device or deve"
+  },
+  {
     "id": "/docs/getting-started/android-quickstart#platform-auto-detection",
     "url": "/docs/getting-started/android-quickstart#platform-auto-detection",
     "title": "Android Quickstart",
@@ -829,7 +837,7 @@
     "title": "CLI Command Reference",
     "section": null,
     "group": "Reference",
-    "content": "The shipit CLI ships with 27 commands and workflow actions covering the full release pipeline — from generating your first config to delivering builds to stores and testers. Run shipit --help for the complete flag reference of any command, and pass --shipfile ./path/to/config.yml anywhere your config isn't the default Shipfile.yml."
+    "content": "The shipit CLI ships with commands and workflow actions covering the full release pipeline — from generating your first config to delivering builds to stores and testers. Run shipit --help for the complete flag reference of any command, and pass --shipfile ./path/to/config.yml anywhere your config isn't the default Shipfile.yml."
   },
   {
     "id": "/docs/reference/cli-commands#project-setup--configuration",
@@ -846,6 +854,14 @@
     "section": "Build, test & quality",
     "group": "Reference",
     "content": "| Command | What it does | | --------------------- | ---------------------------------------------------------------------------------------- | | shipit build | Compile the app (iOS: xcodebuild build, Android: gradlew assemble) | | shipit test | Run unit and UI tests using xcodebuild test | | shipit lint | Run static analysis and lint checks (iOS: xcodebuild analyze, Android: gradlew lint) | | shipit coverage | Read and summarize native coverage artifacts (iOS: xcresult/xccov, Android: JaCoCo XML) | | shipit test-results | Read and normalize test-result artifacts (iOS: xcresult, Android: JUnit"
+  },
+  {
+    "id": "/docs/reference/cli-commands#androidcli-preview-tooling",
+    "url": "/docs/reference/cli-commands#androidcli-preview-tooling",
+    "title": "CLI Command Reference",
+    "section": "AndroidCLI preview tooling",
+    "group": "Reference",
+    "content": "| Command | What it does | | ------------------------------ | ----------------------------------------------------------------------------------------------------------------- | | shipit android-cli | Pass through AndroidCLI's create, describe, docs, emulator, layout, run, screen, SDK, skills, and Studio families | The direct command does not require AndroidCLI workflow opt-in. Shipfile workflows can use the corresponding android- actions after setting android.cli.enabled: true. Mutating workflow operations also require allowmutation: true. AndroidCLI complements rather than replaces Gradle-ba"
   },
   {
     "id": "/docs/reference/cli-commands#archive--export",
@@ -1182,6 +1198,14 @@
     "section": "`android`",
     "group": "Reference",
     "content": "Platform-specific Android configuration. These values are merged on top of shared config when --platform android is active or the platform is auto-detected as Android. | Key | Type | Default | Env Var | Description | | -------------------- | ------ | ------------------ | ------------------------------------ | ------------------------------------------------------------------------------------------------------ | | buildsystem | string | native | SHIPITANDROIDBUILDSYSTEM | Build system: native, flutter, reactnative, or kmp. See Build systems. | | module | string | app | — | Gradle module to bui"
+  },
+  {
+    "id": "/docs/reference/configuration#androidcli-preview-opt-in",
+    "url": "/docs/reference/configuration#androidcli-preview-opt-in",
+    "title": "Configuration Reference",
+    "section": "AndroidCLI (preview, opt-in)",
+    "group": "Reference",
+    "content": "AndroidCLI complements the Gradle/ADB pipeline and does not build release artifacts. Use shipit android-cli for direct commands; workflow actions require explicit opt-in: | Key | Type | Default | Environment variable | Description | | --------------------- | ------ | --------- | -------------------------------------- | ---------------------------------------------------------------------------------------------- | | cli.enabled | bool | false | SHIPITANDROIDCLIENABLED | Enables AndroidCLI-backed workflow actions | | cli.executablepath | string | android | SHIPITANDROIDCLIEXECUTABLEPATH | Execu"
   },
   {
     "id": "/docs/reference/configuration#google-play-credentials",

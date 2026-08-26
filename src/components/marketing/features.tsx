@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, type ComponentType } from "react";
-import { Bot, ChartNoAxesColumn, GitBranch, Shield, Smartphone, Upload } from "lucide-react";
+import {
+  Bot,
+  ChartNoAxesColumn,
+  GitBranch,
+  Shield,
+  Smartphone,
+  Terminal,
+  Upload,
+} from "lucide-react";
 
 interface Feature {
   Icon: ComponentType<{ size?: number; className?: string }>;
@@ -40,6 +48,12 @@ const featureData: Feature[] = [
     title: "Guided setup",
     tag: "Cross-platform",
     desc: "Start with shipit generate to infer config from Xcode, Gradle, or shared projects, then use ai-session when you want an agent-ready JSON hand-off.",
+  },
+  {
+    Icon: Terminal,
+    title: "AndroidCLI, when you want it",
+    tag: "Android",
+    desc: "Opt into Google's preview AndroidCLI for project, layout, emulator, SDK, skills, and Android Studio tooling while keeping Gradle and ADB as the dependable release pipeline.",
   },
   {
     Icon: GitBranch,
