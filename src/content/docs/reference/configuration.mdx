@@ -662,7 +662,27 @@ Platform-specific Android configuration. These values are merged on top of share
 | `gradle_properties`  | map    | `{}`               | —                                    | Extra `-P key=value` properties passed to Gradle                                                       |
 | `gradlew_path`       | string | —                  | `SHIPIT_ANDROID__GRADLEW_PATH`       | Explicit path to the `gradlew` script (auto-detected when omitted)                                     |
 | `gradle_project_dir` | string | Shipfile directory | `SHIPIT_ANDROID__GRADLE_PROJECT_DIR` | Directory containing the Gradle root project                                                           |
-| `gradle_flags`       | array  | `[]`               | —                                    | Extra Gradle flags such as `--stacktrace`                                                              |
+
+### AndroidCLI (preview, opt-in)
+
+AndroidCLI complements the Gradle/ADB pipeline and does not build release artifacts. Use `shipit android-cli` for direct commands; workflow actions require explicit opt-in:
+
+```yaml
+android:
+  cli:
+    enabled: true
+    executable_path: android
+    sdk_path: /opt/android-sdk
+```
+
+| Key                   | Type   | Default   | Environment variable                   | Description                                                                                    |
+| --------------------- | ------ | --------- | -------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `cli.enabled`         | bool   | `false`   | `SHIPIT_ANDROID__CLI__ENABLED`         | Enables AndroidCLI-backed workflow actions                                                     |
+| `cli.executable_path` | string | `android` | `SHIPIT_ANDROID__CLI__EXECUTABLE_PATH` | Executable name or path; bare names use `PATH`, while relative paths resolve from the Shipfile |
+| `cli.sdk_path`        | string | —         | `SHIPIT_ANDROID__CLI__SDK_PATH`        | SDK path forwarded through AndroidCLI's global `--sdk` option                                  |
+
+ShipIt requires AndroidCLI 1.0 or newer when enabled. It never downloads, initializes, updates, or installs skills automatically. Device- or environment-changing workflow operations require `allow_mutation: true`. AndroidCLI is preview software and may report basic command/option telemetry; emulator management is currently unavailable on Windows.
+| `gradle_flags` | array | `[]` | — | Extra Gradle flags such as `--stacktrace` |
 
 ### Google Play credentials
 
