@@ -5,7 +5,7 @@ group: "Reference"
 order: 2
 ---
 
-The `shipit` CLI ships with 27 commands and workflow actions covering the full release pipeline — from generating your first config to delivering builds to stores and testers. Run `shipit <command> --help` for the complete flag reference of any command, and pass `--shipfile ./path/to/config.yml` anywhere your config isn't the default `Shipfile.yml`.
+The `shipit` CLI ships with commands and workflow actions covering the full release pipeline — from generating your first config to delivering builds to stores and testers. Run `shipit <command> --help` for the complete flag reference of any command, and pass `--shipfile ./path/to/config.yml` anywhere your config isn't the default `Shipfile.yml`.
 
 ## Project setup & configuration
 
@@ -32,6 +32,14 @@ See the [Configuration Reference](/docs/reference/configuration) for every Shipf
 | `shipit coverage`     | Read and summarize native coverage artifacts (iOS: xcresult/xccov, Android: JaCoCo XML)  |
 | `shipit test-results` | Read and normalize test-result artifacts (iOS: xcresult, Android: JUnit XML)             |
 | `shipit version`      | Bump `CFBundleVersion` and/or `CFBundleShortVersionString`                               |
+
+## AndroidCLI preview tooling
+
+| Command                        | What it does                                                                                                      |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `shipit android-cli <command>` | Pass through AndroidCLI's create, describe, docs, emulator, layout, run, screen, SDK, skills, and Studio families |
+
+The direct command does not require AndroidCLI workflow opt-in. Shipfile workflows can use the corresponding `android-*` actions after setting `android.cli.enabled: true`. Mutating workflow operations also require `allow_mutation: true`. AndroidCLI complements rather than replaces Gradle-backed build, test, lint, and archive commands.
 
 ## Archive & export
 
