@@ -79,10 +79,14 @@ The `firebase-app-distribution` workflow action uploads signed iOS IPAs and Andr
 
 | Command             | What it does                                                                           |
 | ------------------- | -------------------------------------------------------------------------------------- |
-| `shipit run`        | Execute a named workflow from `Shipfile.yml` — supports `--dry-run` and `--ci`         |
-| `shipit notify`     | Send build notifications to Slack, Teams, or webhooks                                  |
-| `shipit ai-session` | Structured AI-agent session bootstrap — emits a stable JSON contract for coding agents |
+| `shipit run`             | Execute a named workflow from `Shipfile.yml` — supports `--dry-run` and `--ci`                    |
+| `shipit notify`          | Send build notifications to Slack, Teams, or webhooks                                             |
+| `shipit ai session`      | Structured AI-agent session bootstrap — emits a stable JSON contract for coding agents (default subcommand of `shipit ai`) |
+| `shipit ai prompt`       | Print just the recommended agent system prompt for the current project                            |
+| `shipit ai instructions` | Print ShipItSwifty's own operating guidance for agents — no project inspection required            |
 
 `shipit run <workflow> --dry-run` previews exactly which actions would execute, in what order, with what options. `--ci` disables TTY prompts and enables structured logging — see [CI Setup](/docs/guides/ci-setup).
 
-For agent-driven workflows with `ai-session`, see the [Agent Fast Start](/docs/guides/agent-fast-start) guide.
+For agent-driven workflows with `shipit ai`, see the [Agent Fast Start](/docs/guides/agent-fast-start) guide.
+
+> **Breaking change (0.7.0):** `shipit ai-session` was renamed to `shipit ai session` and moved under the `shipit ai` command group alongside `shipit ai prompt` and `shipit ai instructions`. There is no backwards-compatible alias — update any scripts or CI invoking `shipit ai-session` directly.
