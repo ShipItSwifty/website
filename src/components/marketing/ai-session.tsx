@@ -6,7 +6,7 @@ import { AnimTerminal, type TerminalLine } from "./anim-terminal";
 import { CodeBlock } from "./code-block";
 
 const sessionLines: TerminalLine[] = [
-  { t: "prompt", s: "shipit ai-session" },
+  { t: "prompt", s: "shipit ai session" },
   { t: "dim", s: "▸ analyzing project…" },
   { t: "ok", s: "  ✓ project context captured" },
   { t: "ok", s: "  ✓ shipit documentation included" },
@@ -17,10 +17,10 @@ const sessionLines: TerminalLine[] = [
 const steps = [
   {
     num: "01",
-    title: "Run ai-session",
+    title: "Run shipit ai session",
     desc: (
       <>
-        <code>shipit ai-session</code> generates a machine-readable snapshot: your project
+        <code>shipit ai session</code> generates a machine-readable snapshot: your project
         structure, available <code>shipit</code> commands, and documentation - everything an AI
         agent needs to understand your setup.
       </>
@@ -85,7 +85,7 @@ export function AISession() {
                 background: "var(--brand-muted)",
               }}
             >
-              shipit ai-session
+              shipit ai session
             </code>{" "}
             generates a machine-readable context dump — shipit documentation, available commands,
             and your project details — so any coding agent can understand the tool and generate a
@@ -135,7 +135,7 @@ export function AISession() {
               >
                 Example agent prompt
               </div>
-              <CodeBlock lang="text">{`Run shipit ai-session --output json and use
+              <CodeBlock lang="text">{`Run shipit ai session --output json and use
 the output as context to understand my project
 and the shipit tool. Then generate a Shipfile.yml
 for my app. Ask me for clarification if anything
@@ -163,7 +163,7 @@ is ambiguous or missing.`}</CodeBlock>
                   className="text-sm font-semibold"
                   style={{ fontFamily: "var(--font-display)", color: "var(--fg1)" }}
                 >
-                  shipit ai-session
+                  shipit ai session
                 </div>
               </div>
               <AnimTerminal lines={sessionLines} loopMs={8000} />
