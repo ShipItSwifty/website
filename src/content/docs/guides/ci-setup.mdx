@@ -209,6 +209,62 @@ shipit run release --dry-run --output json      # full step list, no execution
 shipit version --bump patch --dry-run --output json   # computed before/after, nothing written
 ```
 
+## Exporting a workflow as a GitHub Actions job
+
+`shipit ci export` translates a named workflow, and the `artifacts` its steps declare, into a runnable job. Export only prints YAML: it doesn't run setup, publish a workflow, or upload anything.
+
+```bash
+shipit ci export --provider github-actions --workflow tests --runner macos-26 \
+  --setup-command "swift build" --export-path .github/workflows/tests.yml
+```
+
+For a `tests` workflow whose `swift-test` step declares a `results` artifact, the job looks like this:
+
+```yaml
+name: tests
+"on": [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: macos-26
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Setup 1
+        run: swift build
+      - name: Run tests
+        run: "'shipit' run 'tests' --shipfile 'Shipfile.yml' --ci"
+      - if: always()
+        name: Publish results
+        uses: actions/upload-artifact@v7
+        with:
+          if-no-files-found: warn
+          name: tests-step-2-results
+          path: build/workflow-artifacts/*/step-2/results/
+          retention-days: 14
+      - if: always()
+        name: Publish workflow evidence
+        uses: actions/upload-artifact@v7
+        with:
+          if-no-files-found: warn
+          name: tests-evidence
+          path: build/workflow-artifacts/
+          retention-days: 14
+```
+
+- **Always-upload artifacts.** The publish steps use `if: always()`, so a failing run still uploads the declared artifacts and the evidence of every attempt, including the failed ones.
+- **Runner label.** `--runner` is required and is used verbatim. Choose it yourself; export never guesses.
+- **Setup commands.** Each `--setup-command` becomes its own step, before the workflow runs. The job calls `shipit` by name (change it with `--executable`), so a setup command must install or build it. For example, build it from source and pass `--executable ./build/bin/shipit`.
+- **Artifacts.** Steps declare `artifacts` with a `name`, `paths` (files, directories, or globs), and `retention_days`. Report and result locations a step publishes are staged automatically. Build products such as IPAs, AABs, APKs, and archives are never collected unless you list them.
+- **New file only.** The `--export-path` must not exist yet.
+
+GitHub Actions is the only built-in provider. Other providers, such as Xcode Cloud, Bitrise, or CircleCI, are not included yet. Library consumers add one by implementing `CIProvider` and registering it with `CIProviderRegistry`.
+
+See [Test Results & Workflows](/docs/guides/test-results) for what the uploaded evidence contains.
+
 ## Linux Swift Version
 
 The Linux CI job uses `swift:6.3.1-noble` (Ubuntu 24.04, current stable Swift). To update it, change the `container.image` value in `.github/workflows/ci.yml` and the `SWIFT_IMAGE` variable at the top of the `Makefile`.

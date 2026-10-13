@@ -22,7 +22,8 @@ const steps = [
       <>
         <code>shipit ai session</code> generates a machine-readable snapshot: your project
         structure, available <code>shipit</code> commands, and documentation - everything an AI
-        agent needs to understand your setup.
+        agent needs to understand your setup, including how to read structured test results and
+        evidence instead of scraping console output.
       </>
     ),
   },
@@ -89,7 +90,8 @@ export function AISession() {
             </code>{" "}
             generates a machine-readable context dump — shipit documentation, available commands,
             and your project details — so any coding agent can understand the tool and generate a
-            correct Shipfile.yml without guessing.
+            correct Shipfile.yml without guessing. The instructions and skills commands carry the
+            same guidance on reading test results and evidence.
           </p>
         </div>
 

@@ -24,14 +24,61 @@ See the [Configuration Reference](/docs/reference/configuration) for every Shipf
 
 ## Build, test & quality
 
-| Command               | What it does                                                                             |
-| --------------------- | ---------------------------------------------------------------------------------------- |
-| `shipit build`        | Compile the app (iOS: `xcodebuild build`, Android: `gradlew assemble`)                   |
-| `shipit test`         | Run unit and UI tests using `xcodebuild test`                                            |
-| `shipit lint`         | Run static analysis and lint checks (iOS: `xcodebuild analyze`, Android: `gradlew lint`) |
-| `shipit coverage`     | Read and summarize native coverage artifacts (iOS: xcresult/xccov, Android: JaCoCo XML)  |
-| `shipit test-results` | Read and normalize test-result artifacts (iOS: xcresult, Android: JUnit XML)             |
-| `shipit version`      | Bump `CFBundleVersion` and/or `CFBundleShortVersionString`                               |
+| Command               | What it does                                                                                                                                                    |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `shipit build`        | Compile the app (iOS: `xcodebuild build`, Android: `gradlew assemble`)                                                                                          |
+| `shipit test`         | Run a named test workflow or platform tests — iOS builds once and tests many times, and Android, Flutter, React Native, and KMP are covered too                 |
+| `shipit swift-test`   | Run SwiftPM package tests with structured results, coverage, and selective reruns                                                                               |
+| `shipit swift-format` | Lint Swift formatting without rewriting files                                                                                                                   |
+| `shipit lint`         | Run static analysis and lint checks (iOS: `xcodebuild analyze`, Android: `gradlew lint`)                                                                        |
+| `shipit coverage`     | Read and summarize coverage artifacts — xcresult/xccov, SwiftPM LLVM JSON, LCOV (Flutter, Jest), and JaCoCo/Kover XML — with source-root filters and gates      |
+| `shipit test-results` | Read and normalize saved test results — xcresult, JUnit XML, Swift Testing events, Flutter and Jest output, and ShipIt manifests — and export portable evidence |
+| `shipit version`      | Bump `CFBundleVersion` and/or `CFBundleShortVersionString`                                                                                                      |
+
+### Running tests
+
+`shipit test` runs the workflow named by the top-level `test_workflow` key, or the one you pass with `--workflow`. Without either, it runs the platform's tests directly. On native iOS it builds the tests once into an `.xctestproducts` bundle, then runs each test plan and destination into its own result bundle without rebuilding.
+
+| Flag                       | What it does                                                                      |
+| -------------------------- | --------------------------------------------------------------------------------- |
+| `--workflow <name>`        | Run a named test workflow. Exclusive with the direct test options below           |
+| `--test-plans <plan>`      | Run ordered Xcode test plans that share one test build                            |
+| `--legacy-combined-test`   | Use the older single `xcodebuild test` invocation instead of build-once-test-many |
+| `--rerun-failed-tests`     | Rerun only the failed tests, where the runner can select them                     |
+| `--max-rerun-attempts <n>` | Total attempts including the initial run (default `2`)                            |
+| `--report-path <path>`     | Write the structured JSON `TestRunReport` to a file                               |
+
+```bash
+shipit test --rerun-failed-tests --max-rerun-attempts 2 --report-path ./artifacts/test-report.json
+shipit test --workflow tests --ci --output json
+```
+
+Run `shipit test --help` for the remaining Xcode and Android flags, such as `--scheme`, `--destination`, `--kind`, and `--device-strategy`. For the options, reruns, and the report each run writes, see [Test Results & Workflows](/docs/guides/test-results).
+
+### Swift packages
+
+```bash
+shipit swift-test --code-coverage --rerun-failed-tests
+shipit swift-test --parallel-workers 1   # run XCTest cases one at a time (suites that share state)
+shipit swift-format --configuration .swift-format
+```
+
+`swift-test` accepts `--package-path`, `--scratch-path`, `--filter`, `--skip`, `--env KEY=VALUE`, `--output-directory`, `--code-coverage`, `--rerun-failed-tests`, `--max-rerun-attempts`, `--infrastructure-attempts`, and `--parallel-workers`. `swift-format` lints one or more paths recursively and takes `--configuration` and `--report-path`.
+
+A package that imports UIKit without a `canImport` or `os(...)` guard can't run under `swift test`. Use `shipit test` with the scheme Xcode generates for the package instead — see [Swift packages](/docs/reference/configuration#swift-test-and-swift-format-actions).
+
+### Reading results and coverage
+
+```bash
+shipit test-results --input ./build/MyApp-tests.xcresult --export-directory artifacts/ios
+shipit test-results --input app/build/test-results/testDebugUnitTest --runner gradle --failed-only
+shipit test-results --input artifacts/ios/manifest.json --format markdown
+shipit coverage --input-format lcov --report coverage/lcov.info --runner flutter-test --minimum-coverage 70
+```
+
+`test-results` takes repeatable `--input` paths (no Shipfile needed), plus `--input-format`, `--runner`, `--build-system`, `--failed-only`, `--format text|json|markdown`, `--report-path`, and the evidence flags `--coverage-input`, `--evidence`, and `--export-directory`. `coverage` also reads saved reports with `--input-format swift|lcov|jacoco|kover`, `--source-root`, `--exclude-previews`, and `--minimum-coverage`.
+
+See [Test Results & Workflows](/docs/guides/test-results) for what the report contains and how evidence export works.
 
 ## AndroidCLI preview tooling
 
@@ -77,16 +124,35 @@ The `firebase-app-distribution` workflow action uploads signed iOS IPAs and Andr
 
 ## Workflows & automation
 
-| Command             | What it does                                                                           |
-| ------------------- | -------------------------------------------------------------------------------------- |
-| `shipit run`             | Execute a named workflow from `Shipfile.yml` — supports `--dry-run` and `--ci`                    |
-| `shipit notify`          | Send build notifications to Slack, Teams, or webhooks                                             |
-| `shipit ai session`      | Structured AI-agent session bootstrap — emits a stable JSON contract for coding agents (default subcommand of `shipit ai`) |
-| `shipit ai prompt`       | Print just the recommended agent system prompt for the current project                            |
-| `shipit ai instructions` | Print ShipItSwifty's own operating guidance for agents — no project inspection required            |
-| `shipit ai skills`       | Curated, built-in agent playbooks (`list` / `show <id>`) for common jobs — React Native/Expo setup, Firebase distribution, fastlane migration, KMP, custom actions. Fixed catalog, no installation. |
+| Command                  | What it does                                                                                                                                                                                                                                 |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `shipit run`             | Execute a named workflow from `Shipfile.yml` — supports `--dry-run` and `--ci`                                                                                                                                                               |
+| `shipit ci export`       | Export a named workflow as a runnable CI job that uploads its artifacts and evidence even when it fails                                                                                                                                      |
+| `shipit notify`          | Send build notifications to Slack, Teams, or webhooks                                                                                                                                                                                        |
+| `shipit ai session`      | Structured AI-agent session bootstrap — emits a stable JSON contract for coding agents (default subcommand of `shipit ai`)                                                                                                                   |
+| `shipit ai prompt`       | Print just the recommended agent system prompt for the current project                                                                                                                                                                       |
+| `shipit ai instructions` | Print ShipItSwifty's own operating guidance for agents — no project inspection required                                                                                                                                                      |
+| `shipit ai skills`       | Curated, built-in agent playbooks (`list` / `show <id>`) for common jobs — React Native/Expo setup, Firebase distribution, fastlane migration, KMP, custom actions, test workflows, and test-failure triage. Fixed catalog, no installation. |
 
 `shipit run <workflow> --dry-run` previews exactly which actions would execute, in what order, with what options. `--ci` disables TTY prompts and enables structured logging — see [CI Setup](/docs/guides/ci-setup).
+
+### Exporting a workflow as a CI job
+
+```bash
+shipit ci export --provider github-actions --workflow tests --runner macos-26 \
+  --setup-command "swift build" --export-path .github/workflows/tests.yml
+```
+
+| Flag                    | What it does                                                               |
+| ----------------------- | -------------------------------------------------------------------------- |
+| `--provider <name>`     | CI provider (default and only built-in: `github-actions`)                  |
+| `--workflow <name>`     | Workflow to run in the job                                                 |
+| `--runner <label>`      | Runner label, such as `macos-26`. Required — export never guesses a runner |
+| `--setup-command <cmd>` | Toolchain or setup command, repeatable. Export doesn't run it              |
+| `--executable <path>`   | The `shipit` binary the job invokes (default `shipit`)                     |
+| `--export-path <path>`  | Write the YAML to a new file instead of stdout                             |
+
+The generated job runs the workflow, then publishes artifacts and test evidence with `if: always()`, so a failing run still uploads what you need to investigate it. See [CI Setup](/docs/guides/ci-setup#exporting-a-workflow-as-a-github-actions-job).
 
 For agent-driven workflows with `shipit ai`, see the [Agent Fast Start](/docs/guides/agent-fast-start) guide.
 
