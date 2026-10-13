@@ -1,0 +1,167 @@
+---
+title: "Test Results & Workflows"
+description: "Run tests as workflows with selective reruns, read structured results from every runner, and export portable evidence."
+group: "Guides"
+order: 2
+sourcePath: "upstream:Sources/ShipItKit/ShipItKit.docc/Articles/TestResults.md"
+---
+
+Every test run, and every saved result file, is read into the same normalized model. That lets a workflow decide whether to rerun a failure, lets `shipit test-results` inspect an artifact on a machine that never ran the tests, and keeps a live run and an offline inspection in agreement about every test's identity.
+
+This guide covers how results are described, how to run tests as workflows, and how to read and share what a run left behind. For every option, see the [Configuration Reference](/docs/reference/configuration#test-action-options); for the commands, the [CLI Command Reference](/docs/reference/cli-commands#running-tests).
+
+## Who ran it, where, and on what
+
+A result keeps three things apart that used to be squeezed into one label:
+
+| Field          | Meaning                             | Values                                                                                                                                                                                                                     |
+| -------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `runner`       | The tool that executed the tests    | `xcodebuild`, `gradle`, `swift-test`, `flutter-test`, `jest`                                                                                                                                                               |
+| `buildSystem`  | The project's framework, when known | `native`, `kmp`, `flutter`, `react_native`                                                                                                                                                                                 |
+| `destinations` | Where the tests ran                 | A `platform` (`ios`, `android`, `macos`, `linux`, `windows`, `jvm`, `js`), a `kind` (`simulator`, `emulator`, `device`, `host`), an optional device `name`, and the `scope` that ran (a Gradle task or an Xcode test plan) |
+
+Each test points at its destination with `destinationID`, so one Gradle run on a Kotlin Multiplatform project can span `ios`, `android`, and `jvm` and every test still knows which.
+
+> **Never put a framework in a platform field.** `kmp`, `flutter`, and `react_native` are build systems. `ios` and `android` are platforms. Mixing them up is what the three-field model exists to prevent.
+
+Destinations come from evidence, not guesses: the Gradle task name and the device the Android Gradle Plugin records, the devices an `.xcresult` lists, the `xcodebuild -destination` and test plan, or the host for `swift test`, Flutter, and Jest. A result that doesn't say where it ran, such as saved Flutter events or an LCOV file, has no destination. A runner or platform value ShipIt doesn't know yet decodes as `other`, so output from a plugin or a newer ShipIt still groups correctly.
+
+## Running tests as workflows
+
+A test workflow is an ordinary [workflow](/docs/reference/configuration#workflows) made of test steps. The top-level `test_workflow` key names the one `shipit test` runs by default, and `shipit test --workflow <name>` picks one explicitly.
+
+```yaml
+test_workflow: tests
+workflows:
+  format:
+    - action: swift-format
+      options: { paths: [Sources, Tests] }
+  tests:
+    - action: swift-test
+      options:
+        enable_code_coverage: true
+        rerun_failed_tests: { enabled: true, max_attempts: 2 }
+        infrastructure_retry: { max_attempts: 3, initial_delay_seconds: 2, max_delay_seconds: 30 }
+```
+
+Pick the action that matches the project:
+
+| Project                          | Action                                                        | Runner         |
+| -------------------------------- | ------------------------------------------------------------- | -------------- |
+| Swift package                    | `swift-test` (and `swift-format` to lint)                     | `swift-test`   |
+| Swift package that imports UIKit | `test`, using the package's scheme from the package directory | `xcodebuild`   |
+| iOS app                          | `test`                                                        | `xcodebuild`   |
+| Android, KMP                     | `test`                                                        | `gradle`       |
+| Flutter                          | `test`                                                        | `flutter-test` |
+| React Native                     | `test`                                                        | `jest`         |
+
+Native iOS builds the tests once into an `.xctestproducts` bundle, then runs each test plan and destination into its own result bundle. See [Native iOS: build once, test many](/docs/reference/configuration#native-ios-build-once-test-many) for `test_plans`, `legacy_combined_test`, and the serial clone-failure fallback.
+
+## Flaky and persistent failures
+
+`rerun_failed_tests: { enabled: true, max_attempts: 2 }` reruns only the failures. `max_attempts` **counts the initial run**, so `2` means one rerun. It applies to SwiftPM, Flutter, React Native (Jest), Android JVM unit tests, and native iOS.
+
+- A test that **passes on a rerun** is reported as **flaky**. It doesn't fail the run, and it isn't hidden.
+- A failure that **persists** keeps the workflow failing.
+- A runner that can't select a failed test, such as Kotlin/Native targets in a KMP build, reports the rerun as unsupported rather than silently skipping it.
+- Reruns use each runner's own selection: `--skip-build` for SwiftPM, test names from `flutter test --machine` for Flutter, `--testNamePattern` for Jest, and `--tests` for Gradle.
+
+`infrastructure_retry` is a separate budget. It retries a whole invocation after a transient tool, simulator, or emulator failure, and never spends a rerun attempt (or the reverse). Each execution is its own attempt in the report.
+
+A green run can still contain flaky tests, so look at `summary.flaky` and not just the exit code.
+
+## The run report
+
+Every run writes a `report.json`: a `TestRunReport`, **schema version 2**. This trimmed excerpt comes from a real run of a small SwiftPM package whose tests were scripted to fail once and then pass:
+
+```json
+{
+  "schemaVersion": 2,
+  "runner": "swift-test",
+  "buildSystem": "native",
+  "destinations": [{ "id": "macos:host", "kind": "host", "platform": "macos" }],
+  "summary": { "passed": 9, "failed": 0, "flaky": 3, "skipped": 1, "errored": 0 },
+  "attempts": [
+    { "attemptNumber": 1, "reason": "initial", "summary": { "passed": 6, "failed": 3 } },
+    { "attemptNumber": 2, "reason": "failed_tests", "summary": { "passed": 3, "failed": 0 } }
+  ],
+  "flakyTests": [
+    {
+      "name": "flaky()",
+      "status": "passed",
+      "attempts": 2,
+      "destinationID": "macos:host",
+      "stableID": "swift-case:SampleTests.SwiftTestingTests/flaky()",
+      "metadata": { "first_failure": "Expectation failed: …", "flaky": "true" }
+    }
+  ],
+  "persistentFailedTests": []
+}
+```
+
+What to read in it:
+
+- **`summary`** counts the whole run. Flaky tests are counted in `passed` as well as `flaky`, because they passed.
+- **`attempts`** records each execution: its `reason` (`initial`, `failed_tests`, `infrastructure`, or `serial_fallback`), its summary, the failures it saw, `durationSeconds`, and `metadata` such as `overhead_seconds` (everything around the test command, like reinstalling the app or reading the result bundle). `buildSeconds` is the shared build for runners that build once and test many times.
+- **`flakyTests`** passed only after a retry, whether ShipIt's rerun or the runner's own retry plugin recovered them. `metadata.first_failure` says why the first attempt failed.
+- **`persistentFailedTests`** are real failures. Use `message`, `stackTrace`, and `destinationID` to find them.
+- **`stableID`** is the same on every machine and across attempts, so a selective rerun and its reconciliation line up.
+
+Each test carries a `status` of `passed`, `failed`, `skipped`, `flaky`, or `errored`. An `errored` test or run didn't produce a result at all, which is different from a test that failed: a compile error, a crash, or no tests found.
+
+Two rules keep the report honest:
+
+- **`report.json` always describes the whole run.** If a run stops before the final report is written, ShipIt writes a provisional one from the attempts it has, plus one extra `errored`, so it can never read as a pass.
+- **A run that exits 0 without reporting any results is a failure,** not a passing zero-test run. This applies to Flutter, KMP, and Android. The one legitimate empty run is when Gradle reports `NO-SOURCE` or `SKIPPED` for that exact test task.
+
+### Evidence for every attempt
+
+Every attempt keeps its own directory, so an earlier attempt is never overwritten: stdout and stderr, `command.json` (the exact arguments, exit code, start time, and `duration_seconds`), the runner's native results (`.xcresult`, saved events, JUnit XML, or Jest JSON), and `results.json`. A direct run writes them under `build/test-runs/<run>/attempt-N/`. Inside a workflow they live under `build/workflow-artifacts/<run_id>/`, which needs no `artifacts:` declaration. Saving evidence is best effort and never replaces a test outcome.
+
+## Reading saved results
+
+`shipit test-results` reads an artifact without running anything, and without a Shipfile:
+
+```bash
+shipit test-results --input results.xcresult --export-directory artifacts/ios
+shipit test-results --input app/build/test-results/testDebugUnitTest --runner gradle
+shipit test-results --input shared/build/test-results --runner gradle --build-system kmp
+shipit test-results --input flutter-events.jsonl --input-format flutter
+shipit test-results --input jest.json --input-format jest
+shipit test-results --input artifacts/ios/manifest.json --format markdown
+shipit test-results --input build/test-runs/<run>/report.json --failed-only --output json
+```
+
+| `--input-format`     | Source                                                                                                                                                                  |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `xcresult`           | An `.xcresult` bundle, read through `xcresulttool` (macOS)                                                                                                              |
+| `junit`              | Gradle, KMP, or `swift test` JUnit XML. Pass `--runner swift-test` for the latter and `--build-system kmp` for Kotlin Multiplatform, because the file alone doesn't say |
+| `swift`              | Swift Testing's saved event stream                                                                                                                                      |
+| `flutter`            | `flutter test --machine` events                                                                                                                                         |
+| `jest`               | `jest --json --outputFile`                                                                                                                                              |
+| `shipit`, `manifest` | A ShipIt report, or a portable export                                                                                                                                   |
+
+Test identities are relative to the project (the Gradle root, or the directory holding `package.json`), so they match between a live run and an offline read. Filtering the displayed cases with `--failed-only` never changes the full-run summary.
+
+## Portable evidence export
+
+Add `--export-directory` to write a **new** directory you can attach to a bug report or hand to a teammate who doesn't have your machine:
+
+```bash
+shipit test-results --input build/test-runs/<run>/report.json \
+  --evidence screenshots/ --export-directory artifacts/run-42
+```
+
+The export holds normalized `results.json` and `coverage.json` (both carry a `schemaVersion`), the original artifacts under `originals/`, extracted xcresult attachments, diagnostics and logs, a `manifest.json`, and an `index.md` whose links are relative. ShipIt builds it in a hidden sibling directory and renames it into place only when it is complete, follows symbolic links so the export holds real files, and never overwrites an existing export. Pass the exported `manifest.json` back to `--input` to read it again.
+
+## Coverage
+
+Coverage is read the same way: SwiftPM LLVM JSON, LCOV (Flutter or Jest — pass the runner, since the file doesn't say), and JaCoCo or Kover XML, with a `runner` and a typed `platform`. Reports from different runs are listed side by side and never summed. See the [`coverage` action options](/docs/reference/configuration#coverage-action-options) for source-root filters and `minimum_coverage` gates.
+
+## Running in CI
+
+`shipit ci export` turns a test workflow into a GitHub Actions job that uploads the evidence with `if: always()`, so a failing run still leaves everything needed to investigate it. See [CI Setup](/docs/guides/ci-setup#exporting-a-workflow-as-a-github-actions-job).
+
+## For coding agents
+
+Agents should read the structured report instead of scraping console output. `shipit ai instructions` and `shipit ai session` carry this guidance, and `shipit ai skills show investigate-test-failures` walks through the triage: read `summary` first, then `persistentFailedTests`, then `flakyTests`, then the per-attempt evidence. Never edit a report or its evidence to change an outcome. See [Agent Fast Start](/docs/guides/agent-fast-start#test-results-and-evidence).

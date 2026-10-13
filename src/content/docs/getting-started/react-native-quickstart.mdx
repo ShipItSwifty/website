@@ -87,7 +87,7 @@ GRADLE_OPTS="-Dorg.gradle.workers.max=2 -Dorg.gradle.parallel=false"
 android:
   gradle_flags: [--no-parallel]
   gradle_properties:
-    reactNativeArchitectures: arm64-v8a   # build one ABI instead of all four locally
+    reactNativeArchitectures: arm64-v8a # build one ABI instead of all four locally
 ```
 
 ## 5. Archive
@@ -131,6 +131,28 @@ xcodebuild flags (e.g. there is no way to pass `-jobs` through it).
 Shipfile — matching `shipit run beta` from the rest of the documentation. If you hand-authored a
 Shipfile with a different workflow name, `shipit run beta` will fail with a list of the
 workflows that do exist; use that name instead of guessing.
+
+## 8. Tests and reruns
+
+`shipit test` runs the project's package-manager `test` script (`npm`, `pnpm`, or `yarn`, detected from the lockfile). If the script is missing from `package.json`, the action fails with a clear message instead of guessing.
+
+When the script accepts Jest CLI arguments, ShipIt also collects Jest's JSON output so the report names each failing test:
+
+- Failing tests are a **test failure**, not a build failure.
+- `rerun_failed_tests` reruns only the failures with `--runTestsByPath` and `--testNamePattern`. A test that recovers is reported as flaky. A script that isn't Jest can't be rerun selectively, so it runs once.
+- Results from a previous run are cleared first, so a Jest run that dies early is never mistaken for the last one.
+- Test identities are relative to the project root, so they match between machines and CI.
+
+```yaml
+workflows:
+  beta:
+    - action: test
+      options:
+        rerun_failed_tests: { enabled: true, max_attempts: 2 }
+    - action: archive
+```
+
+See [Test Results & Workflows](/docs/guides/test-results).
 
 ## What's not React Native-specific
 

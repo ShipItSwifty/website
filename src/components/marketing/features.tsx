@@ -35,7 +35,7 @@ const featureData: Feature[] = [
     Icon: ChartNoAxesColumn,
     title: "Coverage & validation",
     tag: "Cross-platform",
-    desc: "Run lint, tests, coverage, and validation commands before shipping. ShipItSwifty reads native build outputs and keeps dry-runs machine-readable.",
+    desc: "Run lint, tests, coverage, and validation commands before shipping. ShipItSwifty reads native build outputs and keeps dry-runs machine-readable. Test runs produce structured results, rerun failures to surface flaky tests, and export portable evidence and CI artifacts.",
   },
   {
     Icon: Shield,
