@@ -25,7 +25,15 @@
  *   3  unsupported platform (non-darwin)
  */
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, rmSync, cpSync, appendFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  rmSync,
+  cpSync,
+  appendFileSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { join, resolve } from "node:path";
 import { platform } from "node:os";
 
@@ -108,6 +116,18 @@ const repoDir = join(WORK_DIR, "shipitswifty");
 
 run("git", ["clone", "--depth", "1", "--branch", tag, UPSTREAM_GIT, repoDir]);
 
+// Upstream's Package.swift lists `ShipItKit.docc` in the target's `exclude:` to quiet
+// "unhandled resource" warnings, but the DocC plugin then can't see the catalog and emits
+// symbol pages only — no articles, tutorials, or landing page. Drop the exclusion in our
+// throwaway clone so the catalog is built. Releases tagged before upstream fixes this still need it.
+const manifestPath = join(repoDir, "Package.swift");
+const manifest = readFileSync(manifestPath, "utf8");
+const catalogExclude = /exclude:\s*\[\s*"ShipItKit\.docc"\s*\]/;
+if (catalogExclude.test(manifest)) {
+  writeFileSync(manifestPath, manifest.replace(catalogExclude, "exclude: []"));
+  console.log("[build-docc] removed ShipItKit.docc from the target's exclude list");
+}
+
 const doccOut = join(repoDir, "docs-output");
 mkdirSync(doccOut, { recursive: true });
 
@@ -131,6 +151,12 @@ run(
 // Keep only data/, index/, metadata.json — discard HTML/CSS/JS
 if (existsSync(OUTPUT_DIR)) rmSync(OUTPUT_DIR, { recursive: true, force: true });
 mkdirSync(OUTPUT_DIR, { recursive: true });
+
+// The catalog's tutorials are the canary for "the catalog was built": symbol-only output has none.
+if (!existsSync(join(doccOut, "data", "tutorials"))) {
+  console.error("[build-docc] output has no tutorials — the .docc catalog was not built");
+  process.exit(1);
+}
 
 const SUBSETS = ["data", "index", "metadata.json"];
 for (const s of SUBSETS) {
