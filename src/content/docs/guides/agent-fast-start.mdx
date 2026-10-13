@@ -2,7 +2,7 @@
 title: "Agent Fast Start"
 description: "Where agents should look first when working inside the ShipItSwifty repo."
 group: "Guides"
-order: 3
+order: 4
 sourcePath: "upstream:docs/agent-index.md"
 ---
 
@@ -60,6 +60,17 @@ This page is a compact navigation guide for coding agents working in the ShipItS
 - `Sources/ShipItKit/Actions/`
 - `Sources/ShipItKit/Introspection/`
 - `Tests/ShipItKitTests/`
+
+## Test results and evidence
+
+Agents driving a project through `shipit` should read structured results instead of scraping console output. `shipit ai session`, `shipit ai instructions`, and `shipit ai skills` all carry this guidance:
+
+- Read `build/test-runs/<run>/report.json` (or the file written by `--report-path`) and its per-attempt evidence. For saved artifacts, run `shipit test-results --input <path> --output json`.
+- Results state the `runner`, `buildSystem`, and `destinations` separately, count `attempts` per test, and mark tests that passed only after a retry as flaky. A green run can still contain flaky tests, so report them.
+- A run with zero results is a failure. Never mark a run green from the exit code alone when the report says otherwise, and never edit a report or its evidence to change an outcome.
+- Two built-in playbooks cover this: `shipit ai skills show test-workflows` (package, Xcode, Gradle, Flutter, and Jest workflows with reruns, evidence, and CI export) and `shipit ai skills show investigate-test-failures` (triage from the typed report).
+
+See [Test Results & Workflows](/docs/guides/test-results) for the report format.
 
 ## Validation commands
 
