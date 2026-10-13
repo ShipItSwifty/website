@@ -4,11 +4,15 @@
  * Server component that reads the index from disk and renders the symbol
  * tree as nested links. Active-link highlighting is delegated to a small
  * client subcomponent that reads `usePathname()`.
+ *
+ * Only the top level and the branch containing the current page are expanded.
+ * The full tree has thousands of nodes, and rendering it into every prerendered
+ * page multiplied the build output by the number of pages.
  */
-import { type IndexNode, getDoccIndex, isDoccAvailable } from "@/lib/docc";
+import { type IndexNode, getDoccIndex, isDoccAvailable, routeSegment } from "@/lib/docc";
 import { ApiSidebarLink } from "./api-sidebar-link";
 
-export function ApiSidebar() {
+export function ApiSidebar({ slug = [] }: { slug?: string[] }) {
   if (!isDoccAvailable()) return null;
   const index = getDoccIndex();
   if (!index) return null;
@@ -20,12 +24,22 @@ export function ApiSidebar() {
       <ApiSidebarLink href="/docs/api/shipitkit" className="docc-sidebar-root">
         {root.title}
       </ApiSidebarLink>
-      {root.children?.length ? <NavList nodes={root.children} /> : null}
+      {root.children?.length ? (
+        <NavList nodes={root.children} activeBranch={slug[0]?.toLowerCase()} />
+      ) : null}
     </nav>
   );
 }
 
-function NavList({ nodes, depth = 0 }: { nodes: IndexNode[]; depth?: number }) {
+function NavList({
+  nodes,
+  depth = 0,
+  activeBranch,
+}: {
+  nodes: IndexNode[];
+  depth?: number;
+  activeBranch?: string;
+}) {
   return (
     <ul className="docc-sidebar-list" style={{ paddingLeft: depth === 0 ? 0 : "0.75rem" }}>
       {nodes.map((n, i) => {
@@ -37,7 +51,7 @@ function NavList({ nodes, depth = 0 }: { nodes: IndexNode[]; depth?: number }) {
           );
         }
         const href = n.path
-          ? `/docs/api${n.path.toLowerCase().replace("/documentation/", "/")}`
+          ? `/docs/api${n.path.toLowerCase().replace("/documentation/", "/").split("/").map(routeSegment).join("/")}`
           : null;
         return (
           <li key={n.path ?? `n-${i}`} className="docc-sidebar-item">
@@ -50,10 +64,18 @@ function NavList({ nodes, depth = 0 }: { nodes: IndexNode[]; depth?: number }) {
                 {n.title}
               </span>
             )}
-            {n.children?.length ? <NavList nodes={n.children} depth={depth + 1} /> : null}
+            {n.children?.length && (depth > 0 || isActiveBranch(n, activeBranch)) ? (
+              <NavList nodes={n.children} depth={depth + 1} />
+            ) : null}
           </li>
         );
       })}
     </ul>
   );
+}
+
+/** Whether a top-level node is the first path segment of the page being rendered. */
+function isActiveBranch(node: IndexNode, activeBranch?: string): boolean {
+  if (!activeBranch || !node.path) return false;
+  return node.path.toLowerCase().split("/")[3] === activeBranch;
 }
