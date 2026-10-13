@@ -10,6 +10,7 @@
 
 import { promises as fs } from "node:fs";
 import { join, relative } from "node:path";
+import { createHash } from "node:crypto";
 import matter from "gray-matter";
 import GithubSlugger from "github-slugger";
 
@@ -127,6 +128,13 @@ function inlineToText(fragments) {
     .trim();
 }
 
+// Keep in sync with `routeSegment` in src/lib/docc.ts.
+function routeSegment(segment) {
+  if (segment.length <= 80) return segment;
+  const hash = createHash("sha1").update(segment).digest("hex").slice(0, 10);
+  return `${segment.slice(0, 48)}-${hash}`;
+}
+
 // Index DocC API render nodes (data/docc/**) so API symbols are searchable.
 // Mirrors the slug scheme of src/app/docs/(api)/api/shipitkit/[[...slug]].
 async function buildDoccEntries() {
@@ -144,7 +152,10 @@ async function buildDoccEntries() {
     const rel = relative(DOCC_DOCS_ROOT, file)
       .replace(/\\/g, "/")
       .replace(/\.json$/, "")
-      .toLowerCase();
+      .toLowerCase()
+      .split("/")
+      .map(routeSegment)
+      .join("/");
     // rel is "shipitkit" (module root) or "shipitkit/<...path>"
     const url = `/docs/api/${rel}`;
     entries.push({
