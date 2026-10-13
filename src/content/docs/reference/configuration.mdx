@@ -55,6 +55,7 @@ metadata:
 versioning:
 project_generation:
 notifications:
+test_workflow:
 workflows:
 custom_actions:
 # Platform-specific overrides (merged on top of shared config)
@@ -188,13 +189,25 @@ ShipItSwifty follows Apple's two-version model:
 
 The `versioning` section controls how `CFBundleVersion` is incremented. `CFBundleShortVersionString` is only changed when the `version` action is called with `bump: major`, `bump: minor`, or `bump: patch`.
 
-| Key             | Type   | Default      | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| --------------- | ------ | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `strategy`      | string | `sequential` | `sequential` — adds 1 each run (guarantees a plain integer). `timestamp` — uses `YYYYMMDDHHmm` format.                                                                                                                                                                                                                                                                                                                                                                                       |
-| `source`        | string | `xcodeproj`  | `xcodeproj` — reads `MARKETING_VERSION`/`CURRENT_PROJECT_VERSION` from `xcodebuild -showBuildSettings`; falls back to `agvtool`, then `plutil` on Info.plist. `asc` — reads current build number from App Store Connect. `project_spec` — reads/writes version values in a YAML spec file (XcodeGen/Tuist). `kmp` — reads/writes `versionName`/`versionCode` in `gradle.properties`. `gradle` — reads/writes directly in `build.gradle.kts` or `build.gradle`; default for Android projects. |
-| `spec_path`     | string | —            | Path to the project spec file (used with `source: project_spec`).                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `build_key`     | string | —            | YAML key path for the build number in the spec file (e.g. `settings.CURRENT_PROJECT_VERSION`).                                                                                                                                                                                                                                                                                                                                                                                               |
-| `marketing_key` | string | —            | YAML key path for the marketing version in the spec file (e.g. `settings.MARKETING_VERSION`).                                                                                                                                                                                                                                                                                                                                                                                                |
+| Key             | Type   | Default      | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| --------------- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `strategy`      | string | `sequential` | `sequential` — adds 1 each run (guarantees a plain integer). `timestamp` — uses `YYYYMMDDHHmm` format.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `source`        | string | `xcodeproj`  | `xcodeproj` — reads `MARKETING_VERSION`/`CURRENT_PROJECT_VERSION` from `xcodebuild -showBuildSettings`; falls back to `agvtool`, then `plutil` on Info.plist. `asc` — reads current build number from App Store Connect. `project_spec` — reads/writes version values in a YAML spec file (XcodeGen/Tuist). `xcconfig` — reads/writes named keys in an `.xcconfig` file (set `spec_path` to the file and `marketing_key`/`build_key` to the variable names), so a `$(VAR)` indirection from the project survives. `kmp` — reads/writes `versionName`/`versionCode` in `gradle.properties`. `gradle` — reads/writes directly in `build.gradle.kts` or `build.gradle`; default for Android projects. `pubspec` — reads/writes the `version: X.Y.Z+B` key in `pubspec.yaml`; default for Flutter projects. |
+| `spec_path`     | string | —            | Path to the version source file. Required for `source: project_spec` (e.g. `project.yml`) and `source: xcconfig` (e.g. `Config/Version.xcconfig`). For `source: pubspec` it defaults to `pubspec.yaml` at the project root.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `build_key`     | string | —            | Key for the build number in the spec file (YAML, e.g. `settings.CURRENT_PROJECT_VERSION`) or `.xcconfig` (e.g. `APP_BUILD_NUMBER`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `marketing_key` | string | —            | Key for the marketing version in the spec file (YAML, e.g. `settings.MARKETING_VERSION`) or `.xcconfig` (e.g. `APP_MARKETING_VERSION`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+
+#### `source: pubspec` (Flutter)
+
+Flutter treats the pubspec `version:` key as the single source of truth: `flutter build` stamps `CFBundleShortVersionString`, `CFBundleVersion`, `versionName`, and `versionCode` from it on every build, so bumping the native project files directly wouldn't stick. `pubspec` is already the default source when the resolved build system is Flutter. Set it only to override the file location:
+
+```yaml
+versioning:
+  source: pubspec # default for build_system: flutter
+  spec_path: pubspec.yaml # optional; defaults to pubspec.yaml at the project root
+```
+
+The part before `+` is the marketing version and the part after is the build number, so `version: 1.2.3+45` reads as marketing `1.2.3`, build `45`. With no `+build` suffix the build number reads as `0`, and the first `bump: build` writes `+1`. Only the top-level `version:` key is rewritten; comments and the rest of the file are preserved.
 
 ### `version` action options
 
@@ -278,31 +291,67 @@ To add a TestFlight upload later, append a `testflight` step and uncomment the `
 
 The `test` action is configured inline in a workflow step. It does **not** have a top-level Shipfile section.
 
-`retry_on_failure`, `rerun_failed_tests`, and `infrastructure_retry` solve different problems. Use `retry_on_failure` for xcodebuild's built-in one-pass iOS retry behavior. Use `rerun_failed_tests` when you want ShipIt to collect the initial failures, rerun those specific tests once, and emit flaky/persistent failure information in `TestRunReport`. Use `infrastructure_retry` for whole-run failures such as simulator launch crashes, Android emulator disconnects, Flutter tool crashes, or JS worker failures.
+Three options retry tests, and they solve different problems:
+
+- `retry_on_failure` passes xcodebuild's built-in `-retry-tests-on-failure` for a one-pass iOS retry.
+- `rerun_failed_tests` is ShipIt's own selective rerun. It collects the failures, reruns only those tests, and reports flaky versus persistent failures in the `TestRunReport`.
+- `infrastructure_retry` reruns the whole invocation after a transient tool, simulator, or emulator failure — a simulator launch crash, an Android emulator disconnect, a Flutter tool crash, or a JS worker failure.
+
+The last two have **separate budgets**. An infrastructure retry never spends a rerun attempt, and a selective rerun never spends an infrastructure attempt. Each execution is recorded as its own attempt in the report.
 
 `shipit generate` asks whether generated test steps should enable `infrastructure_retry`. `shipit ai session` includes the same guidance in the agent prompt so AI-assisted workflow creation asks the same question.
 
-| Option                 | Type   | Default          | Description                                                                                                                                                                                                                                                                                                                   |
-| ---------------------- | ------ | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `destinations`         | list   | —                | **Required.** One or more xcodebuild destination strings. Each entry triggers a separate `xcodebuild test` pass; pass/fail/skip counts are aggregated. Discover valid values with `xcodebuild -showdestinations -scheme <Scheme>`.                                                                                            |
-| `destination`          | string | —                | Legacy single-destination string. Promoted to a one-element `destinations` list internally. Prefer `destinations` for new configuration.                                                                                                                                                                                      |
-| `scheme`               | string | `app.scheme`     | Xcode scheme containing the test targets. Falls back to `app.scheme` when omitted.                                                                                                                                                                                                                                            |
-| `configuration`        | string | `Debug`          | Build configuration used for test compilation.                                                                                                                                                                                                                                                                                |
-| `enable_code_coverage` | bool   | —                | Enable `-enableCodeCoverage YES`. When `true` and `result_bundle_path` is unset, a path of `./build/<scheme>-tests.xcresult` is auto-derived.                                                                                                                                                                                 |
-| `result_bundle_path`   | string | —                | Output path for the `.xcresult` bundle. Auto-derived when `enable_code_coverage` is `true`.                                                                                                                                                                                                                                   |
-| `test_plan`            | string | —                | Named `.xctestplan` to run.                                                                                                                                                                                                                                                                                                   |
-| `only_testing`         | list   | —                | Restrict to specific targets or test cases. Each entry maps to `-only-testing`.                                                                                                                                                                                                                                               |
-| `skip_testing`         | list   | —                | Skip specific targets or test cases. Each entry maps to `-skip-testing`.                                                                                                                                                                                                                                                      |
-| `retry_on_failure`     | bool   | `false`          | Pass `-retry-tests-on-failure` to retry each failing test once.                                                                                                                                                                                                                                                               |
-| `rerun_failed_tests`   | object | —                | Selectively rerun only the failed tests when the runner supports it. Supports `enabled` and `max_attempts` (default `2`).                                                                                                                                                                                                     |
-| `report_path`          | string | —                | Optional path to write the structured JSON `TestRunReport` for CI artifact upload.                                                                                                                                                                                                                                            |
-| `infrastructure_retry` | object | —                | Retry the entire test invocation for transient infrastructure failures (iOS simulator crashes, Android emulator disconnects, Flutter tool crashes, JS worker failures). Presence of this block enables retries; omit to disable. Recommended default: `{ max_attempts: 3, initial_delay_seconds: 2, max_delay_seconds: 30 }`. |
-| `module`               | string | `android.module` | Android/KMP. Gradle module whose tests should run.                                                                                                                                                                                                                                                                            |
-| `kind`                 | string | `unit`           | Android only. `unit` for JVM tests (no device), `instrumented` for on-device tests, `e2e` for end-to-end.                                                                                                                                                                                                                     |
-| `scope`                | string | auto             | Android only. Gradle task scope: `module` qualifies the task with the module path; `root` runs the root-level task (cascades across all modules). When `kind: instrumented` and scope is unset, defaults to `root`. Set `scope: module` explicitly for single-module behaviour.                                               |
-| `build_variant`        | string | `debug`          | Android only. Overrides `android.build_variant` for this test step.                                                                                                                                                                                                                                                           |
-| `task`                 | string | —                | Android only. Explicit Gradle task name (e.g. `testDebugUnitTest`). Overrides variant-based task selection.                                                                                                                                                                                                                   |
-| `devices`              | object | —                | Android only. Device config for instrumented runs. Fields: `strategy` (`none`/`connected`/`named_emulators`/`managed`), `emulators` (AVD names), `group` (managed device group), `prompt_locally` (interactive selection outside CI).                                                                                         |
+Every test run writes a `TestRunReport` (schema version 2). See [Test Results & Workflows](/docs/guides/test-results) for what it contains.
+
+| Option                  | Type   | Default              | Description                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ----------------------- | ------ | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `destinations`          | list   | auto-discovered      | One or more xcodebuild destination strings. Each entry gets its own `test-without-building` pass, and pass/fail/skip counts are aggregated. When omitted, ShipIt discovers an iPhone simulator, or fails with the list of what it found. Discover valid values with `xcodebuild -showdestinations -scheme <Scheme>`.                                                                                                                  |
+| `destination`           | string | —                    | Legacy single-destination string, promoted to a one-element `destinations` list. Prefer `destinations`.                                                                                                                                                                                                                                                                                                                               |
+| `scheme`                | string | `app.scheme`         | Xcode scheme containing the test targets.                                                                                                                                                                                                                                                                                                                                                                                             |
+| `configuration`         | string | `Debug`              | Build configuration used for test compilation.                                                                                                                                                                                                                                                                                                                                                                                        |
+| `enable_code_coverage`  | bool   | —                    | Collect coverage in each native result bundle. ShipIt saves a unique bundle per plan, destination, and attempt under `build/test-runs` (or the workflow evidence root), with coverage retained inside it.                                                                                                                                                                                                                             |
+| `result_bundle_path`    | string | —                    | Explicit initial bundle path for a single-plan, single-destination run. An existing bundle at the path is removed first.                                                                                                                                                                                                                                                                                                              |
+| `test_plan`             | string | —                    | Named `.xctestplan` to run.                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `test_plans`            | list   | —                    | Ordered plans over the same test targets that share one build. Exclusive with `test_plan`.                                                                                                                                                                                                                                                                                                                                            |
+| `test_products_path`    | string | unique run directory | New `.xctestproducts` path for the shared build.                                                                                                                                                                                                                                                                                                                                                                                      |
+| `legacy_combined_test`  | bool   | `false`              | Use the previous single `xcodebuild test` invocation instead of build-once-test-many.                                                                                                                                                                                                                                                                                                                                                 |
+| `serial`                | bool   | `false`              | Force `-parallel-testing-enabled NO`.                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `skip_macro_validation` | bool   | `false`              | Pass `-skipMacroValidation` while building the tests.                                                                                                                                                                                                                                                                                                                                                                                 |
+| `erase_simulator`       | bool   | `false`              | Erase the resolved simulator before running. Refuses a device that is already booted.                                                                                                                                                                                                                                                                                                                                                 |
+| `only_testing`          | list   | —                    | Restrict to specific targets or test cases. Each entry maps to `-only-testing`.                                                                                                                                                                                                                                                                                                                                                       |
+| `skip_testing`          | list   | —                    | Skip specific targets or test cases. Each entry maps to `-skip-testing`.                                                                                                                                                                                                                                                                                                                                                              |
+| `retry_on_failure`      | bool   | `false`              | Pass `-retry-tests-on-failure` to retry each failing test once.                                                                                                                                                                                                                                                                                                                                                                       |
+| `rerun_failed_tests`    | object | —                    | Selectively rerun only the failed tests. Fields: `enabled` and `max_attempts` (default `2`, **counting the initial run**; `1` disables reruns, and a recovered run stops early). Supported for native iOS (per plan, destination, and configuration), Android JVM unit tests (`kind: unit`), Flutter, React Native (Jest), and SwiftPM. A test that fails again fails the step. A test that recovers passes and is reported as flaky. |
+| `infrastructure_retry`  | object | —                    | Retry the whole test invocation after a transient infrastructure failure. The block's presence enables it. Fields: `max_attempts` (default `3`, including the first), `initial_delay_seconds` (default `2`), and `max_delay_seconds` (default `60`). Recommended: `{ max_attempts: 3, initial_delay_seconds: 2, max_delay_seconds: 30 }`.                                                                                             |
+| `report_path`           | string | —                    | Path to write the structured JSON `TestRunReport`.                                                                                                                                                                                                                                                                                                                                                                                    |
+| `module`                | string | `android.module`     | Android/KMP. Gradle module whose tests should run.                                                                                                                                                                                                                                                                                                                                                                                    |
+| `kind`                  | string | `unit`               | Android only. `unit` for JVM tests (no device), `instrumented` for on-device tests, `e2e` for end-to-end.                                                                                                                                                                                                                                                                                                                             |
+| `scope`                 | string | auto                 | Android only. Gradle task scope: `module` qualifies the task with the module path; `root` runs the root-level task (cascades across all modules). When `kind: instrumented` and scope is unset, defaults to `root`. Set `scope: module` explicitly for single-module behaviour.                                                                                                                                                       |
+| `build_variant`         | string | `debug`              | Android only. Overrides `android.build_variant` for this test step.                                                                                                                                                                                                                                                                                                                                                                   |
+| `task`                  | string | —                    | Android only. Explicit Gradle task name (e.g. `testDebugUnitTest`). Overrides variant-based task selection.                                                                                                                                                                                                                                                                                                                           |
+| `devices`               | object | —                    | Android only. Device config for instrumented runs. Fields: `strategy` (`none`/`connected`/`named_emulators`/`managed`), `emulators` (AVD names), `group` (managed device group), `prompt_locally` (interactive selection outside CI).                                                                                                                                                                                                 |
+
+### Native iOS: build once, test many
+
+By default ShipIt builds the tests once into an `.xctestproducts` bundle, then runs every plan and destination with `test-without-building`, writing a separate result bundle for each. Retries reuse the same products.
+
+```yaml
+workflows:
+  tests:
+    - action: test
+      options:
+        test_plans: [Unit, UI]
+        destinations:
+          - "platform=iOS Simulator,name=iPhone 17"
+        rerun_failed_tests: { enabled: true, max_attempts: 2 }
+        infrastructure_retry: { max_attempts: 3, initial_delay_seconds: 2, max_delay_seconds: 30 }
+```
+
+- Plans run independently. A failing plan doesn't stop the others, but a failed shared build blocks all of them.
+- Each plan and destination is its own entry in the report's `destinations`, carrying that configuration's language and region.
+- If xcodebuild reports a simulator **clone** failure, ShipIt falls back to serial execution once per destination without rebuilding. Ordinary assertion failures never trigger the fallback.
+- Set `legacy_combined_test: true` to keep the older single `xcodebuild test` invocation.
+- Select a test workflow by name with the top-level `test_workflow` key. See [Test workflows](#test-workflows-and-artifacts).
 
 **Destination string format**
 
@@ -346,19 +395,74 @@ workflows:
 
 For Android aggregate tasks, ShipItSwifty falls back to JUnit XML reports under `build/test-results/<taskName>/` when Gradle stdout does not include a test summary.
 
+## `swift-test` and `swift-format` actions
+
+SwiftPM packages use two dedicated actions, which are ordinary workflow steps. Select a test workflow with the top-level `test_workflow` key (or `SHIPIT_TEST_WORKFLOW`); `shipit test --workflow <name>` overrides it.
+
+```yaml
+test_workflow: tests
+workflows:
+  format:
+    - action: swift-format
+      options: { paths: [Sources, Tests] }
+  tests:
+    - action: swift-test
+      options:
+        enable_code_coverage: true
+        rerun_failed_tests: { enabled: true, max_attempts: 2 }
+        infrastructure_retry: { max_attempts: 3, initial_delay_seconds: 2, max_delay_seconds: 30 }
+```
+
+| `swift-test` option    | Type    | Default | Description                                                                                                                                                                                  |
+| ---------------------- | ------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `package_path`         | string  | `.`     | Swift package directory.                                                                                                                                                                     |
+| `scratch_path`         | string  | —       | Isolated SwiftPM build storage.                                                                                                                                                              |
+| `filter`               | string  | —       | Test selector regex.                                                                                                                                                                         |
+| `skip`                 | string  | —       | Excluded test selector regex.                                                                                                                                                                |
+| `environment`          | map     | —       | Extra environment for the test run, including snapshot-testing controls.                                                                                                                     |
+| `enable_code_coverage` | bool    | —       | Collect full-suite coverage. SwiftPM writes no coverage file when a test fails, so ShipIt recomputes it from the raw profiles right after the first attempt, before a rerun adds its own.    |
+| `parallel_workers`     | integer | —       | Maximum XCTest worker processes (`swift test --num-workers`). `1` runs XCTest cases one at a time, for suites that share state. Swift Testing parallelism is set in code with `.serialized`. |
+| `rerun_failed_tests`   | object  | —       | `enabled` and `max_attempts` (default `2`, counting the initial run). Reruns reuse the built products (`--skip-build`). A recovered test passes and stays marked flaky.                      |
+| `infrastructure_retry` | object  | —       | Retry transient SwiftPM execution failures. Same fields as the `test` action.                                                                                                                |
+| `output_directory`     | string  | —       | **New** directory for per-attempt results, logs, and attachments.                                                                                                                            |
+
+`swift-test` saves Swift Testing events, attachments, stdout/stderr, and a final `report.json`.
+
+| `swift-format` option | Type   | Default | Description                                  |
+| --------------------- | ------ | ------- | -------------------------------------------- |
+| `paths`               | list   | —       | Paths to lint recursively.                   |
+| `configuration`       | string | —       | Path to a `swift-format` configuration file. |
+| `report_path`         | string | —       | Save the lint stdout/stderr.                 |
+
+`swift-format` is strict and non-mutating: it lints and never rewrites files.
+
+### Packages that import UIKit
+
+A package whose sources import a framework the host lacks, such as UIKit, without a `canImport` or `os(...)` guard can't run under `swift test`. `shipit inspect project --output json` reports this under `swiftPackage`, and `shipit generate --goal local` (or `shipit ai session --goal local`) suggests a `test` step instead of `swift-test`. That step uses the scheme Xcode generates for the package directory — the package name when it has at most one product, `<name>-Package` when it has several — and runs `xcodebuild` on a simulator without `app.project` or `app.workspace`.
+
 ## `test-results` action options
 
-Use `test-results` to parse an existing `.xcresult` bundle or Gradle JUnit XML directory into a normalized JSON report.
+Use `test-results` to read test-result artifacts without running tests: xcresult bundles, JUnit XML (Gradle, KMP, and `swift test`), Swift Testing events, Flutter machine events, Jest JSON, and ShipIt reports or portable exports. Explicit inputs work without a Shipfile. The options below follow the schema printed by `shipit schema --output json`.
 
-| Option               | Type   | Default           | Description                                                                                                                             |
-| -------------------- | ------ | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `format`             | string | `text`            | Output format hint: `text`, `json`, or `markdown`.                                                                                      |
-| `platform`           | string | resolved platform | Explicit platform override when parsing outside a Shipfile-backed context.                                                              |
-| `xcresult_path`      | string | auto-discover     | Explicit path to a `.xcresult` bundle (iOS). Falls back to `./build/<scheme>-tests.xcresult` or the first `.xcresult` under `./build/`. |
-| `report_path`        | string | auto-discover     | Explicit path to a JUnit XML report directory (Android). Falls back to common Gradle `build/test-results/...` locations.                |
-| `failed_only`        | bool   | `false`           | Only include failed and errored tests in the parsed output.                                                                             |
-| `include_passed`     | bool   | `true`            | Include passed tests in the parsed output.                                                                                              |
-| `report_output_path` | string | —                 | Optional path to write the structured JSON report to disk.                                                                              |
+| Option               | Type   | Default           | Description                                                                                                                                                          |
+| -------------------- | ------ | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `inputs`             | list   | —                 | Result artifacts to read. The CLI's `--input` is repeatable.                                                                                                         |
+| `input_format`       | string | detected          | `xcresult`, `junit`, `swift`, `flutter`, `jest`, `shipit`, or `manifest`. Ambiguous input needs an override.                                                         |
+| `runner`             | string | from the artifact | The tool that produced the results: `xcodebuild`, `gradle`, `swift-test`, `flutter-test`, or `jest`. Needed for JUnit XML, which Gradle and `swift test` both write. |
+| `build_system`       | string | from the Shipfile | `native`, `kmp`, `flutter`, or `react_native`, for results read outside a Shipfile. A framework is a build system, never a platform.                                 |
+| `coverage_inputs`    | list   | —                 | Coverage artifacts to keep alongside the results.                                                                                                                    |
+| `coverage_format`    | string | —                 | `swift`, `lcov`, `jacoco`, or `kover`.                                                                                                                               |
+| `evidence_paths`     | list   | —                 | Extra screenshots, videos, logs, and native artifacts to copy into an export.                                                                                        |
+| `export_directory`   | string | —                 | **New** directory for a portable export with originals, extracted evidence, a manifest, and an index with relative links.                                            |
+| `format`             | string | `text`            | Output format hint: `text`, `json`, or `markdown`.                                                                                                                   |
+| `platform`           | string | resolved platform | `ios` or `android` override when reading outside a Shipfile-backed context.                                                                                          |
+| `xcresult_path`      | string | auto-discover     | Explicit `.xcresult` bundle. Falls back to `./build/<scheme>-tests.xcresult`.                                                                                        |
+| `report_path`        | string | auto-discover     | Explicit JUnit XML report directory. Falls back to common Gradle `build/test-results/...` locations.                                                                 |
+| `failed_only`        | bool   | `false`           | Only include failed and errored tests in the output.                                                                                                                 |
+| `include_passed`     | bool   | `true`            | Include passed tests in the output.                                                                                                                                  |
+| `report_output_path` | string | —                 | Write the structured JSON report to disk.                                                                                                                            |
+
+> The CLI flags don't map one to one onto these keys: on the command line, `--report` is the JUnit directory (the action's `report_path`), and `--report-path` is where the JSON report is written (the action's `report_output_path`).
 
 ## Archive action options
 
@@ -425,19 +529,21 @@ workflows:
 
 ### Workflow-level overrides
 
-| Key             | Type   | Description                                                                                                 |
-| --------------- | ------ | ----------------------------------------------------------------------------------------------------------- |
-| `build_variant` | string | Overrides `android.build_variant` for all steps in this workflow. Used by actions that auto-discover paths. |
-| `flavor`        | string | Overrides `android.gradle_properties.flavor` for all steps in this workflow.                                |
-| `steps`         | array  | Required when using the object format. The ordered sequence of action steps.                                |
+| Key                   | Type   | Description                                                                                                                                                                                                                                                                                           |
+| --------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `build_variant`       | string | Overrides `android.build_variant` for all steps in this workflow. Used by actions that auto-discover paths.                                                                                                                                                                                           |
+| `flavor`              | string | Overrides `android.gradle_properties.flavor` for all steps in this workflow.                                                                                                                                                                                                                          |
+| `steps`               | array  | Required when using the object format. The ordered sequence of action steps.                                                                                                                                                                                                                          |
+| `continue_on_failure` | bool   | Optional, default `false`. Opt-in for workflows made of independent checks: a failing step doesn't stop the remaining steps, but the workflow still finishes as **failed**. Set it next to `steps` (object format), not on a step. See [Test workflows and artifacts](#test-workflows-and-artifacts). |
 
 Each step:
 
-| Key       | Description                                                                                                                                                                                                  |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `action`  | Registered action name                                                                                                                                                                                       |
-| `options` | Optional key-value map passed to the action                                                                                                                                                                  |
-| `when`    | Optional condition. Reserved tokens are substituted, then the result must be truthy (`true`/`1`/`yes`) for the step to run; otherwise the step is **skipped** (status `skipped`) and the workflow continues. |
+| Key         | Description                                                                                                                                                                                                     |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `action`    | Registered action name                                                                                                                                                                                          |
+| `options`   | Optional key-value map passed to the action                                                                                                                                                                     |
+| `when`      | Optional condition. Reserved tokens are substituted, then the result must be truthy (`true`/`1`/`yes`) for the step to run; otherwise the step is **skipped** (status `skipped`) and the workflow continues.    |
+| `artifacts` | Optional list of files to publish from the step, each with `name`, `paths`, and `retention_days`. Works on built-in and custom-action steps. See [Test workflows and artifacts](#test-workflows-and-artifacts). |
 
 Use these AI-oriented commands to inspect the supported workflow surface:
 
@@ -456,6 +562,39 @@ Workflow notes:
 - `export` can write an IPA into `export.output_directory`.
 - `testflight` and `upload` can reuse that exported IPA automatically when they run after `export` in the same workflow and no explicit `ipa` / `ipa_path` is set.
 - `validate` reports an error when `testflight` or `upload` has no explicit IPA and no prior export context.
+
+### Test workflows and artifacts
+
+A test workflow is an ordinary workflow made of test steps. The top-level `test_workflow` key (or `SHIPIT_TEST_WORKFLOW`) names the one `shipit test` runs by default, and `shipit test --workflow <name>` picks one explicitly. Workflow selection is exclusive with direct test options.
+
+```yaml
+test_workflow: tests
+workflows:
+  tests:
+    continue_on_failure: true # workflow-level: run the tests even if formatting fails
+    steps:
+      - action: swift-format
+      - action: swift-test
+        options:
+          output_directory: "build/results/{{run_id}}"
+        artifacts:
+          - name: results
+            paths: ["build/results/{{run_id}}"]
+            retention_days: 14
+```
+
+**`artifacts`** declares files a step produces that should be published with the run.
+
+- `name` uses letters, numbers, underscores, and hyphens. `paths` takes files, directories, or globs (`*`, `?`, and `**`), and `retention_days` is 1–90.
+- Test runs already keep their evidence under `build/workflow-artifacts/<run_id>/`, which is staged and uploaded as a whole. Declare artifacts only for files a step writes elsewhere.
+- Report and result locations a step publishes (`report_path`, `output_directory`, `result_bundle_path`) are collected automatically. Build products such as IPAs, AABs, APKs, and archives are **never** collected unless you list them.
+- Evidence is gathered after a failed step too. A missing optional match becomes a diagnostic, not a failure.
+
+**`continue_on_failure: true`** is a workflow-level key, set next to `steps` in the object format. It is opt-in, for independent checks that should all run. The default stays fail-fast, and any failed step still makes the whole workflow fail. Only `artifacts` (and `when`) go on an individual step.
+
+**`{{run_id}}`** resolves to the current workflow run's ID in a step's options and artifact paths, keeping the output of separate runs apart. It is available to top-level steps only. See [Workflow tokens & step conditions](#workflow-tokens--step-conditions).
+
+Turn a test workflow into a CI job with [`shipit ci export`](/docs/guides/ci-setup#exporting-a-workflow-as-a-github-actions-job).
 
 ### `firebase-app-distribution` action options
 
@@ -585,12 +724,14 @@ Top-level workflow steps support reserved interpolation tokens and an optional `
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `{{version}}`         | The marketing version (e.g. `1.2.3`), from a prior `version` step or the current versioning source.                    |
 | `{{build_number}}`    | The build number (e.g. `42`).                                                                                          |
+| `{{run_id}}`          | The current workflow run's unique ID. Use it to scope output and artifact paths per run.                               |
 | `{{version_changed}}` | `true`/`false` — whether the marketing version changed (`false` for a build-only bump, or when no `version` step ran). |
 
 Rules:
 
 - Tokens are substituted into string leaves of a step's `options:` **and** into its `when:` value, at run time.
 - Values come from the most recent `version` step's result. Before any `version` step runs they are seeded best-effort from the current versioning source (and `{{version_changed}}` is `false`).
+- `{{run_id}}` doesn't depend on a `version` step: it is generated when the workflow starts.
 - An unknown or not-yet-resolved token is left **literal** (and logged) rather than expanding to empty.
 - These are **distinct** from composite [`{{param.NAME}}`](#parameter-reference-syntax-paramname) references and from Shipfile `${ENV_VAR}` expansion. Resolution is scoped to top-level workflow steps; tokens inside `custom_actions` substeps are not resolved in this release.
 
@@ -598,7 +739,7 @@ Rules:
 
 A step may carry `when: "<expr>"`. Reserved tokens are substituted first, then the result is evaluated for truthiness: `true`, `1`, or `yes` (case-insensitive) run the step; anything else — including an unresolved literal token — **skips** it (recorded with status `skipped`; the workflow continues). v1 supports a single truthy token, not operators or comparisons.
 
-Skips are the **only** exception to fail-fast workflow semantics. A failing step still aborts the workflow as before.
+Skips and workflows marked `continue_on_failure: true` are the **only** exceptions to fail-fast workflow semantics. Any other failing step still aborts the workflow, and a `continue_on_failure` workflow with a failed step still finishes as failed.
 
 ### Example: tag the released version in one `shipit run`
 
@@ -747,6 +888,20 @@ When `build_system` is unset, ShipItSwifty resolves it automatically:
 | `build.gradle.kts` applying `kotlin("multiplatform")`     | `kmp`          |
 | None of the above                                         | `native`       |
 
+### Flutter
+
+- **iOS:** `flutter build ipa` writes the IPA to `build/ios/ipa/`, so there is no separate `export` step. Omit `export` from a Flutter iOS workflow.
+- **Android:** `build` runs `flutter build apk`; `archive` runs `flutter build appbundle`.
+- **Versioning:** `pubspec` is the default [`versioning.source`](#source-pubspec-flutter), because `flutter build` stamps the native projects from `pubspec.yaml`.
+- **Tests:** `test` runs `flutter test` with machine output. Reruns select failed tests by name, and results report the `flutter-test` runner with `buildSystem: flutter`.
+
+### React Native
+
+- **iOS:** `archive` runs `xcodebuild archive` on the Xcode project React Native or Expo generated, then `export` and `testflight` work as for a native app.
+- **Android:** `archive` runs `npx react-native build-android --tasks bundleRelease`, falling back to a direct `gradlew :app:bundleRelease` on an Expo app without the React Native CLI.
+- **Tests and lint:** `test` and `lint` run the package manager's `test` and `lint` scripts. Jest results are collected as JSON and support `rerun_failed_tests`.
+- Run `shipit` from the directory that holds `package.json`. See the [React Native Quickstart](/docs/getting-started/react-native-quickstart).
+
 ### KMP example
 
 ```yaml
@@ -768,18 +923,40 @@ versioning:
 
 ## `coverage` action options
 
-The `coverage` action reads native coverage artifacts — it does not generate them.
+The `coverage` action reads coverage artifacts — it does not generate them. Without `input_format` it auto-discovers an iOS `.xcresult` or an Android JaCoCo report; with it, it reads a saved report from any supported tool. The options below follow the schema printed by `shipit schema --output json`.
 
-| Option             | Type   | Default         | Description                                                |
-| ------------------ | ------ | --------------- | ---------------------------------------------------------- |
-| `platform`         | string | auto-detected   | `ios` or `android`                                         |
-| `xcresult`         | string | auto-discovered | Explicit `.xcresult` bundle path (iOS)                     |
-| `report`           | string | auto-discovered | Explicit JaCoCo XML report path (Android)                  |
-| `first_party_only` | bool   | `true`          | Suppress test bundles, SPM deps, and known vendor prefixes |
-| `targets`          | bool   | `false`         | Show per-target (iOS) or per-module (Android) breakdown    |
-| `files`            | bool   | `false`         | Show per-file breakdown                                    |
-| `include_target`   | list   | `[]`            | Include only these targets (overrides first-party filter)  |
-| `exclude_target`   | list   | `[]`            | Exclude specific targets                                   |
-| `sort`             | string | `coverage`      | `coverage` (lowest first — most actionable) or `name`      |
-| `limit`            | int    | —               | Cap number of entries shown                                |
-| `format`           | string | `text`          | `text`, `json`, or `markdown`                              |
+| Option             | Type    | Default         | Description                                                                                                                                                            |
+| ------------------ | ------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `input_format`     | string  | —               | Read a portable report: `swift` (SwiftPM LLVM JSON), `lcov`, `jacoco`, or `kover`. Pair with `report_path`.                                                            |
+| `runner`           | string  | —               | Label for an `lcov` file: `flutter-test` or `jest`. LCOV doesn't say which tool wrote it, so without this the reported runner is `unknown`. Ignored for other formats. |
+| `source_roots`     | list    | —               | Source directories to include (Swift and LCOV inputs).                                                                                                                 |
+| `exclude_previews` | bool    | —               | Exclude SwiftUI preview regions from file coverage.                                                                                                                    |
+| `minimum_coverage` | number  | —               | Required line coverage percentage (0–100). Fails below it, and fails outright on zero executable lines.                                                                |
+| `xcresult_path`    | string  | auto-discovered | Explicit `.xcresult` bundle (iOS).                                                                                                                                     |
+| `report_path`      | string  | auto-discovered | Explicit JaCoCo XML report (Android), or the saved report to read with `input_format`.                                                                                 |
+| `first_party_only` | bool    | `true`          | Suppress test bundles, SPM dependencies, and known vendor frameworks.                                                                                                  |
+| `show_targets`     | bool    | —               | Show the per-target (iOS) or per-module (Android) breakdown.                                                                                                           |
+| `show_files`       | bool    | —               | Show the per-file breakdown.                                                                                                                                           |
+| `show_functions`   | bool    | —               | Show the per-function breakdown (iOS only).                                                                                                                            |
+| `include_targets`  | list    | —               | Include only these targets or modules (overrides the first-party filter).                                                                                              |
+| `exclude_targets`  | list    | —               | Exclude these targets or modules.                                                                                                                                      |
+| `sort`             | string  | `coverage`      | `coverage` (lowest first, most actionable) or `name`.                                                                                                                  |
+| `limit`            | integer | —               | Cap the number of entries shown.                                                                                                                                       |
+| `summary`          | bool    | —               | Print a single overall line.                                                                                                                                           |
+| `format`           | string  | `text`          | `text`, `json`, or `markdown`.                                                                                                                                         |
+
+A SwiftPM or LCOV file doesn't say where the tests ran, so its `platform` is `unknown`, and reports from different runs are never summed. Kotlin/Native and JavaScript coverage aren't available through these formats.
+
+```yaml
+workflows:
+  tests:
+    - action: swift-test
+      options: { enable_code_coverage: true }
+    - action: coverage
+      options:
+        input_format: swift
+        report_path: .build/debug/codecov/MyPackage.json
+        source_roots: [Sources]
+        exclude_previews: true
+        minimum_coverage: 70
+```

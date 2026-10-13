@@ -164,6 +164,16 @@ When `build_system` is omitted, ShipItSwifty detects it automatically:
 | `build.gradle.kts` applying `kotlin("multiplatform")` | `kmp`          |
 | None of the above                                     | `native`       |
 
+## Test results on KMP
+
+One `shipit test` run on a Kotlin Multiplatform project can span several targets, so each test in the report records where it ran: `ios`, `android`, or `jvm`. The `runner` is `gradle` and the `buildSystem` is `kmp` — never put `kmp` in a platform field.
+
+- To read saved Gradle JUnit XML elsewhere, pass both: `shipit test-results --input shared/build/test-results --runner gradle --build-system kmp`.
+- `rerun_failed_tests` can't select a failed Kotlin/Native test, so the report marks that rerun as unsupported instead of skipping it quietly.
+- A Gradle run that exits 0 without reporting any results fails, unless Gradle reported `NO-SOURCE` or `SKIPPED` for that test task.
+
+See [Test Results & Workflows](/docs/guides/test-results).
+
 ## Common pitfalls
 
 | Symptom                                           | Likely cause                                                               | Fix                                                              |
