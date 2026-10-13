@@ -100,7 +100,11 @@ async function main() {
 
   const r = isZip
     ? spawnSync("unzip", ["-q", tmpFile, "-d", OUT_DIR], { stdio: "inherit" })
-    : spawnSync("tar", ["-xzf", tmpFile, "-C", OUT_DIR], { stdio: "inherit" });
+    : // build-docc.mjs packs everything under a top-level `docc/` directory; strip it so
+      // data/, index/, and metadata.json land directly in OUT_DIR.
+      spawnSync("tar", ["-xzf", tmpFile, "-C", OUT_DIR, "--strip-components=1"], {
+        stdio: "inherit",
+      });
   if (r.status !== 0) throw new Error("Extraction failed");
   await rm(tmpFile);
 
