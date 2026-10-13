@@ -529,21 +529,21 @@ workflows:
 
 ### Workflow-level overrides
 
-| Key             | Type   | Description                                                                                                 |
-| --------------- | ------ | ----------------------------------------------------------------------------------------------------------- |
-| `build_variant` | string | Overrides `android.build_variant` for all steps in this workflow. Used by actions that auto-discover paths. |
-| `flavor`        | string | Overrides `android.gradle_properties.flavor` for all steps in this workflow.                                |
-| `steps`         | array  | Required when using the object format. The ordered sequence of action steps.                                |
+| Key                   | Type   | Description                                                                                                                                                                                                                                                                                           |
+| --------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `build_variant`       | string | Overrides `android.build_variant` for all steps in this workflow. Used by actions that auto-discover paths.                                                                                                                                                                                           |
+| `flavor`              | string | Overrides `android.gradle_properties.flavor` for all steps in this workflow.                                                                                                                                                                                                                          |
+| `steps`               | array  | Required when using the object format. The ordered sequence of action steps.                                                                                                                                                                                                                          |
+| `continue_on_failure` | bool   | Optional, default `false`. Opt-in for workflows made of independent checks: a failing step doesn't stop the remaining steps, but the workflow still finishes as **failed**. Set it next to `steps` (object format), not on a step. See [Test workflows and artifacts](#test-workflows-and-artifacts). |
 
 Each step:
 
-| Key                   | Description                                                                                                                                                                                                     |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `action`              | Registered action name                                                                                                                                                                                          |
-| `options`             | Optional key-value map passed to the action                                                                                                                                                                     |
-| `when`                | Optional condition. Reserved tokens are substituted, then the result must be truthy (`true`/`1`/`yes`) for the step to run; otherwise the step is **skipped** (status `skipped`) and the workflow continues.    |
-| `continue_on_failure` | Optional, default `false`. When `true`, a failure doesn't stop the remaining steps, but the workflow still finishes as **failed**. See [Test workflows and artifacts](#test-workflows-and-artifacts).           |
-| `artifacts`           | Optional list of files to publish from the step, each with `name`, `paths`, and `retention_days`. Works on built-in and custom-action steps. See [Test workflows and artifacts](#test-workflows-and-artifacts). |
+| Key         | Description                                                                                                                                                                                                     |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `action`    | Registered action name                                                                                                                                                                                          |
+| `options`   | Optional key-value map passed to the action                                                                                                                                                                     |
+| `when`      | Optional condition. Reserved tokens are substituted, then the result must be truthy (`true`/`1`/`yes`) for the step to run; otherwise the step is **skipped** (status `skipped`) and the workflow continues.    |
+| `artifacts` | Optional list of files to publish from the step, each with `name`, `paths`, and `retention_days`. Works on built-in and custom-action steps. See [Test workflows and artifacts](#test-workflows-and-artifacts). |
 
 Use these AI-oriented commands to inspect the supported workflow surface:
 
@@ -571,9 +571,9 @@ A test workflow is an ordinary workflow made of test steps. The top-level `test_
 test_workflow: tests
 workflows:
   tests:
+    continue_on_failure: true # workflow-level: run the tests even if formatting fails
     steps:
       - action: swift-format
-        continue_on_failure: true # run the tests even if formatting fails
       - action: swift-test
         options:
           output_directory: "build/results/{{run_id}}"
@@ -590,7 +590,7 @@ workflows:
 - Report and result locations a step publishes (`report_path`, `output_directory`, `result_bundle_path`) are collected automatically. Build products such as IPAs, AABs, APKs, and archives are **never** collected unless you list them.
 - Evidence is gathered after a failed step too. A missing optional match becomes a diagnostic, not a failure.
 
-**`continue_on_failure: true`** is opt-in, for independent checks that should all run. The default stays fail-fast, and any failed step still makes the whole workflow fail.
+**`continue_on_failure: true`** is a workflow-level key, set next to `steps` in the object format. It is opt-in, for independent checks that should all run. The default stays fail-fast, and any failed step still makes the whole workflow fail. Only `artifacts` (and `when`) go on an individual step.
 
 **`{{run_id}}`** resolves to the current workflow run's ID in a step's options and artifact paths, keeping the output of separate runs apart. It is available to top-level steps only. See [Workflow tokens & step conditions](#workflow-tokens--step-conditions).
 
@@ -739,7 +739,7 @@ Rules:
 
 A step may carry `when: "<expr>"`. Reserved tokens are substituted first, then the result is evaluated for truthiness: `true`, `1`, or `yes` (case-insensitive) run the step; anything else — including an unresolved literal token — **skips** it (recorded with status `skipped`; the workflow continues). v1 supports a single truthy token, not operators or comparisons.
 
-Skips and steps marked `continue_on_failure: true` are the **only** exceptions to fail-fast workflow semantics. Any other failing step still aborts the workflow, and a workflow with a failed `continue_on_failure` step still finishes as failed.
+Skips and workflows marked `continue_on_failure: true` are the **only** exceptions to fail-fast workflow semantics. Any other failing step still aborts the workflow, and a `continue_on_failure` workflow with a failed step still finishes as failed.
 
 ### Example: tag the released version in one `shipit run`
 
