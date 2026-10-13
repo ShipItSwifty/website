@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { ApiShell } from "@/components/docs/api/api-shell";
 import { ApiPage } from "@/components/docs/api/api-page";
 import { getDoccMetadata, isDoccAvailable, listAllSlugs, loadRenderNode } from "@/lib/docc";
 
@@ -43,5 +44,9 @@ export default async function ApiRoute({ params }: PageProps) {
   if (!isDoccAvailable()) notFound();
   const node = loadRenderNode(slug);
   if (!node) notFound();
-  return <ApiPage node={node} />;
+  return (
+    <ApiShell slug={slug}>
+      <ApiPage node={node} />
+    </ApiShell>
+  );
 }
