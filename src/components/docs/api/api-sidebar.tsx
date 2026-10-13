@@ -9,7 +9,7 @@
  * The full tree has thousands of nodes, and rendering it into every prerendered
  * page multiplied the build output by the number of pages.
  */
-import { type IndexNode, getDoccIndex, isDoccAvailable } from "@/lib/docc";
+import { type IndexNode, getDoccIndex, isDoccAvailable, routeSegment } from "@/lib/docc";
 import { ApiSidebarLink } from "./api-sidebar-link";
 
 export function ApiSidebar({ slug = [] }: { slug?: string[] }) {
@@ -51,7 +51,7 @@ function NavList({
           );
         }
         const href = n.path
-          ? `/docs/api${n.path.toLowerCase().replace("/documentation/", "/")}`
+          ? `/docs/api${n.path.toLowerCase().replace("/documentation/", "/").split("/").map(routeSegment).join("/")}`
           : null;
         return (
           <li key={n.path ?? `n-${i}`} className="docc-sidebar-item">

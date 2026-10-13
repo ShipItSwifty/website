@@ -9,6 +9,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { createHash } from "node:crypto";
 
 const INDEX_PATH = path.join(process.cwd(), "data", "docc", "index", "index.json");
 const METADATA_PATH = path.join(process.cwd(), "data", "docc", "metadata.json");
@@ -111,10 +112,7 @@ export type ContentSection = {
 };
 
 export type PrimarySection =
-  | DeclarationSection
-  | ParametersSection
-  | ContentSection
-  | { kind: string; [k: string]: unknown };
+  DeclarationSection | ParametersSection | ContentSection | { kind: string; [k: string]: unknown };
 
 export type TopicSection = {
   title?: string;
@@ -214,6 +212,18 @@ export type DoccMetadata = {
   bundleID: string;
 };
 
+/**
+ * Route segment for a lowercased DocC path segment. Initializers with many
+ * labels produce segments past the 255-byte filename limit once Next adds its
+ * `.rsc.prerender-config.json` suffix, so long ones become `<prefix>-<hash>`.
+ * Keep in sync with `routeSegment` in scripts/build-search-index.mjs.
+ */
+export function routeSegment(segment: string): string {
+  if (segment.length <= 80) return segment;
+  const hash = createHash("sha1").update(segment).digest("hex").slice(0, 10);
+  return `${segment.slice(0, 48)}-${hash}`;
+}
+
 // ---------- Filesystem availability ----------
 
 export function isDoccAvailable(): boolean {
@@ -245,7 +255,7 @@ export function getDoccIndex(): DoccIndex | null {
 }
 
 export function loadRenderNode(slug: string[]): RenderNode | null {
-  const key = slug.map((s) => s.toLowerCase()).join("/");
+  const key = slug.map((s) => routeSegment(s.toLowerCase())).join("/");
   return getRenderNodeCache().get(key) ?? null;
 }
 
@@ -266,12 +276,12 @@ function getRenderNodeCache(): Map<string, RenderNode> {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
       const entryPath = path.join(dir, entry.name);
       if (entry.isDirectory()) {
-        walk(entryPath, [...slugPrefix, entry.name.toLowerCase()]);
+        walk(entryPath, [...slugPrefix, routeSegment(entry.name.toLowerCase())]);
         continue;
       }
       if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
 
-      const fileSlug = entry.name.slice(0, -".json".length).toLowerCase();
+      const fileSlug = routeSegment(entry.name.slice(0, -".json".length).toLowerCase());
       const key = [...slugPrefix, fileSlug].join("/");
       const raw = fs.readFileSync(entryPath, "utf8");
       nodes.set(key, JSON.parse(raw) as RenderNode);
@@ -293,7 +303,7 @@ export function identifierToHref(identifier: string): string | null {
   if (!m) return null;
   const moduleName = m[1];
   if (moduleName.toLowerCase() !== "shipitkit") return null;
-  const rest = (m[2] ?? "").toLowerCase();
+  const rest = (m[2] ?? "").toLowerCase().split("/").map(routeSegment).join("/");
   return `/docs/api/${moduleName.toLowerCase()}${rest}`;
 }
 
@@ -313,7 +323,7 @@ export function listAllSlugs(): string[][] {
         const parts = n.path.split("/").filter(Boolean);
         // strip leading "documentation" and module name
         if (parts[0] === "documentation" && parts[1]) {
-          const slug = parts.slice(2).map((s) => s.toLowerCase());
+          const slug = parts.slice(2).map((s) => routeSegment(s.toLowerCase()));
           slugs.push(slug);
         }
       }
