@@ -8,6 +8,8 @@ sourcePath: "upstream:Sources/ShipItKit/ShipItKit.docc/Articles/TestResults.md"
 
 Every test run, and every saved result file, is read into the same normalized model. That lets a workflow decide whether to rerun a failure, lets `shipit test-results` inspect an artifact on a machine that never ran the tests, and keeps a live run and an offline inspection in agreement about every test's identity.
 
+Parsing native artifacts (`.xcresult`, JUnit XML, Swift Testing events, Flutter machine output, Jest JSON) and the per-run model come from the `MobileTesting` library in [`mobile-kits`](https://github.com/ShipItSwifty/mobile-kits), which Amoo uses too. ShipIt adds what happens across attempts: reruns, flaky classification, the run report, evidence, and coverage.
+
 This guide covers how results are described, how to run tests as workflows, and how to read and share what a run left behind. For every option, see the [Configuration Reference](/docs/reference/configuration#test-action-options); for the commands, the [CLI Command Reference](/docs/reference/cli-commands#running-tests).
 
 ## Who ran it, where, and on what
