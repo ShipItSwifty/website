@@ -1,0 +1,31 @@
+---
+title: "Packages"
+description: "How ShipIt is split into release automation, shared mobile mechanisms, and typed tool wrappers, and which package to depend on."
+group: "Guides"
+order: 7
+---
+
+ShipIt is the release-automation layer of three Swift packages in the [ShipItSwifty](https://github.com/ShipItSwifty) organization. Each one depends only on the layers below it.
+
+| Layer              | Package                                                                                | What it holds                                                                                                                                                                                                                                                                                                                                |
+| ------------------ | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Release automation | [`shipitswifty`](https://github.com/ShipItSwifty/shipitswifty) (`ShipItKit`, `shipit`) | Workflows, Shipfile configuration, signing, versioning, store and Firebase distribution, test retries and flaky classification, coverage gates, evidence, and reporting.                                                                                                                                                                     |
+| Mobile mechanisms  | [`mobile-kits`](https://github.com/ShipItSwifty/mobile-kits)                           | `MobileBuild` (Xcode, Gradle, Flutter, React Native, KMP, SwiftPM, Bazel builds), `MobileDevices` (simulators, emulators, physical devices, device claims), `MobileTesting` (test runners and native result parsing), `MobileProject` (read-only repository inspection), `MobileCore` (shared types such as `AppFramework` and `JSONValue`). |
+| Tool wrappers      | [`cli-wrappers`](https://github.com/ShipItSwifty/cli-wrappers)                         | One library per command-line tool: `XcodeBuildKit`, `XcrunKit`, `DeviceCtlKit`, `GradleKit`, `AdbKit`, `EmulatorKit`, `BundletoolKit`, `AndroidCLIKit`, `FlutterKit`, `ReactNativeKit`, `SwiftPMKit`, `BazelKit`, `TuistCLIKit`, `CocoaPodsKit`, `CodesignKit`, and more.                                                                    |
+
+[Amoo](https://github.com/maniramezan/mobile-testing), the device-automation tool for AI agents, builds on the same `mobile-kits` and `cli-wrappers`. That is why ShipIt and Amoo can share simulators without colliding: both claim devices through the same store.
+
+## Which package to depend on
+
+- **Release workflows or ShipIt plugins:** `ShipItKit`. Plugins that read action options also import `MobileCore` for `JSONValue`.
+- **Building, testing, or driving devices from your own Swift tool:** the `mobile-kits` product you need.
+- **Only typed commands for one tool:** the matching `cli-wrappers` product, for example `XcodeBuildKit` or `AdbKit`.
+
+Nothing is re-exported: import each module you use. Before 1.0, track `main`:
+
+```swift
+.package(url: "https://github.com/ShipItSwifty/mobile-kits.git", branch: "main"),
+.package(url: "https://github.com/ShipItSwifty/cli-wrappers.git", branch: "main"),
+```
+
+API documentation for `mobile-kits` and `cli-wrappers` is published from each repository. The [ShipItKit API reference](/docs/api) on this site covers `ShipItKit` only.
