@@ -8,6 +8,9 @@ multi-ecosystem-groups:
 updates:
   - package-ecosystem: npm
     directory: /
+    ignore:
+      - dependency-name: typescript
+        versions: [">=7.0.0 <8.0.0"]
     patterns:
       - '*'
     multi-ecosystem-group: dependencies
