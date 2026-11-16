@@ -39,18 +39,26 @@ See the [Configuration Reference](/docs/reference/configuration) for every Shipf
 
 `shipit test` runs the workflow named by the top-level `test_workflow` key, or the one you pass with `--workflow`. Without either, it runs the platform's tests directly. On native iOS it builds the tests once into an `.xctestproducts` bundle, then runs each test plan and destination into its own result bundle without rebuilding.
 
-| Flag                       | What it does                                                                      |
-| -------------------------- | --------------------------------------------------------------------------------- |
-| `--workflow <name>`        | Run a named test workflow. Exclusive with the direct test options below           |
-| `--test-plans <plan>`      | Run ordered Xcode test plans that share one test build                            |
-| `--legacy-combined-test`   | Use the older single `xcodebuild test` invocation instead of build-once-test-many |
-| `--rerun-failed-tests`     | Rerun only the failed tests, where the runner can select them                     |
-| `--max-rerun-attempts <n>` | Total attempts including the initial run (default `2`)                            |
-| `--report-path <path>`     | Write the structured JSON `TestRunReport` to a file                               |
+| Flag                                          | What it does                                                                                            |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `--workflow <name>`                           | Run a named test workflow. Exclusive with the direct test options below                                 |
+| `--test-plans <plan>`                         | Run ordered Xcode test plans that share one test build                                                  |
+| `--legacy-combined-test`                      | Use the older single `xcodebuild test` invocation instead of build-once-test-many                       |
+| `--rerun-failed-tests`                        | Rerun only the failed tests, where the runner can select them                                           |
+| `--max-rerun-attempts <n>`                    | Total attempts including the initial run (default `2`)                                                  |
+| `--report-path <path>`                        | Write the structured JSON `TestRunReport` to a file                                                     |
+| `--infrastructure-retry-attempts <n>`         | Retry a whole invocation after a transient simulator or runner failure                                  |
+| `--only-testing <id>` / `--skip-testing <id>` | Run or skip a target, class, or test. Repeatable; use to shard                                          |
+| `--build-for-testing-only`                    | Build once into `--test-products-path` and stop, so other jobs can test without rebuilding (native iOS) |
+| `--use-test-products <path>`                  | Run an existing `.xctestproducts` bundle without building (native iOS)                                  |
 
 ```bash
 shipit test --rerun-failed-tests --max-rerun-attempts 2 --report-path ./artifacts/test-report.json
 shipit test --workflow tests --ci --output json
+
+# Build once, then test on another job or machine without rebuilding
+shipit test --scheme MyApp --build-for-testing-only --test-products-path build/MyApp.xctestproducts
+shipit test --scheme MyApp --use-test-products build/MyApp.xctestproducts --only-testing MyAppTests/CartTests
 ```
 
 Run `shipit test --help` for the remaining Xcode and Android flags, such as `--scheme`, `--destination`, `--kind`, and `--device-strategy`. For the options, reruns, and the report each run writes, see [Test Results & Workflows](/docs/guides/test-results).
@@ -128,6 +136,8 @@ The `firebase-app-distribution` workflow action uploads signed iOS IPAs and Andr
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `shipit run`             | Execute a named workflow from `Shipfile.yml` — supports `--dry-run` and `--ci`                                                                                                                                                               |
 | `shipit ci export`       | Export a named workflow as a runnable CI job that uploads its artifacts and evidence even when it fails                                                                                                                                      |
+| `shipit ci report`       | Summarize `TestRunReport` files for CI: Markdown job summary, GitHub annotations, and a pass/fail verdict. Merges shards                                                                                                                     |
+| `shipit ci issues`       | File, update, reopen, and close GitHub issues for consistently failing and flaky tests                                                                                                                                                       |
 | `shipit notify`          | Send build notifications to Slack, Teams, or webhooks                                                                                                                                                                                        |
 | `shipit ai session`      | Structured AI-agent session bootstrap — emits a stable JSON contract for coding agents (default subcommand of `shipit ai`)                                                                                                                   |
 | `shipit ai prompt`       | Print just the recommended agent system prompt for the current project                                                                                                                                                                       |
@@ -153,6 +163,16 @@ shipit ci export --provider github-actions --workflow tests --runner macos-26 \
 | `--export-path <path>`  | Write the YAML to a new file instead of stdout                             |
 
 The generated job runs the workflow, then publishes artifacts and test evidence with `if: always()`, so a failing run still uploads what you need to investigate it. See [CI Setup](/docs/guides/ci-setup#exporting-a-workflow-as-a-github-actions-job).
+
+### Reporting test runs to GitHub
+
+```bash
+shipit ci report --report build/report.json --summary-path "$GITHUB_STEP_SUMMARY" --annotations --result-path build/result.json
+shipit ci report --report shard-1/report.json --report shard-2/report.json --fail-on-flaky
+GITHUB_TOKEN=... shipit ci issues --report build/report.json --repository owner/name --only-ref main --dry-run
+```
+
+Both read the report `shipit test --report-path` writes. For every flag, the issue lifecycle, and the `actions/test` GitHub Action that wires them together, see [Reporting Tests to GitHub](/docs/guides/github-test-reporting).
 
 For agent-driven workflows with `shipit ai`, see the [Agent Fast Start](/docs/guides/agent-fast-start) guide.
 

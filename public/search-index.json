@@ -664,6 +664,14 @@
     "content": "Add --dry-run to any step to see what it would do without building, uploading, or writing version files:"
   },
   {
+    "id": "/docs/guides/ci-setup#testing-ios-on-github-with-actionstest",
+    "url": "/docs/guides/ci-setup#testing-ios-on-github-with-actionstest",
+    "title": "CI Setup",
+    "section": "Testing iOS on GitHub with `actions/test`",
+    "group": "Guides",
+    "content": "For native iOS tests, the actions/test GitHub Action builds once, runs shards from the same test products without rebuilding, retries failing tests, and reports back with a job summary, pull-request annotations, and GitHub issues for consistently failing and flaky tests. Its policy lives in shipit ci report and shipit ci issues, which you can also call after any shipit test --report-path run on other platforms. See Reporting Tests to GitHub."
+  },
+  {
     "id": "/docs/guides/ci-setup#exporting-a-workflow-as-a-github-actions-job",
     "url": "/docs/guides/ci-setup#exporting-a-workflow-as-a-github-actions-job",
     "title": "CI Setup",
@@ -717,7 +725,7 @@
     "title": "Firebase App Distribution",
     "section": "What you need",
     "group": "Guides",
-    "content": "A Firebase project with an iOS or Android app registered for App Distribution The Firebase app ID, found under Project settings -> Your apps -> App ID At least one Firebase tester group alias or tester email address A Google service-account JSON key with access to the Firebase project A signed artifact produced earlier in the workflow Create the service account in Google Cloud IAM for the same Firebase project, grant it the Firebase App Distribution Admin role, and create a JSON key. Store the key in your CI secret manager, not in the repository."
+    "content": "A Firebase project with an iOS or Android app registered for App Distribution The Firebase app ID, found under Project settings -> Your apps -> App ID At least one Firebase tester group alias or tester email address A Google service account with access to the Firebase project A signed artifact produced earlier in the workflow Create the service account in Google Cloud IAM for the same Firebase project and grant it the Firebase App Distribution Admin role. On GitHub Actions, prefer keyless Workload Identity Federation over a JSON key. Elsewhere, create a JSON key and store it in your CI secret "
   },
   {
     "id": "/docs/guides/firebase-app-distribution#configure-credentials",
@@ -725,7 +733,23 @@
     "title": "Firebase App Distribution",
     "section": "Configure credentials",
     "group": "Guides",
-    "content": "Choose one credential source. ShipIt checks them in this order: serviceaccountpath on the workflow action FIREBASESERVICEACCOUNTJSON, containing the raw JSON key GOOGLEAPPLICATIONCREDENTIALS, containing the local path to the JSON key For CI, pass the raw JSON from a secret: Do not inline the JSON key in Shipfile.yml."
+    "content": "Choose one credential source. ShipIt checks them in this order: A Workload Identity Federation pair: workloadidentityprovider with serviceaccountemail on the action, or GOOGLEWORKLOADIDENTITYPROVIDER with GOOGLESERVICEACCOUNTEMAIL serviceaccountpath on the workflow action FIREBASESERVICEACCOUNTJSON, containing the raw JSON key GOOGLEAPPLICATIONCREDENTIALS, containing the local path to the JSON key"
+  },
+  {
+    "id": "/docs/guides/firebase-app-distribution#keyless-on-github-actions",
+    "url": "/docs/guides/firebase-app-distribution#keyless-on-github-actions",
+    "title": "Firebase App Distribution",
+    "section": "Keyless on GitHub Actions",
+    "group": "Guides",
+    "content": "With Workload Identity Federation there is no key to store or rotate. GitHub mints a short-lived OIDC token for the job, and Google exchanges it for access as the service account. Grant the repository's identity roles/iam.workloadIdentityUser on the service account, then let the job request a token: Both keys must be set together; one without the other is rejected."
+  },
+  {
+    "id": "/docs/guides/firebase-app-distribution#with-a-json-key",
+    "url": "/docs/guides/firebase-app-distribution#with-a-json-key",
+    "title": "Firebase App Distribution",
+    "section": "With a JSON key",
+    "group": "Guides",
+    "content": "For other CI providers, pass the raw JSON from a secret: Do not inline the JSON key in Shipfile.yml."
   },
   {
     "id": "/docs/guides/firebase-app-distribution#ios-workflow",
@@ -750,6 +774,86 @@
     "section": "Verify safely",
     "group": "Guides",
     "content": "Run the workflow-level dry run first: For a Firebase-only preview, set dryrun: true on the action. This validates the app ID, artifact path, and audience without uploading. When a distribution succeeds, structured output includes Firebase's tester installation URL and console URL when they are available. Tester email addresses are not included in the output."
+  },
+  {
+    "id": "/docs/guides/github-test-reporting",
+    "url": "/docs/guides/github-test-reporting",
+    "title": "Reporting Tests to GitHub",
+    "section": null,
+    "group": "Guides",
+    "content": "ShipIt can report test runs back to GitHub: a job summary, error and warning annotations on the pull request, a pass/fail verdict, and GitHub issues that track consistently failing and flaky tests across runs. There are two ways in: The actions/test GitHub Action for native iOS projects. It builds once, runs shards from the same test products without rebuilding, retries failing tests, and reports. The shipit ci report and shipit ci issues commands, which the action calls. Use them directly for any platform, any CI provider, or to reproduce a CI result locally. All the policy (retries, flaky cl"
+  },
+  {
+    "id": "/docs/guides/github-test-reporting#the-github-action",
+    "url": "/docs/guides/github-test-reporting#the-github-action",
+    "title": "Reporting Tests to GitHub",
+    "section": "The GitHub Action",
+    "group": "Guides",
+    "content": "Pin the action to a bare SemVer release tag, with no v prefix. It downloads the shipit release with the same version and verifies it against the release's published checksums. Pin to a commit or branch instead and it builds shipit from that checkout. | mode | What it does | | ----------------------- | -------------------------------------------------------------------------------------- | | full (default) | Build for testing, run the tests, retry, and report in one job | | build-for-testing | Build once and upload the test products (.xctestproducts) as an artifact | | test-without-building | D"
+  },
+  {
+    "id": "/docs/guides/github-test-reporting#one-build-many-test-jobs",
+    "url": "/docs/guides/github-test-reporting#one-build-many-test-jobs",
+    "title": "Reporting Tests to GitHub",
+    "section": "One build, many test jobs",
+    "group": "Guides",
+    "content": "Each shard passes or fails on its own and uploads a shipit-report- artifact. The report job merges them, so issue filing runs once and shards never race to edit the same issue. Keep destination identical in the build and test jobs, since the products are built for it, and run every job on the same Xcode version. Set artifact-suffix to a unique value per matrix entry. The full list of inputs and outputs is in the action's README."
+  },
+  {
+    "id": "/docs/guides/github-test-reporting#retries-and-the-verdict",
+    "url": "/docs/guides/github-test-reporting#retries-and-the-verdict",
+    "title": "Reporting Tests to GitHub",
+    "section": "Retries and the verdict",
+    "group": "Guides",
+    "content": "| Outcome | Meaning | Effect | | ------------------------ | --------------------------------------------------------------- | -------------------------------------------------------------------------- | | Flaky | Failed in an attempt, passed on a retry | Warning annotation and summary entry. Passes unless fail-on-flaky is set | | Consistently failing | Failed in every attempt | Error annotation, fails the job, and is filed as an issue | | Run error | The run itself broke: build failure, crashed runner, no results | Fails the job | max-attempts (default 2, counting the first run) reruns only th"
+  },
+  {
+    "id": "/docs/guides/github-test-reporting#issues",
+    "url": "/docs/guides/github-test-reporting#issues",
+    "title": "Reporting Tests to GitHub",
+    "section": "Issues",
+    "group": "Guides",
+    "content": "With issue filing on, ShipIt keeps GitHub issues in step with your runs: One issue per consistently failing test. A hidden fingerprint in the issue body (runner, test plan, and the runner's own test id) finds it again, so reruns and re-sharding never file a duplicate. A recurring failure updates the issue silently instead of commenting on every run. Closed issues reopen when the test fails again, with one comment. Issues close after close-after-clean-runs (default 3) consecutive runs where the test passed without a retry. 0 never closes them. One rolling \"Flaky tests\" issue lists every flaky t"
+  },
+  {
+    "id": "/docs/guides/github-test-reporting#permissions",
+    "url": "/docs/guides/github-test-reporting#permissions",
+    "title": "Reporting Tests to GitHub",
+    "section": "Permissions",
+    "group": "Guides",
+    "content": "| Permission | When | | ---------------- | --------------------------------- | | contents: read | Always, for the checkout | | issues: write | Only on the job that files issues | Annotations are written to the job log, so pull-requests: write is never needed. A token without issues: write produces a warning and never changes the test verdict."
+  },
+  {
+    "id": "/docs/guides/github-test-reporting#the-cli-commands",
+    "url": "/docs/guides/github-test-reporting#the-cli-commands",
+    "title": "Reporting Tests to GitHub",
+    "section": "The CLI commands",
+    "group": "Guides",
+    "content": "Every step of the action is a command you can run locally: ci report and ci issues read the TestRunReport JSON that shipit test --report-path writes, from any runner ShipIt supports. Pass --report more than once to merge shards."
+  },
+  {
+    "id": "/docs/guides/github-test-reporting#shipit-ci-report",
+    "url": "/docs/guides/github-test-reporting#shipit-ci-report",
+    "title": "Reporting Tests to GitHub",
+    "section": "`shipit ci report`",
+    "group": "Guides",
+    "content": "Summarizes reports and exits non-zero when the run fails ShipIt's policy. | Flag | What it does | | ----------------------- | -------------------------------------------------------------------------------- | | --report | A TestRunReport JSON file. Repeatable; shards are merged | | --summary-path | Append a Markdown summary to this file. On GitHub, pass \"$GITHUBSTEPSUMMARY\" | | --annotations | Print GitHub workflow-command annotations for failing and flaky tests | | --workspace | Checkout root, to make failure paths repo-relative (default $GITHUBWORKSPACE) | | --artifact-url | Link to the run'"
+  },
+  {
+    "id": "/docs/guides/github-test-reporting#shipit-ci-issues",
+    "url": "/docs/guides/github-test-reporting#shipit-ci-issues",
+    "title": "Reporting Tests to GitHub",
+    "section": "`shipit ci issues`",
+    "group": "Guides",
+    "content": "Files, updates, reopens, and closes issues. It needs a GITHUBTOKEN with issues: write. Add the global --dry-run flag to print what it would do without calling the API. | Flag | What it does | | ------------------------------ | ----------------------------------------------------------------- | | --report | A TestRunReport JSON file. Repeatable; shards are merged | | --repository | Target repository (default $GITHUBREPOSITORY) | | --label | Extra label for every issue. Repeatable | | --close-after-clean-runs | Clean runs before an issue closes; 0 never closes (default 3) | | --only-ref | Act on"
+  },
+  {
+    "id": "/docs/guides/github-test-reporting#known-limits",
+    "url": "/docs/guides/github-test-reporting#known-limits",
+    "title": "Reporting Tests to GitHub",
+    "section": "Known limits",
+    "group": "Guides",
+    "content": "The action is native iOS only. For Android, Flutter, React Native, KMP, and Swift packages, run your tests with shipit test or shipit run, then call shipit ci report and shipit ci issues on the report yourself, or export the workflow with shipit ci export. Annotations carry a file and line only when the runner reports them, and only when the failure's path sits inside the workspace. Test products are tarred before upload, because a plain artifact upload drops file permissions and symlinks. For what a TestRunReport contains, see Test Results & Workflows."
   },
   {
     "id": "/docs/guides/packages",
@@ -1077,7 +1181,7 @@
     "title": "CLI Command Reference",
     "section": "Running tests",
     "group": "Reference",
-    "content": "shipit test runs the workflow named by the top-level testworkflow key, or the one you pass with --workflow. Without either, it runs the platform's tests directly. On native iOS it builds the tests once into an .xctestproducts bundle, then runs each test plan and destination into its own result bundle without rebuilding. | Flag | What it does | | -------------------------- | --------------------------------------------------------------------------------- | | --workflow | Run a named test workflow. Exclusive with the direct test options below | | --test-plans | Run ordered Xcode test plans that"
+    "content": "shipit test runs the workflow named by the top-level testworkflow key, or the one you pass with --workflow. Without either, it runs the platform's tests directly. On native iOS it builds the tests once into an .xctestproducts bundle, then runs each test plan and destination into its own result bundle without rebuilding. | Flag | What it does | | --------------------------------------------- | ------------------------------------------------------------------------------------------------------- | | --workflow | Run a named test workflow. Exclusive with the direct test options below | | --test-"
   },
   {
     "id": "/docs/reference/cli-commands#swift-packages",
@@ -1141,7 +1245,7 @@
     "title": "CLI Command Reference",
     "section": "Workflows & automation",
     "group": "Reference",
-    "content": "| Command | What it does | | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | | shipit run | Execute a named workflow from Shipfile.yml — supports --dry-run and --ci | | shipit ci export | Export a named workflow as a runnable CI job that uploads its artifacts and evidence even when it fails | | shipit notify | Send build notifications to Slack, Teams, or webhooks | | shipit ai se"
+    "content": "| Command | What it does | | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | | shipit run | Execute a named workflow from Shipfile.yml — supports --dry-run and --ci | | shipit ci export | Export a named workflow as a runnable CI job that uploads its artifacts and evidence even when it fails | | shipit ci report | Summarize TestRunReport files for CI: Markdown job summary, GitHub "
   },
   {
     "id": "/docs/reference/cli-commands#exporting-a-workflow-as-a-ci-job",
@@ -1150,6 +1254,14 @@
     "section": "Exporting a workflow as a CI job",
     "group": "Reference",
     "content": "| Flag | What it does | | ----------------------- | -------------------------------------------------------------------------- | | --provider | CI provider (default and only built-in: github-actions) | | --workflow | Workflow to run in the job | | --runner | Runner label, such as macos-26. Required — export never guesses a runner | | --setup-command | Toolchain or setup command, repeatable. Export doesn't run it | | --executable | The shipit binary the job invokes (default shipit) | | --export-path | Write the YAML to a new file instead of stdout | The generated job runs the workflow, then pub"
+  },
+  {
+    "id": "/docs/reference/cli-commands#reporting-test-runs-to-github",
+    "url": "/docs/reference/cli-commands#reporting-test-runs-to-github",
+    "title": "CLI Command Reference",
+    "section": "Reporting test runs to GitHub",
+    "group": "Reference",
+    "content": "Both read the report shipit test --report-path writes. For every flag, the issue lifecycle, and the actions/test GitHub Action that wires them together, see Reporting Tests to GitHub. For agent-driven workflows with shipit ai, see the Agent Fast Start guide. Breaking change (0.7.0): shipit ai-session was renamed to shipit ai session and moved under the shipit ai command group alongside shipit ai prompt and shipit ai instructions. There is no backwards-compatible alias — update any scripts or CI invoking shipit ai-session directly."
   },
   {
     "id": "/docs/reference/configuration",

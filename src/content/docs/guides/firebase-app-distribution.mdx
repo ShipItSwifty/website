@@ -12,20 +12,45 @@ ShipIt `0.4.0` adds the `firebase-app-distribution` workflow action. It uploads 
 - A Firebase project with an iOS or Android app registered for App Distribution
 - The Firebase app ID, found under **Project settings -> Your apps -> App ID**
 - At least one Firebase tester group alias or tester email address
-- A Google service-account JSON key with access to the Firebase project
+- A Google service account with access to the Firebase project
 - A signed artifact produced earlier in the workflow
 
-Create the service account in Google Cloud IAM for the same Firebase project, grant it the Firebase App Distribution Admin role, and create a JSON key. Store the key in your CI secret manager, not in the repository.
+Create the service account in Google Cloud IAM for the same Firebase project and grant it the Firebase App Distribution Admin role. On GitHub Actions, prefer keyless Workload Identity Federation over a JSON key. Elsewhere, create a JSON key and store it in your CI secret manager, not in the repository.
 
 ## Configure credentials
 
 Choose one credential source. ShipIt checks them in this order:
 
-1. `service_account_path` on the workflow action
-2. `FIREBASE_SERVICE_ACCOUNT_JSON`, containing the raw JSON key
-3. `GOOGLE_APPLICATION_CREDENTIALS`, containing the local path to the JSON key
+1. A Workload Identity Federation pair: `workload_identity_provider` with `service_account_email` on the action, or `GOOGLE_WORKLOAD_IDENTITY_PROVIDER` with `GOOGLE_SERVICE_ACCOUNT_EMAIL`
+2. `service_account_path` on the workflow action
+3. `FIREBASE_SERVICE_ACCOUNT_JSON`, containing the raw JSON key
+4. `GOOGLE_APPLICATION_CREDENTIALS`, containing the local path to the JSON key
 
-For CI, pass the raw JSON from a secret:
+### Keyless on GitHub Actions
+
+With Workload Identity Federation there is no key to store or rotate. GitHub mints a short-lived OIDC token for the job, and Google exchanges it for access as the service account. Grant the repository's identity `roles/iam.workloadIdentityUser` on the service account, then let the job request a token:
+
+```yaml
+permissions:
+  contents: read
+  id-token: write
+```
+
+```yaml
+- action: firebase-app-distribution
+  options:
+    app_id: ${FIREBASE_IOS_QA_APP_ID}
+    artifact_path: ./build/export/MyApp.ipa
+    groups: [qa-testers]
+    workload_identity_provider: projects/123456789/locations/global/workloadIdentityPools/github/providers/my-repo
+    service_account_email: firebase-distribution@my-project.iam.gserviceaccount.com
+```
+
+Both keys must be set together; one without the other is rejected.
+
+### With a JSON key
+
+For other CI providers, pass the raw JSON from a secret:
 
 ```bash
 export FIREBASE_SERVICE_ACCOUNT_JSON="${FIREBASE_SERVICE_ACCOUNT_JSON}"

@@ -209,6 +209,10 @@ shipit run release --dry-run --output json      # full step list, no execution
 shipit version --bump patch --dry-run --output json   # computed before/after, nothing written
 ```
 
+## Testing iOS on GitHub with `actions/test`
+
+For native iOS tests, the `actions/test` GitHub Action builds once, runs shards from the same test products without rebuilding, retries failing tests, and reports back with a job summary, pull-request annotations, and GitHub issues for consistently failing and flaky tests. Its policy lives in `shipit ci report` and `shipit ci issues`, which you can also call after any `shipit test --report-path` run on other platforms. See [Reporting Tests to GitHub](/docs/guides/github-test-reporting).
+
 ## Exporting a workflow as a GitHub Actions job
 
 `shipit ci export` translates a named workflow, and the `artifacts` its steps declare, into a runnable job. Export only prints YAML: it doesn't run setup, publish a workflow, or upload anything.
