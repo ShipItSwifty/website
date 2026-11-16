@@ -1,0 +1,190 @@
+---
+title: "Reporting Tests to GitHub"
+description: "Build an iOS app once, shard its tests across jobs, and report the result as a job summary, annotations, and GitHub issues."
+group: "Guides"
+order: 2.5
+sourcePath: "upstream:actions/test/README.md"
+---
+
+ShipIt can report test runs back to GitHub: a job summary, error and warning annotations on the pull request, a pass/fail verdict, and GitHub issues that track consistently failing and flaky tests across runs.
+
+There are two ways in:
+
+- **The `actions/test` GitHub Action** for native iOS projects. It builds once, runs shards from the same test products without rebuilding, retries failing tests, and reports.
+- **The `shipit ci report` and `shipit ci issues` commands**, which the action calls. Use them directly for any platform, any CI provider, or to reproduce a CI result locally.
+
+All the policy (retries, flaky classification, the verdict, and the issue lifecycle) lives in the CLI. The action only wires it to a runner, so anything it does you can run on your Mac.
+
+## The GitHub Action
+
+Pin the action to a bare SemVer release tag, with no `v` prefix. It downloads the `shipit` release with the same version and verifies it against the release's published checksums. Pin to a commit or branch instead and it builds `shipit` from that checkout.
+
+```yaml
+- uses: ShipItSwifty/shipitswifty/actions/test@<version>
+  with:
+    scheme: MyApp
+```
+
+| `mode`                  | What it does                                                                           |
+| ----------------------- | -------------------------------------------------------------------------------------- |
+| `full` (default)        | Build for testing, run the tests, retry, and report in one job                         |
+| `build-for-testing`     | Build once and upload the test products (`.xctestproducts`) as an artifact             |
+| `test-without-building` | Download the test products and run tests from them with retries and reporting          |
+| `report`                | Merge `report.json` files from other jobs into one summary, verdict, and set of issues |
+
+Run it on `macos-*` runners.
+
+### One build, many test jobs
+
+```yaml
+name: Tests
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: ShipItSwifty/shipitswifty/actions/test@<version>
+        with:
+          mode: build-for-testing
+          scheme: MyApp
+          destination: "platform=iOS Simulator,name=iPhone 17,OS=26.4"
+
+  test:
+    needs: build
+    runs-on: macos-26
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [UnitTests, FeatureTests, UITests]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: ShipItSwifty/shipitswifty/actions/test@<version>
+        with:
+          mode: test-without-building
+          scheme: MyApp
+          destination: "platform=iOS Simulator,name=iPhone 17,OS=26.4"
+          only-testing: MyAppTests/${{ matrix.shard }}
+          artifact-suffix: ${{ matrix.shard }}
+          max-attempts: 3
+
+  report:
+    needs: test
+    if: always() && needs.test.result != 'skipped'
+    runs-on: macos-26
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: shipit-report-*
+          path: shipit-reports
+      - uses: ShipItSwifty/shipitswifty/actions/test@<version>
+        with:
+          mode: report
+          file-issues: "true"
+```
+
+Each shard passes or fails on its own and uploads a `shipit-report-<suffix>` artifact. The `report` job merges them, so issue filing runs once and shards never race to edit the same issue.
+
+Keep `destination` identical in the build and test jobs, since the products are built for it, and run every job on the same Xcode version. Set `artifact-suffix` to a unique value per matrix entry.
+
+The full list of inputs and outputs is in the action's [README](https://github.com/ShipItSwifty/shipitswifty/blob/main/actions/test/README.md).
+
+## Retries and the verdict
+
+| Outcome                  | Meaning                                                         | Effect                                                                     |
+| ------------------------ | --------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| **Flaky**                | Failed in an attempt, passed on a retry                         | Warning annotation and summary entry. Passes unless `fail-on-flaky` is set |
+| **Consistently failing** | Failed in every attempt                                         | Error annotation, fails the job, and is filed as an issue                  |
+| **Run error**            | The run itself broke: build failure, crashed runner, no results | Fails the job                                                              |
+
+`max-attempts` (default `2`, counting the first run) reruns only the failed tests. `infrastructure-retry-attempts` (default `3`) separately retries a whole invocation after a transient simulator or runner failure, with backoff. A simulator that stopped answering is restarted, never erased, before a rerun.
+
+## Issues
+
+With issue filing on, ShipIt keeps GitHub issues in step with your runs:
+
+- **One issue per consistently failing test.** A hidden fingerprint in the issue body (runner, test plan, and the runner's own test id) finds it again, so reruns and re-sharding never file a duplicate. A recurring failure updates the issue silently instead of commenting on every run.
+- **Closed issues reopen** when the test fails again, with one comment.
+- **Issues close** after `close-after-clean-runs` (default `3`) consecutive runs where the test passed without a retry. `0` never closes them.
+- **One rolling "Flaky tests" issue** lists every flaky test and how many runs it flaked in. A test leaves the list after the same number of clean runs.
+- **Issues hold test ids, plans, and links only**, never failure messages, stack traces, or logs. Those stay in the run's evidence artifact, linked from the issue.
+- **Issues are filed only on one branch**, the repository's default branch unless you choose another, so pull requests and feature branches get annotations and a summary but never file issues.
+
+Issues are labeled `shipit-test-failure` or `shipit-flaky-tests`, which is how later runs find them, plus any labels you add.
+
+### Permissions
+
+| Permission       | When                              |
+| ---------------- | --------------------------------- |
+| `contents: read` | Always, for the checkout          |
+| `issues: write`  | Only on the job that files issues |
+
+Annotations are written to the job log, so `pull-requests: write` is never needed. A token without `issues: write` produces a warning and never changes the test verdict.
+
+## The CLI commands
+
+Every step of the action is a command you can run locally:
+
+```bash
+shipit test --scheme MyApp --build-for-testing-only --test-products-path build/MyApp.xctestproducts
+shipit test --scheme MyApp --use-test-products build/MyApp.xctestproducts \
+  --only-testing MyAppTests/CartTests --rerun-failed-tests --max-rerun-attempts 3 \
+  --infrastructure-retry-attempts 3 --report-path build/report.json
+shipit ci report --report build/report.json --annotations --result-path build/result.json
+GITHUB_TOKEN=... shipit ci issues --report build/report.json --repository owner/name --only-ref main --dry-run
+```
+
+`ci report` and `ci issues` read the `TestRunReport` JSON that `shipit test --report-path` writes, from any runner ShipIt supports. Pass `--report` more than once to merge shards.
+
+### `shipit ci report`
+
+Summarizes reports and exits non-zero when the run fails ShipIt's policy.
+
+| Flag                    | What it does                                                                     |
+| ----------------------- | -------------------------------------------------------------------------------- |
+| `--report <path>`       | A `TestRunReport` JSON file. Repeatable; shards are merged                       |
+| `--summary-path <path>` | Append a Markdown summary to this file. On GitHub, pass `"$GITHUB_STEP_SUMMARY"` |
+| `--annotations`         | Print GitHub workflow-command annotations for failing and flaky tests            |
+| `--workspace <path>`    | Checkout root, to make failure paths repo-relative (default `$GITHUB_WORKSPACE`) |
+| `--artifact-url <url>`  | Link to the run's uploaded evidence, shown in the summary                        |
+| `--result-path <path>`  | Write the machine-readable result JSON                                           |
+| `--fail-on-flaky`       | Treat a test that passed only on a retry as a failure                            |
+
+### `shipit ci issues`
+
+Files, updates, reopens, and closes issues. It needs a `GITHUB_TOKEN` with `issues: write`. Add the global `--dry-run` flag to print what it would do without calling the API.
+
+| Flag                           | What it does                                                      |
+| ------------------------------ | ----------------------------------------------------------------- |
+| `--report <path>`              | A `TestRunReport` JSON file. Repeatable; shards are merged        |
+| `--repository <owner/name>`    | Target repository (default `$GITHUB_REPOSITORY`)                  |
+| `--label <name>`               | Extra label for every issue. Repeatable                           |
+| `--close-after-clean-runs <n>` | Clean runs before an issue closes; `0` never closes (default `3`) |
+| `--only-ref <branch>`          | Act only when `$GITHUB_REF_NAME` is this branch                   |
+| `--run-url <url>`              | Link to the run (default: built from the GitHub environment)      |
+| `--artifact-url <url>`         | Link to the run's uploaded evidence                               |
+
+## Known limits
+
+- The action is native iOS only. For Android, Flutter, React Native, KMP, and Swift packages, run your tests with `shipit test` or `shipit run`, then call `shipit ci report` and `shipit ci issues` on the report yourself, or export the workflow with [`shipit ci export`](/docs/guides/ci-setup#exporting-a-workflow-as-a-github-actions-job).
+- Annotations carry a file and line only when the runner reports them, and only when the failure's path sits inside the workspace.
+- Test products are tarred before upload, because a plain artifact upload drops file permissions and symlinks.
+
+For what a `TestRunReport` contains, see [Test Results & Workflows](/docs/guides/test-results).

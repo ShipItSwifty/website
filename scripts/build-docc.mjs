@@ -10,7 +10,7 @@
  * GitHub release asset on the website repo.
  *
  * Inputs (env):
- *   TAG              — upstream ref (e.g. v1.2.3 or main). If unset, queries
+ *   TAG              — upstream ref (e.g. 1.2.3 or main). If unset, queries
  *                      GitHub for the latest release, then latest tag, then
  *                      the repo default branch.
  *   GITHUB_TOKEN     — optional. Avoids unauthenticated rate limiting.

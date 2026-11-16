@@ -13,6 +13,15 @@ ShipIt is the release-automation layer of three Swift packages in the [ShipItSwi
 | Mobile mechanisms  | [`mobile-kits`](https://github.com/ShipItSwifty/mobile-kits)                           | `MobileBuild` (Xcode, Gradle, Flutter, React Native, KMP, SwiftPM, Bazel builds), `MobileDevices` (simulators, emulators, physical devices, device claims), `MobileTesting` (test runners and native result parsing), `MobileProject` (read-only repository inspection), `MobileCore` (shared types such as `AppFramework` and `JSONValue`). |
 | Tool wrappers      | [`cli-wrappers`](https://github.com/ShipItSwifty/cli-wrappers)                         | One library per command-line tool: `XcodeBuildKit`, `XcrunKit`, `DeviceCtlKit`, `GradleKit`, `AdbKit`, `EmulatorKit`, `BundletoolKit`, `AndroidCLIKit`, `FlutterKit`, `ReactNativeKit`, `SwiftPMKit`, `BazelKit`, `TuistCLIKit`, `CocoaPodsKit`, `CodesignKit`, and more.                                                                    |
 
+ShipIt also builds on a few standalone packages that are useful on their own:
+
+| Package                                                                          | What it holds                                                                                                                                                       |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`app-store-connect-mcp`](https://github.com/ShipItSwifty/app-store-connect-mcp) | `AppStoreConnectKit` (App Store Connect client, JWT auth, rate limiting, Xcode Cloud read API), macOS-only `AppStoreConnectUploadKit`, and an MCP server for agents |
+| [`google-play-store-mcp`](https://github.com/ShipItSwifty/google-play-store-mcp) | `GoogleAuthKit` (service-account and Workload Identity Federation auth), `GooglePlayKit` (Play Developer API and release workflow), and an MCP server for agents    |
+| [`SwiftyShell`](https://github.com/maniramezan/SwiftyShell)                      | Typed process execution and mocking. Every command ShipIt runs goes through it                                                                                      |
+| [`SwiftyTerminal`](https://github.com/maniramezan/SwiftyTerminal)                | Prompts, menus, spinners, progress, and styled output shared by the `shipit` and Amoo CLIs                                                                          |
+
 [Amoo](https://github.com/ArjangConsulting/amoo-ai), the device-automation tool for AI agents, builds on the same `mobile-kits` and `cli-wrappers`. That is why ShipIt and Amoo can share simulators without colliding: both claim devices through the same store.
 
 ## Which package to depend on
